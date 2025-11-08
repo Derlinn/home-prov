@@ -1,0 +1,18 @@
+pve_endpoint  = "https://my.proxmox.instance:8006/"
+pve_node      = "my_node""
+pve_datastore = "local-zfs"
+pve_bridge    = "vmbr0"
+pve_snippets_datastore = "local"
+default_ssh_pubkey = "ssh-ed25519 AAAAC3N......."
+
+vms = {
+  "deb-srv-01" = {
+    cpu = 2, mem_mb = 2048, disk_gb = 50, vm_id = 1000,
+    domain = "ny_domain.fr",
+    ci_user = "default",
+    ip_cidr = "dhcp", gw_ip = null,
+    ssh_pubkey = null,
+    tags = ["terraform","live","srv"],
+    template_tags = ["template","debian-13"]
+  }
+}

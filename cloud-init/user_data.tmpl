@@ -1,0 +1,30 @@
+#cloud-config
+hostname: ${hostname}
+fqdn: ${hostname}.${domain}
+manage_etc_hosts: true
+
+package_update: true
+package_upgrade: true
+
+users:
+  - name: ${username}
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: [adm, sudo]
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ${ssh_pubkey}
+
+ssh_pwauth: false
+growpart:
+  mode: auto
+  devices: ["/"]
+resize_rootfs: true
+
+# Optionnel
+write_files:
+  - path: /etc/motd
+    permissions: "0644"
+    content: |
+      Provisioned by cloud-init (Terraform/Proxmox)
+runcmd:
+  - systemctl restart qemu-guest-agent || true

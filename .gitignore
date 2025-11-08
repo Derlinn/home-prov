@@ -1,0 +1,24 @@
+# Terraform working dirs and caches
+.terraform/
+terraform.tfstate
+terraform.tfstate.*
+*.tfstate*
+.terraform.lock.hcl
+
+# variable files with secrets
+*.tfvars
+*.auto.tfvars
+
+# env files
+.env
+.env.*
+
+# modules vendoring if ever used
+.terraform/providers/
+
+# plan outputs
+*.plan
+
+# IDE crud
+.vscode/
+.idea/
