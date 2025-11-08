@@ -1,0 +1,47 @@
+version: '3'
+
+vars:
+  TF_DIR: "./terraform"
+  TFVARS: "{{.TFVARS | default `terraform.tfvars`}}"   # chemin relatif à TF_DIR
+
+tasks:
+
+  templates:
+    desc: "generate cloud images templates"
+    cmds:
+      - bash ./scripts/templates.sh debian-13 ubuntu-noble alpine-3.22
+
+  init:
+    desc: "terraform init"
+    cmds:
+      - terraform -chdir={{.TF_DIR}} init
+
+  validate:
+    desc: "terraform validate"
+    cmds:
+      - terraform -chdir={{.TF_DIR}} validate
+
+  fmt:
+    desc: "terraform fmt"
+    cmds:
+      - terraform fmt -recursive
+
+  plan:
+    desc: "terraform plan"
+    cmds:
+      - terraform -chdir={{.TF_DIR}} plan -var-file={{.TFVARS}}
+
+  apply:
+    desc: "terraform apply"
+    cmds:
+      - terraform -chdir={{.TF_DIR}} apply -var-file={{.TFVARS}} -auto-approve
+
+  destroy:
+    desc: "terraform destroy"
+    cmds:
+      - terraform -chdir={{.TF_DIR}} destroy -var-file={{.TFVARS}} -auto-approve
+
+  clean:
+    desc: "clean terraform local artifacts"
+    cmds:
+      - rm -rf {{.TF_DIR}}/.terraform {{.TF_DIR}}/*.tfstate* {{.TF_DIR}}/.terraform.lock.hcl
