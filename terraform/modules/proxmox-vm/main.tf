@@ -63,6 +63,7 @@ resource "proxmox_virtual_environment_vm" "this" {
     sockets = 1
   }
 
+  agent { enabled = true}
   # Memory allocation (dedicated)
   memory { dedicated = var.mem_mb }
 

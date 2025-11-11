@@ -1,0 +1,18 @@
+all:
+  hosts:
+%{ for _, v in vm_inventory ~}
+    ${v.name}:
+      ansible_host: ${v.ansible_host}
+      ansible_user: ${v.ansible_user}
+      fqdn: ${v.fqdn}
+      vm_id: ${v.vm_id}
+      ip_cidr: ${v.ip_cidr}
+%{ endfor ~}
+  children:
+%{ for tag, hosts in groups_by_tag ~}
+    ${tag}:
+      hosts:
+%{ for h in hosts ~}
+        ${h}: {}
+%{ endfor ~}
+%{ endfor ~}

@@ -28,3 +28,4 @@ write_files:
       Provisioned by cloud-init (Terraform/Proxmox)
 runcmd:
   - systemctl restart qemu-guest-agent || true
+  - systemctl enable --now qemu-guest-agent || true
