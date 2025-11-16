@@ -82,3 +82,5 @@ Security best practices:
 ## License
 No License
 
+## TO ADD TO README
+terraform workspace new prod

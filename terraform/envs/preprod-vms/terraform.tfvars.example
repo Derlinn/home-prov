@@ -1,0 +1,44 @@
+# The proxmox var can be moved in proxmox.auto.tfvars
+proxmox = {
+  name         = "terraform"
+  cluster_name = "cluster-name"
+  endpoint     = "https://192.168.1.20:8006"
+  insecure     = true
+  username     = "root"
+  api_token    = "user@pve!prov=token"
+}
+
+default_ssh_pubkey = "ssh-ed25519 AAAAC3N......."
+
+vms = {
+  "deb-srv-01" = {
+    cpu = 2, mem_mb = 2048, disk_gb = 50, vm_id = 1000,
+    domain = "ny_domain.fr",
+    ci_user = "default",
+    ip_cidr = "dhcp", gw_ip = null,
+    ssh_pubkey = null,
+    tags = ["terraform","live","srv"],
+    template_tags = ["template","debian-13"]
+  }
+}
+
+cluster = {
+  name            = "talos"
+  endpoint        = "192.168.1.30"
+  gateway         = "192.168.1.254"
+  talos_version   = "v1.11.5"
+  proxmox_cluster = "cluster-name"
+}
+
+talos_nodes = {
+  #"lin-ctrl-00" = {
+  #  host_node     = "node-name"
+  #  machine_type  = "controlplane"
+  #  ip            = "192.168.1.30"
+  #  datastore_id  = "local-zfs"
+  #  mac_address   = "AA:AA:AA:AA:AA:AA"
+  #  vm_id         = 100
+  #  cpu           = 3
+  #  ram_dedicated = 8192
+  #}
+}
