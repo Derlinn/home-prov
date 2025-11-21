@@ -1,86 +1,92 @@
 # LINDERIS HomeLab Infrastructure
 
-This repository contains the Infrastructure as Code (IaC) for managing my homelab environment running on Proxmox VE. It uses Terraform with the **bpg/proxmox** provider to provision and maintain virtual machines through template cloning and cloud-init configuration.
+Infrastructure-as-Code for a Proxmox-based homelab. The stack relies on Terraform (with the bpg/proxmox provider), cloud-init, Ansible inventory generation, and an optional Talos/Kubernetes layer.
 
-## Infrastructure Overview
+## What’s inside
+- Terraform environments for `production` and `pre-production` under `terraform/envs/`
+- Reusable modules: `terraform/modules/proxmox-vm` (VMs) and `terraform/modules/proxmox-talos` (Talos cluster bootstrap)
+- Kubernetes manifests and values under `kubernetes/`
+- Ansible inventories generated from Terraform outputs under `ansible/`
+- Taskfile-based workflow automation and a script to build Proxmox VM templates
 
-- **Host**: LIN-PRC-01 (Proxmox VE host)
-- **Deployment Method**: Terraform + Cloud-Init
-- **Network**: Managed through Proxmox bridges
-- **Storage**: Templates and VM disks stored on configured Proxmox datastores
+## Tooling & prerequisites
+- Proxmox CLI tools available on the host running Terraform (`qm`, `pvesm`, `pvesh`)
+- Terraform + Task (`task`) installed locally
+- `virt-customize` and `wget` available on the Proxmox host for template builds (`libguestfs-tools`)
+- SSH key added to your agent for Proxmox access
+- Optional: [`mise`](https://github.com/jdx/mise) to load the project environment (see below)
 
-## VM Template Management
+## Environment management with mise
+The repo ships `.mise.toml`, which:
+- Creates a Python virtualenv in `.venv` when needed
+- Exposes `NODE_ENV` (default `pre-production`) and maps `KUBECONFIG` to the matching Terraform env output: `./terraform/envs/{{env.NODE_ENV}}/output/kube-config.yaml`
 
-### Template Requirements
+Usage example:
+```bash
+mise shell               # activate direnv-style shell
+echo $KUBECONFIG         # points to the current environment kubeconfig
+```
 
-Templates used for VM deployment must:
-- Be properly configured with cloud-init
-- Have QEMU guest agent installed
-- Have SSH server configured
-- Use a minimal OS installation
-- Support network configuration via cloud-init
-- Be tagged appropriately for Terraform selection
+## Automations via Taskfile
+Common workflows are wrapped in `Taskfile.yml`:
+- `task templates` — generate Proxmox VM templates (delegates to `scripts/templates.sh`)
+- `task init|validate|fmt|plan|apply|destroy|clean` — Terraform helpers. Override `TF_DIR` to pick an environment (default `./terraform`) and `TFVARS` to target the correct tfvars file.
 
-> TODO: Document the actual template creation/management process used in this infrastructure
+Examples:
+```bash
+# Work in pre-production
+task init TF_DIR=./terraform/envs/pre-production
+task plan TF_DIR=./terraform/envs/pre-production TFVARS=terraform.tfvars
+task apply TF_DIR=./terraform/envs/pre-production TFVARS=terraform.tfvars
+```
 
-## Terraform Deployment
+## Building VM templates (Proxmox)
+`scripts/templates.sh` builds cloud-init ready templates on the Proxmox host. Allowed images today: `debian-13`, `ubuntu-noble`, `alpine-3.22`.
 
-1. Prepare authentication:
+Run directly or through Task:
+```bash
+# direct
+bash ./scripts/templates.sh debian-13 ubuntu-noble
+
+# via task wrapper
+task templates
+```
+The script verifies the target storage, injects `qemu-guest-agent`, resizes disks, and tags the templates (`template,cloud,<distro>`).
+
+## Terraform layout & environments
+- Each environment lives in `terraform/envs/<env>/` with its own state file and `terraform.tfvars`.
+- Core VM provisioning is handled by `modules/proxmox-vm`.
+- Terraform renders Ansible inventories to `ansible/inventories/<env>.yml` once IPs are known.
+
+Workflow per environment:
 ```bash
 export PROXMOX_VE_API_TOKEN='user@pve!token=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
 eval "$(ssh-agent)"; ssh-add ~/.ssh/id_ed25519
-```
 
-2. Configure your VMs in terraform.tfvars:
-```hcl
-vms = {
-  "web01" = {
-    template_tags = ["ubuntu", "jammy"]
-    cpu = 2
-    mem_mb = 2048
-    disk_gb = 32
-    ip_cidr = "192.168.1.10/24"
-  }
-  # Add more VMs as needed
-}
-```
-
-3. Apply the configuration:
-```bash
+cd terraform/envs/pre-production        # or production
 terraform init
-terraform plan
-terraform apply
+terraform plan -var-file=terraform.tfvars
+terraform apply -var-file=terraform.tfvars
 ```
 
-## Repository Structure
+## Talos module
+To bootstrap a Talos cluster, populate `talos_nodes` (and optional `cluster`) in the environment `terraform.tfvars`. When nodes are defined, `modules/proxmox-talos` is enabled and:
+- Downloads the Talos image (version sourced from `cluster.talos_version`)
+- Applies inline Cilium manifests (`kubernetes/cilium/values.yaml`)
+- Emits `kube-config.yaml` into `terraform/envs/<env>/output/`
 
-```
-.
-├── modules/
-│   └── proxmox-vm/       # VM module with cloud-init support
-├── templates.sh          # Template management script
-├── main.tf              # Main Terraform configuration
-├── variables.tf         # Variable definitions
-├── terraform.tfvars     # VM configurations (gitignored)
-└── outputs.tf           # Output definitions
-```
+## Moving VMs between environments
+See `terraform/README.md` for a step-by-step state move guide (pre-production → production) without recreating VMs.
 
-## Pre-commit Hooks & Security
+## TODO
+- Doc: SOPS / CILIUM / Flux
+- Task (taskfile): Move VM from one env to another through taskfile
+- Terraform: Upgrade k8s, provision MikroTik router
+- Ansible: Role pterodactyl, tailscale
 
-Install pre-commit:
-```bash
-pipx install pre-commit
-pre-commit install
-```
-
-Security best practices:
-- Keep terraform.tfvars out of git
-- Use environment variables for sensitive data
-- Store SSH keys securely
-- Use tagged templates for consistency
+## Inspiration & credits
+- Talos + Proxmox workflows inspired by Vegard Hagen’s article: https://gitlab.com/vehagn/blog/-/tree/main/content/articles/2024/08/talos-proxmox-tofu/resources
+- Kubernetes cluster template ideas from onedr0p: https://github.com/onedr0p/cluster-template
 
 ## License
 No License
-
-## TO ADD TO README
-terraform workspace new prod

@@ -1,0 +1,22 @@
+[env]
+_.python.venv = { path = "{{config_root}}/.venv", create = true }
+NODE_ENV = "pre-production"
+KUBECONFIG = "{{config_root}}/terraform/envs/{{env.NODE_ENV}}/output/kube-config.yaml"
+TALOSCONFIG = "{{config_root}}/terraform/envs/{{env.NODE_ENV}}/output/talos-config.yaml"
+SOPS_AGE_KEY_FILE = "~/.config/sops/age/keys.txt"
+
+[tools]
+"python" = "3.14.0"
+"aqua:budimanjojo/talhelper" = "3.0.39"
+"aqua:cilium/cilium-cli" = "0.18.8"
+"aqua:cli/cli" = "2.83.1"
+"aqua:cloudflare/cloudflared" = "2025.11.1"
+"aqua:helm/helm" = "3.19.2"
+"aqua:helmfile/helmfile" = "1.1.9"
+"aqua:jqlang/jq" = "1.8.1"
+"aqua:kubernetes/kubectl" = "1.34.0"
+"aqua:kubernetes-sigs/kustomize" = "5.7.1"
+"aqua:mikefarah/yq" = "4.48.2"
+"aqua:siderolabs/talos" = "1.11.5"
+"aqua:getsops/sops" = "3.11.0"
+"aqua:fluxcd/flux2" = "2.7.3"

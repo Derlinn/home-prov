@@ -6,6 +6,8 @@ vars:
 
 tasks:
 
+  default: task --list
+
   templates:
     desc: "generate cloud images templates"
     cmds:

@@ -6,6 +6,7 @@ variable "cluster" {
     gateway         = string
     talos_version   = string
     proxmox_cluster = string
+    flux_enabled    = optional(bool, false)
   })
 }
 
@@ -42,7 +43,18 @@ variable "image" {
 variable "cilium" {
   description = "Cilium configuration"
   type = object({
-    values  = string
+    helm_release_file  = string
     install = string
   })
+}
+
+variable "flux" {
+  description = "Flux Git repository configuration"
+  type = object({
+      path            = optional(string)
+      sops_age_key    = optional(string)
+  })
+  default = {
+    path = null
+  }
 }

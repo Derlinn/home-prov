@@ -7,11 +7,16 @@ machine:
 
 cluster:
   allowSchedulingOnControlPlanes: true
+  proxy:
+    disabled: true
   network:
     cni:
       name: none
-  proxy:
-    disabled: true
+    dnsDomain: cluster.local
+    podSubnets:
+      - 10.42.0.0/16
+    serviceSubnets:
+      - 10.43.0.0/16
   # Optional Gateway API CRDs
   extraManifests:
   - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.1.0/config/crd/standard/gateway.networking.k8s.io_gatewayclasses.yaml
@@ -20,18 +25,3 @@ cluster:
   - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.1.0/config/crd/standard/gateway.networking.k8s.io_referencegrants.yaml
   - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.1.0/config/crd/standard/gateway.networking.k8s.io_grpcroutes.yaml
   - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.1.0/config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml
-  inlineManifests:
-  - name: cilium-values
-    contents: |
-      ---
-      apiVersion: v1
-      kind: ConfigMap
-      metadata:
-        name: cilium-values
-        namespace: kube-system
-      data:
-        values.yaml: |-
-          ${indent(10, cilium_values)}
-  - name: cilium-bootstrap
-    contents: |
-      ${indent(6, cilium_install)}

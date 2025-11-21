@@ -10,6 +10,20 @@ variable "proxmox" {
   sensitive = true
 }
 
+variable "flux" {
+  description = "Configuration for the Flux GitOps setup."
+  type = object({
+    url          = string
+    author_name  = optional(string, "FluxCD")
+    author_email = optional(string, "fluxcd@fluxcd.io")
+    branch       = optional(string, "main")
+    commit_message_appendix = optional(string, "")
+    ssh_private_key = string
+    ssh_username = optional(string, "git")
+  })
+  sensitive = true
+}
+
 variable "default_ssh_pubkey" {
   type        = string
   default     = ""
@@ -53,6 +67,7 @@ variable "cluster" {
     gateway         = string
     talos_version   = string
     proxmox_cluster = string
+    flux_enabled    = optional(bool, false)
   })
 }
 

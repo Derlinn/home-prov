@@ -22,8 +22,6 @@ data "talos_machine_configuration" "this" {
       hostname       = each.key
       node_name      = each.value.host_node
       cluster_name   = var.cluster.proxmox_cluster
-      cilium_values  = var.cilium.values
-      cilium_install = var.cilium.install
     })
   ] : [
     templatefile("${path.module}/machine-config/worker.yaml.tftpl", {
@@ -61,6 +59,7 @@ data "talos_cluster_health" "this" {
   control_plane_nodes  = [for k, v in var.nodes : v.ip if v.machine_type == "controlplane"]
   worker_nodes         = [for k, v in var.nodes : v.ip if v.machine_type == "worker"]
   endpoints            = data.talos_client_configuration.this.endpoints
+  skip_kubernetes_checks = true
   timeouts = {
     read = "10m"
   }
@@ -75,6 +74,6 @@ data "talos_cluster_kubeconfig" "this" {
   endpoint             = var.cluster.endpoint
   client_configuration = talos_machine_secrets.this.client_configuration
   timeouts = {
-    read = "1m"
+    read = "10m"
   }
 }

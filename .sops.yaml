@@ -1,0 +1,9 @@
+# ~/.sops.yaml
+creation_rules:
+  - path_regex: kubernetes/.*\.sops\.ya?ml
+    age: "#{ age_key('public') }#"
+    mac_only_encrypted: true
+    encrypted_regex: "^(data|stringData)$"
+stores:
+  yaml:
+    indent: 2

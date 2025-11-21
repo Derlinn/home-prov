@@ -22,6 +22,14 @@ module "talos" {
 
   providers = {
     proxmox = proxmox
+    flux    = flux
+    helm    = helm
+    kubernetes = kubernetes
+  }
+
+  flux = {
+    path = "kubernetes/flux/${local.talos_cluster.name}"
+    sops_age_key = file("/home/theo/.config/sops/age/keys.txt")
   }
 
   image = {
@@ -31,7 +39,7 @@ module "talos" {
 
   cilium = {
     install = file("${path.module}/../../modules/proxmox-talos/inline-manifests/cilium-install.yaml")
-    values = file("${path.module}/../../../kubernetes/cilium/values.yaml")
+    helm_release_file = file("${path.module}/../../../kubernetes/apps/kube-system/cilium/app/helmrelease.yaml")
   }
 
   cluster = local.talos_cluster
