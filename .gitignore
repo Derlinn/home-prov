@@ -1,9 +1,10 @@
 # Terraform working dirs and caches
-.terraform/
-terraform.tfstate
-terraform.tfstate.*
-*.tfstate*
-.terraform.lock.hcl
+**/.terraform/
+**/terraform.tfstate*
+**/crash.log
+**/output/*.yaml
+kubeconfig
+talosconfig
 
 # variable files with secrets
 *.tfvars

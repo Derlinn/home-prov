@@ -12,30 +12,8 @@ locals {
 module "vm" {
   source = "../../modules/proxmox-vm"
 
-  default_ssh_pubkey     = var.default_ssh_pubkey
-  vms                    = var.vms
-}
-
-module "talos" {
-  count  = local.talos_enabled ? 1 : 0
-  source = "../../modules/proxmox-talos"
-
-  providers = {
-    proxmox = proxmox
-  }
-
-  image = {
-    version = local.talos_cluster.talos_version
-    schematic = file("${path.module}/../../modules/proxmox-talos/image/schematic.yaml")
-  }
-
-  cilium = {
-    install = file("${path.module}/../../modules/proxmox-talos/inline-manifests/cilium-install.yaml")
-    values = file("${path.module}/../../../kubernetes/cilium/values.yaml")
-  }
-
-  cluster = local.talos_cluster
-  nodes   = var.talos_nodes
+  default_ssh_pubkey = var.default_ssh_pubkey
+  vms                = var.vms
 }
 
 locals {
@@ -74,7 +52,7 @@ resource "terraform_data" "assert_ips" {
 
 resource "local_file" "ansible_inventory" {
   filename = abspath("${path.module}/../../../ansible/inventories/prod.yml")
-  content  = templatefile("${path.module}/../../templates/ansible/inventory.yml.tmpl", {
+  content = templatefile("${path.module}/../../templates/ansible/inventory.yml.tmpl", {
     vm_inventory  = local.vm_inventory
     groups_by_tag = local.groups_by_tag
   })

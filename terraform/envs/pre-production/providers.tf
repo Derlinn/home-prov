@@ -60,23 +60,23 @@ provider "flux" {
     client_key             = trimspace(base64decode(module.talos[0].kube_client_key))
   }
   git = {
-    url = var.flux.url
-    author_name  = var.flux.author_name
-    author_email = var.flux.author_email
-    branch       = var.flux.branch
+    url                     = var.flux.url
+    author_name             = var.flux.author_name
+    author_email            = var.flux.author_email
+    branch                  = var.flux.branch
     commit_message_appendix = var.flux.commit_message_appendix
     ssh = {
-        private_key = file(var.flux.ssh_private_key)
-        username = var.flux.ssh_username
+      private_key = file(var.flux.ssh_private_key)
+      username    = var.flux.ssh_username
     }
   }
 }
 
 provider "kubernetes" {
-    host                   = module.talos[0].kube_host
-    cluster_ca_certificate = trimspace(base64decode(module.talos[0].kube_ca_certificate))
-    client_certificate     = trimspace(base64decode(module.talos[0].kube_client_certificate))
-    client_key             = trimspace(base64decode(module.talos[0].kube_client_key))
+  host                   = module.talos[0].kube_host
+  cluster_ca_certificate = trimspace(base64decode(module.talos[0].kube_ca_certificate))
+  client_certificate     = trimspace(base64decode(module.talos[0].kube_client_certificate))
+  client_key             = trimspace(base64decode(module.talos[0].kube_client_key))
 }
 
 provider "helm" {

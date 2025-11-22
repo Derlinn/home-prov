@@ -40,8 +40,8 @@ resource "proxmox_virtual_environment_vm" "this" {
     discard      = "on"
     ssd          = true
     file_format  = "raw"
-    size         = 20
-    file_id      = proxmox_virtual_environment_download_file.this["${each.value.host_node}_${each.value.update == true ? local.update_image_id : local.image_id}"].id
+    size         = each.value.size_disk
+    file_id      = proxmox_virtual_environment_download_file.this["${each.value.host_node}_${each.value.update ? "update" : "base"}"].id
   }
 
   boot_order = ["scsi0"]
@@ -54,8 +54,8 @@ resource "proxmox_virtual_environment_vm" "this" {
     datastore_id = each.value.datastore_id
     ip_config {
       ipv4 {
-        address = "${each.value.ip}/24"
-        gateway = var.cluster.gateway
+        address = each.value.ip != null ? "${each.value.ip}/24" : "dhcp"
+        gateway = var.cluster.gateway != null ? var.cluster.gateway : null
       }
     }
   }

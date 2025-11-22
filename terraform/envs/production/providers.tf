@@ -34,9 +34,9 @@ provider "proxmox" {
 }
 
 provider "kubernetes" {
-  host = local.talos_enabled ? module.talos[0].kube_config.kubernetes_client_configuration.host : null
-  client_certificate = local.talos_enabled ? base64decode(module.talos[0].kube_config.kubernetes_client_configuration.client_certificate) : null
-  client_key = local.talos_enabled ? base64decode(module.talos[0].kube_config.kubernetes_client_configuration.client_key) : null
+  host                   = local.talos_enabled ? module.talos[0].kube_config.kubernetes_client_configuration.host : null
+  client_certificate     = local.talos_enabled ? base64decode(module.talos[0].kube_config.kubernetes_client_configuration.client_certificate) : null
+  client_key             = local.talos_enabled ? base64decode(module.talos[0].kube_config.kubernetes_client_configuration.client_key) : null
   cluster_ca_certificate = local.talos_enabled ? base64decode(module.talos[0].kube_config.kubernetes_client_configuration.ca_certificate) : null
 }
 

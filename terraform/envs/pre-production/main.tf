@@ -12,8 +12,8 @@ locals {
 module "vm" {
   source = "../../modules/proxmox-vm"
 
-  default_ssh_pubkey     = var.default_ssh_pubkey
-  vms                    = var.vms
+  default_ssh_pubkey = var.default_ssh_pubkey
+  vms                = var.vms
 }
 
 module "talos" {
@@ -21,29 +21,39 @@ module "talos" {
   source = "../../modules/proxmox-talos"
 
   providers = {
-    proxmox = proxmox
-    flux    = flux
-    helm    = helm
+    proxmox    = proxmox
+    flux       = flux
+    helm       = helm
     kubernetes = kubernetes
   }
 
   flux = {
-    path = "kubernetes/flux/${local.talos_cluster.name}"
+    path         = "kubernetes/flux/${local.talos_cluster.name}"
     sops_age_key = file("/home/theo/.config/sops/age/keys.txt")
   }
 
   image = {
-    version = local.talos_cluster.talos_version
+    version   = local.talos_cluster.talos_version
     schematic = file("${path.module}/../../modules/proxmox-talos/image/schematic.yaml")
   }
 
   cilium = {
-    install = file("${path.module}/../../modules/proxmox-talos/inline-manifests/cilium-install.yaml")
-    helm_release_file = file("${path.module}/../../../kubernetes/apps/kube-system/cilium/app/helmrelease.yaml")
+    helm_release_file  = file("${path.module}/../../../kubernetes/apps/kube-system/cilium/app/helmrelease.yaml")
+    ocirepository_file = file("${path.module}/../../../kubernetes/apps/kube-system/cilium/app/ocirepository.yaml")
+  }
+
+  coredns = {
+    helm_release_file  = file("${path.module}/../../../kubernetes/apps/kube-system/coredns/app/helmrelease.yaml")
+    ocirepository_file = file("${path.module}/../../../kubernetes/apps/kube-system/coredns/app/ocirepository.yaml")
   }
 
   cluster = local.talos_cluster
   nodes   = var.talos_nodes
+
+  talos_base_patches = {
+    controlplane = abspath("${path.module}/files/talos-base-controlplane.yaml")
+    worker       = abspath("${path.module}/files/talos-base-worker.yaml")
+  }
 }
 
 locals {
@@ -82,7 +92,7 @@ resource "terraform_data" "assert_ips" {
 
 resource "local_file" "ansible_inventory" {
   filename = abspath("${path.module}/../../../ansible/inventories/preprod.yml")
-  content  = templatefile("${path.module}/../../templates/ansible/inventory.yml.tmpl", {
+  content = templatefile("${path.module}/../../templates/ansible/inventory.yml.tmpl", {
     vm_inventory  = local.vm_inventory
     groups_by_tag = local.groups_by_tag
   })

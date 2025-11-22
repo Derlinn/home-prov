@@ -20,24 +20,24 @@ variable "vms" {
   description = "Map of VM definitions to instantiate"
   type = map(object({
     # Common VM parameters
-    host_node     = string        # Proxmox host node
-    cpu : number                 # CPU core count
-    mem_mb : number              # Memory size in MB
-    disk_gb : number             # Disk size in GB
-    vm_id : number               # Unique Proxmox VM ID
-    ip_cidr : string             # Either 'dhcp' or static CIDR"
-    gw_ip : string               # Gateway IP for static networking"
-    tags : list(string)          # VM tags
-    mac_address : optional(string)    # Optional MAC address
-    datastore_id  = optional(string, "local-zfs")
-    pve_snippets_datastore : optional(string, "local-zfs")  # Snippets datastore (for cloud-init)
-    pve_bridge : optional(string, "vmbr0")    # Network bridge (overrides global if set)
+    host_node = string             # Proxmox host node
+    cpu : number                   # CPU core count
+    mem_mb : number                # Memory size in MB
+    disk_gb : number               # Disk size in GB
+    vm_id : number                 # Unique Proxmox VM ID
+    ip_cidr : string               # Either 'dhcp' or static CIDR"
+    gw_ip : string                 # Gateway IP for static networking"
+    tags : list(string)            # VM tags
+    mac_address : optional(string) # Optional MAC address
+    datastore_id = optional(string, "local-zfs")
+    pve_snippets_datastore : optional(string, "local-zfs") # Snippets datastore (for cloud-init)
+    pve_bridge : optional(string, "vmbr0")                 # Network bridge (overrides global if set)
 
     # Linux (cloud-init + clone)
-    domain : optional(string, "home.arpa")              # Domain used for FQDN
-    ssh_pubkey : optional(string)                       # Optional per-VM SSH pubkey
-    ci_user : optional(string)                          # Cloud-init default user
-    template_tags : optional(list(string))              # Tags to select the base template
+    domain : optional(string, "home.arpa") # Domain used for FQDN
+    ssh_pubkey : optional(string)          # Optional per-VM SSH pubkey
+    ci_user : optional(string)             # Cloud-init default user
+    template_tags : optional(list(string)) # Tags to select the base template
 
     # OS selection. Default is 'linux'
     os : optional(string, "linux")

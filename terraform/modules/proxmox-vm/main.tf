@@ -7,15 +7,15 @@ locals {
   vm_settings = {
     for name, cfg in local.vms :
     name => {
-      node_name            = cfg.host_node
-      datastore_id         = coalesce(cfg.datastore_id, "local-zfs")
-      snippets_datastore   = coalesce(cfg.pve_snippets_datastore, "local-zfs", coalesce(cfg.datastore_id, "local-zfs"))
-      bridge               = coalesce(cfg.pve_bridge, "vmbr0")
-      ssh_pubkey           = coalesce(cfg.ssh_pubkey, var.default_ssh_pubkey, "")
-      ip_cidr              = cfg.ip_cidr
-      gw_ip                = cfg.gw_ip
-      template_tags        = coalesce(cfg.template_tags, [])
-      mac_address          = try(cfg.mac_address, null)
+      node_name          = cfg.host_node
+      datastore_id       = coalesce(cfg.datastore_id, "local-zfs")
+      snippets_datastore = coalesce(cfg.pve_snippets_datastore, "local-zfs", coalesce(cfg.datastore_id, "local-zfs"))
+      bridge             = coalesce(cfg.pve_bridge, "vmbr0")
+      ssh_pubkey         = coalesce(cfg.ssh_pubkey, var.default_ssh_pubkey, "")
+      ip_cidr            = cfg.ip_cidr
+      gw_ip              = cfg.gw_ip
+      template_tags      = coalesce(cfg.template_tags, [])
+      mac_address        = try(cfg.mac_address, null)
     }
   }
 }

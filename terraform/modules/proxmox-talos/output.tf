@@ -4,7 +4,7 @@ output "client_configuration" {
 }
 
 output "kube_config" {
-  value     = data.talos_cluster_kubeconfig.this
+  value     = resource.talos_cluster_kubeconfig.this
   sensitive = true
 }
 
@@ -13,19 +13,19 @@ output "machine_config" {
 }
 
 output "kube_host" {
-  value = data.talos_cluster_kubeconfig.this.kubernetes_client_configuration.host
+  value = resource.talos_cluster_kubeconfig.this.kubernetes_client_configuration.host
 }
 
 output "kube_ca_certificate" {
-  value = data.talos_cluster_kubeconfig.this.kubernetes_client_configuration.ca_certificate
+  value = resource.talos_cluster_kubeconfig.this.kubernetes_client_configuration.ca_certificate
 }
 
 output "kube_client_certificate" {
-  value = data.talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_certificate
+  value     = resource.talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_certificate
   sensitive = true
 }
 
 output "kube_client_key" {
-  value = data.talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_key
+  value     = resource.talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_key
   sensitive = true
 }

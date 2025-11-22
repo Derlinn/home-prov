@@ -5,6 +5,11 @@ KUBECONFIG = "{{config_root}}/terraform/envs/{{env.NODE_ENV}}/output/kube-config
 TALOSCONFIG = "{{config_root}}/terraform/envs/{{env.NODE_ENV}}/output/talos-config.yaml"
 SOPS_AGE_KEY_FILE = "~/.config/sops/age/keys.txt"
 
+KUBE_PS1_NS_ENABLE  = "true"
+KUBE_PS1_PREFIX     = "("
+KUBE_PS1_SEPARATOR  = "|"
+KUBE_PS1_SUFFIX     = ") "
+
 [tools]
 "python" = "3.14.0"
 "aqua:budimanjojo/talhelper" = "3.0.39"
@@ -20,3 +25,92 @@ SOPS_AGE_KEY_FILE = "~/.config/sops/age/keys.txt"
 "aqua:siderolabs/talos" = "1.11.5"
 "aqua:getsops/sops" = "3.11.0"
 "aqua:fluxcd/flux2" = "2.7.3"
+"aqua:derailed/k9s"               = "0.32.5"
+"aqua:ahmetb/kubectx"             = "0.9.5"
+"aqua:ahmetb/kubens"             = "0.9.5"
+
+[tasks.install-kube-ps1]
+description = "Installe kube-ps1 dans /usr/local/bin"
+run = '''
+set -euo pipefail
+
+VERSION="0.9.0"
+TMPDIR="$(mktemp -d)"
+
+cd "$TMPDIR"
+wget "https://github.com/jonmosco/kube-ps1/archive/refs/tags/v${VERSION}.tar.gz"
+tar xzvf "v${VERSION}.tar.gz"
+
+sudo cp "kube-ps1-${VERSION}/kube-ps1.sh" /usr/local/bin/
+sudo chmod +x /usr/local/bin/kube-ps1.sh
+
+cd /
+rm -rf "$TMPDIR"
+'''
+
+[tasks.k8s-shell]
+description = "Shell isolé Kubernetes : kube-ps1 + completion + alias k8s"
+depends = ["install-kube-ps1"]
+run = '''
+set -eo pipefail
+
+if [ ! -f /usr/local/bin/kube-ps1.sh ]; then
+  echo "kube-ps1.sh n'est pas installé !" >&2
+  exit 1
+fi
+
+ROOT_DIR="$(pwd)"
+MISE_DIR="${ROOT_DIR}/.mise"
+RCFILE="${MISE_DIR}/k8s-shell-rc"
+mkdir -p "${MISE_DIR}"
+
+cat > "${RCFILE}" << 'EOF'
+# Charge la config Bash standard si elle existe
+if [ -f ~/.bashrc ]; then
+  source ~/.bashrc
+fi
+
+DEBUG=${DEBUG:-}
+
+source /usr/local/bin/kube-ps1.sh
+
+if command -v kubectl >/dev/null 2>&1; then
+  source <(kubectl completion bash)
+fi
+
+alias ll='ls -laFh --color=auto'
+alias la='ls -A'
+alias l='ls -larth'
+alias gl='git log'
+alias gst='git status'
+alias gg='git log --oneline --all --graph --name-status'
+alias s='sudo -s'
+alias h='helm'
+alias k='kubectl'
+alias kcc='kubectl config current-context'
+alias kg='kubectl get'
+alias kga='kubectl get all --all-namespaces'
+alias kgp='kubectl get pods'
+alias kgs='kubectl get services'
+alias kn='kubens'
+alias ksgp='kubectl get pods -n kube-system'
+alias kss='kubectl get services -n kube-system'
+alias kuc='kubectl config use-context'
+alias kx='kubectx'
+
+PS1='$(kube_ps1) \u@\h \w \$ '
+EOF
+
+# Lance le shell isolé avec ce RCFILE
+exec bash --rcfile "${RCFILE}"
+'''
+
+[tasks.bootstrap-k8s-cli]
+description = "Préparation de l'environnement k8s (outils + kube-ps1)"
+depends = ["install-kube-ps1"]
+run = '''
+set -eo pipefail
+mise install
+echo "OK. Lance :   mise run k8s-shell"
+'''
+
