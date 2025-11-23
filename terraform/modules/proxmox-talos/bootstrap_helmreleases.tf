@@ -87,7 +87,7 @@ resource "kubernetes_secret" "sops_age_key" {
   type = "Opaque"
 
   data = {
-    agekey = base64encode(var.flux.sops_age_key)
+    agekey = var.flux.sops_age_key
   }
 
   depends_on = [flux_bootstrap_git.this]
