@@ -8,6 +8,7 @@ spec:
     provider: sops
     secretRef:
       name: sops-age
+      namespace: flux-system
   deletionPolicy: WaitForTermination
   interval: 1h
   path: ./kubernetes/apps
