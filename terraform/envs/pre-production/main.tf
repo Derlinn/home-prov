@@ -34,7 +34,7 @@ module "talos" {
 
   image = {
     version   = local.talos_cluster.talos_version
-    schematic = file("${path.module}/../../modules/proxmox-talos/image/schematic.yaml")
+    node_name = "lin-prx-01"
   }
 
   cilium = {

@@ -1,4 +1,3 @@
-# tofu/talos/virtual-machines.tf
 resource "proxmox_virtual_environment_vm" "this" {
   for_each = var.nodes
 
@@ -10,17 +9,13 @@ resource "proxmox_virtual_environment_vm" "this" {
   on_boot     = true
   vm_id       = each.value.vm_id
 
-  machine       = "q35"
-  scsi_hardware = "virtio-scsi-single"
-  bios          = "seabios"
-
   agent {
     enabled = true
   }
 
   cpu {
     cores = each.value.cpu
-    type  = "host"
+    type = "x86-64-v2-AES"
   }
 
   memory {
@@ -34,17 +29,16 @@ resource "proxmox_virtual_environment_vm" "this" {
 
   disk {
     datastore_id = each.value.datastore_id
-    interface    = "scsi0"
+    interface    = "virtio0"
     iothread     = true
     cache        = "writethrough"
-    discard      = "on"
     ssd          = true
     file_format  = "raw"
     size         = each.value.size_disk
-    file_id      = proxmox_virtual_environment_download_file.this["${each.value.host_node}_${each.value.update ? "update" : "base"}"].id
+    file_id      = proxmox_virtual_environment_download_file.this["${each.value.host_node}_base"].id
   }
 
-  boot_order = ["scsi0"]
+  boot_order = ["virtio0"]
 
   operating_system {
     type = "l26" # Linux Kernel 2.6 - 6.X.
@@ -59,4 +53,6 @@ resource "proxmox_virtual_environment_vm" "this" {
       }
     }
   }
+
+  depends_on = [ resource.proxmox_virtual_environment_download_file.this ]
 }
