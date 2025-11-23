@@ -24,6 +24,14 @@ locals {
   }
 }
 
+resource "null_resource" "apply_crds" {
+  provisioner "local-exec" {
+    command = "${path.module}/../../../scripts/apply-crds.sh"
+  }
+
+  depends_on = [resource.talos_cluster_kubeconfig.this]
+}
+
 resource "helm_release" "cilium" {
   name       = "cilium"
   repository = local.parsed.cilium.repo
@@ -33,7 +41,7 @@ resource "helm_release" "cilium" {
   wait       = true
   timeout    = 600
   values     = [yamlencode(local.parsed.cilium.values)]
-  depends_on = [resource.talos_cluster_kubeconfig.this]
+  depends_on = [resource.null_resource.apply_crds]
 
   lifecycle { ignore_changes = all }
 }

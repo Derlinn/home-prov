@@ -85,7 +85,7 @@ spec:
       prometheus:
         enabled: true
         serviceMonitor:
-          enabled: false
+          enabled: true
       replicas: 2
       rollOutPods: true
 
@@ -95,8 +95,8 @@ spec:
     prometheus:
       enabled: true
       serviceMonitor:
-        enabled: false
-        trustCRDsExist: false
+        enabled: true
+        trustCRDsExist: true
     rollOutCiliumPods: true
 
     bgpControlPlane:

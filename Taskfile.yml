@@ -43,6 +43,12 @@ tasks:
     cmds:
       - terraform -chdir={{.TF_DIR}} destroy -var-file={{.TFVARS}} -auto-approve
 
+  tsch:
+    desc: "Clean terraform state Helm"
+    cmds:
+      - terraform -chdir={{.USER_WORKING_DIR}} state rm module.talos[0].helm_release.coredns
+      - terraform -chdir={{.USER_WORKING_DIR}} state rm module.talos[0].helm_release.cilium
+
   clean:
     desc: "clean terraform local artifacts"
     cmds:
