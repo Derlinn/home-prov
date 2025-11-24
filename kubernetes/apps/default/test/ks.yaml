@@ -6,7 +6,7 @@ metadata:
   name: test
 spec:
   interval: 5m
-  path: ./kubernetes/apps/default/test
+  path: ./kubernetes/apps/default/test/app
   prune: true
   sourceRef:
     kind: GitRepository
