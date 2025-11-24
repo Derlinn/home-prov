@@ -26,7 +26,3 @@ spec:
     name: flux-system
     namespace: flux-system
   targetNamespace: cert-manager
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
