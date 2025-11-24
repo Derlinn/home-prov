@@ -7,3 +7,4 @@ resources:
   - kube-system
   - observability
   - cert-manager
+  - ./secret.sops.yaml
