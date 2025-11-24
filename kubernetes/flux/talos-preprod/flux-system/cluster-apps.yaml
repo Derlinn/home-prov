@@ -4,6 +4,10 @@ metadata:
   name: cluster-apps
   namespace: flux-system
 spec:
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
   deletionPolicy: WaitForTermination
   interval: 1h
   path: ./kubernetes/apps
@@ -20,10 +24,6 @@ spec:
         metadata:
           name: _
         spec:
-          decryption:
-            provider: sops
-            secretRef:
-              name: sops-age
           deletionPolicy: WaitForTermination
           patches:
             - patch: |-
