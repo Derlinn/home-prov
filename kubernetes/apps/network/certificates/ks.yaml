@@ -14,4 +14,4 @@ spec:
   targetNamespace: network
   wait: false
   dependsOn:
-    - name: cert-manager-issuer
+    - name: cert-manager/cert-manager-issuer
