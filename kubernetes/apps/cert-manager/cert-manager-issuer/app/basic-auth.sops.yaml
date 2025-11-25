@@ -5,7 +5,6 @@ data:
 kind: Secret
 metadata:
   name: basic-auth
-  namespace: default
 sops:
   age:
     - recipient: age1sdspueq7sx87ahpu2aqsg5xfypn0qmnadt67qpatahja8e7gap6qw55hq4
