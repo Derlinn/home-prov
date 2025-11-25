@@ -17,8 +17,8 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/cert-manager/cert-manager-issuer/app
   prune: true
-  dependsOn:
-    - name: cert-manager
+#  dependsOn:
+#    - name: cert-manager
   sourceRef:
     kind: GitRepository
     name: flux-system
