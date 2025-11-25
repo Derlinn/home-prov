@@ -5,4 +5,3 @@ kind: Kustomization
 resources:
   - ./secret.sops.yaml
   - ./clusterissuer.yaml
-  - ./basic-auth.sops.yaml
