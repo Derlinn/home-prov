@@ -13,3 +13,5 @@ spec:
     namespace: flux-system
   targetNamespace: network
   wait: false
+  dependsOn:
+    - name: cert-manager-issuer
