@@ -19,7 +19,7 @@ spec:
     serviceAccount:
       create: true
       annotations: {}
-      name: ""
+      name:
       privileges:
         - apiGroups: [""]
           resources: ["secrets"]
