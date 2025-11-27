@@ -83,7 +83,11 @@ resource "kubernetes_secret" "sops_age_key" {
   metadata {
     name      = "sops-age"
     namespace = "flux-system"
+    annotations = {
+        "replicator.v1.mittwald.de/strip-labels" = "true"
+    }
   }
+  
   type = "Opaque"
 
   data = {

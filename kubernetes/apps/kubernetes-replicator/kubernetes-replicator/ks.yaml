@@ -4,6 +4,8 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: kubernetes-replicator
+  labels:
+    flux.linderis.dev/skip-cluster-apps: "true"
 spec:
   interval: 1h
   path: ./kubernetes/apps/kubernetes-replicator/kubernetes-replicator/app
