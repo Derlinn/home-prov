@@ -17,9 +17,9 @@ spec:
       interval: 1h
   values:
     serviceAccount:
-    create: true
-    annotations: {}
-    name:
-    privileges:
-      - apiGroups: [""]
-        resources: ["secrets"]
+      create: true
+      annotations: {}
+      name: ""
+      privileges:
+        - apiGroups: [""]
+          resources: ["secrets"]
