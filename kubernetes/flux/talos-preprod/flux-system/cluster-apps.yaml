@@ -32,6 +32,8 @@ spec:
                 metadata:
                   name: _
                 spec:
+                  decryption:
+                    provider: sops
                   install:
                     crds: CreateReplace
                     strategy:
