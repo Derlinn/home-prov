@@ -10,6 +10,12 @@ variable "proxmox" {
   sensitive = true
 }
 
+variable "enable_talos_config" {
+  description = "Enable Talos cluster configuration and bootstrapping"
+  type        = bool
+  default     = true
+}
+
 variable "flux" {
   description = "Configuration for the Flux GitOps setup."
   type = object({

@@ -54,10 +54,10 @@ provider "restapi" {
 
 provider "flux" {
   kubernetes = {
-    host                   = module.talos[0].kube_host
-    cluster_ca_certificate = trimspace(base64decode(module.talos[0].kube_ca_certificate))
-    client_certificate     = trimspace(base64decode(module.talos[0].kube_client_certificate))
-    client_key             = trimspace(base64decode(module.talos[0].kube_client_key))
+    host                   = var.enable_talos_config ? module.talos[0].kube_host : "https://localhost:6443"
+    cluster_ca_certificate = var.enable_talos_config ? trimspace(base64decode(module.talos[0].kube_ca_certificate)) : ""
+    client_certificate     = var.enable_talos_config ? trimspace(base64decode(module.talos[0].kube_client_certificate)) : ""
+    client_key             = var.enable_talos_config ? trimspace(base64decode(module.talos[0].kube_client_key)) : ""
   }
   git = {
     url                     = var.flux.url
@@ -73,17 +73,17 @@ provider "flux" {
 }
 
 provider "kubernetes" {
-  host                   = module.talos[0].kube_host
-  cluster_ca_certificate = trimspace(base64decode(module.talos[0].kube_ca_certificate))
-  client_certificate     = trimspace(base64decode(module.talos[0].kube_client_certificate))
-  client_key             = trimspace(base64decode(module.talos[0].kube_client_key))
+  host                   = var.enable_talos_config ? module.talos[0].kube_host : "https://localhost:6443"
+  cluster_ca_certificate = var.enable_talos_config ? trimspace(base64decode(module.talos[0].kube_ca_certificate)) : ""
+  client_certificate     = var.enable_talos_config ? trimspace(base64decode(module.talos[0].kube_client_certificate)) : ""
+  client_key             = var.enable_talos_config ? trimspace(base64decode(module.talos[0].kube_client_key)) : ""
 }
 
 provider "helm" {
   kubernetes = {
-    host                   = module.talos[0].kube_host
-    cluster_ca_certificate = trimspace(base64decode(module.talos[0].kube_ca_certificate))
-    client_certificate     = trimspace(base64decode(module.talos[0].kube_client_certificate))
-    client_key             = trimspace(base64decode(module.talos[0].kube_client_key))
+    host                   = var.enable_talos_config ? module.talos[0].kube_host : "https://localhost:6443"
+    cluster_ca_certificate = var.enable_talos_config ? trimspace(base64decode(module.talos[0].kube_ca_certificate)) : ""
+    client_certificate     = var.enable_talos_config ? trimspace(base64decode(module.talos[0].kube_client_certificate)) : ""
+    client_key             = var.enable_talos_config ? trimspace(base64decode(module.talos[0].kube_client_key)) : ""
   }
 }

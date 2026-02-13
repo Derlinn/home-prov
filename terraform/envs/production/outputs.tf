@@ -19,21 +19,6 @@ resource "local_file" "kube_config" {
   file_permission = "0600"
 }
 
-output "vm_summary" {
-  description = "VM summary information"
-  value = {
-    for k, m in module.vm.vms :
-    k => {
-      id       = m.id
-      name     = m.name
-      ip_mode  = m.ip_mode
-      ipv4     = try(flatten(m.ipv4_addresses)[0], null)
-      ipv4_all = try(flatten(m.ipv4_addresses), [])
-      ipv6_all = try(flatten(m.ipv6_addresses), [])
-    }
-  }
-}
-
 output "kube_config" {
   value     = local.talos_enabled ? module.talos[0].kube_config.kubeconfig_raw : null
   sensitive = true

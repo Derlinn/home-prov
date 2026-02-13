@@ -10,8 +10,8 @@ resource "talos_machine_secrets" "this" {
 
 locals {
   node_ips = {
-    for name, vm in proxmox_virtual_environment_vm.this :
-    name => flatten(vm.ipv4_addresses)[1]
+    for name, def in var.nodes :
+    name => def.ip
   }
 
   controlplane_ips = [
@@ -53,12 +53,10 @@ data "talos_machine_configuration" "this" {
       [
         each.value.machine_type == "controlplane" ?
         templatefile("${path.module}/machine-config/control-plane.yaml.tftpl", {
-          hostname     = each.key
           node_name    = each.value.host_node
           cluster_name = var.cluster.proxmox_cluster
         }) :
         templatefile("${path.module}/machine-config/worker.yaml.tftpl", {
-          hostname     = each.key
           node_name    = each.value.host_node
           cluster_name = var.cluster.proxmox_cluster
         })

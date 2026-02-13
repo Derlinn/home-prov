@@ -13,12 +13,13 @@ default_ssh_pubkey = "ssh-ed25519 AAAAC3N......."
 vms = {
   "deb-srv-01" = {
     cpu = 2, mem_mb = 2048, disk_gb = 50, vm_id = 1000,
-    domain = "ny_domain.fr",
-    ci_user = "default",
-    ip_cidr = "dhcp", gw_ip = null,
-    ssh_pubkey = null,
-    tags = ["terraform","live","srv"],
-    template_tags = ["template","debian-13"]
+    host_node     = "node-name",
+    domain        = "my_domain.fr",
+    ci_user       = "default",
+    ip_cidr       = "dhcp", gw_ip = null,
+    ssh_pubkey    = null,
+    tags          = ["terraform", "live", "srv"],
+    template_tags = ["template", "debian-13"]
   }
 }
 
@@ -28,7 +29,10 @@ cluster = {
   gateway         = "192.168.1.254"
   talos_version   = "v1.11.5"
   proxmox_cluster = "cluster-name"
+  flux_enabled    = false
 }
+
+enable_talos_config = false
 
 talos_nodes = {
   #"lin-ctrl-00" = {
@@ -40,5 +44,6 @@ talos_nodes = {
   #  vm_id         = 100
   #  cpu           = 3
   #  ram_dedicated = 8192
+  #  size_disk     = 20
   #}
 }

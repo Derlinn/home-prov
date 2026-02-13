@@ -1,6 +1,6 @@
 [env]
 _.python.venv = { path = "{{config_root}}/.venv", create = true }
-NODE_ENV = "pre-production"
+NODE_ENV = "production"
 KUBECONFIG = "{{config_root}}/terraform/envs/{{env.NODE_ENV}}/output/kube-config.yaml"
 TALOSCONFIG = "{{config_root}}/terraform/envs/{{env.NODE_ENV}}/output/talos-config.yaml"
 SOPS_AGE_KEY_FILE = "~/.config/sops/age/keys.txt"

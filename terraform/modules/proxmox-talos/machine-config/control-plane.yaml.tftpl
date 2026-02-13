@@ -1,6 +1,4 @@
 machine:
-  network:
-    hostname: ${hostname}
   nodeLabels:
     topology.kubernetes.io/region: ${cluster_name}
     topology.kubernetes.io/zone: ${node_name}
@@ -8,6 +6,8 @@ machine:
 cluster:
   allowSchedulingOnControlPlanes: true
   proxy:
+    disabled: true
+  coreDNS:
     disabled: true
   network:
     cni:

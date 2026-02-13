@@ -9,7 +9,7 @@ talosconfig
 # variable files with secrets
 *.tfvars
 *.auto.tfvars
-
+.claude
 # env files
 .env
 .env.*

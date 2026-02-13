@@ -47,30 +47,3 @@ variable "image" {
     proxmox_datastore = optional(string, "local")
   })
 }
-
-variable "cilium" {
-  description = "Cilium configuration"
-  type = object({
-    helm_release_file  = string
-    ocirepository_file = string
-  })
-}
-
-variable "coredns" {
-  description = "CoreDNS configuration"
-  type = object({
-    helm_release_file  = string
-    ocirepository_file = string
-  })
-}
-
-variable "flux" {
-  description = "Flux Git repository configuration"
-  type = object({
-    path         = optional(string)
-    sops_age_key = optional(string)
-  })
-  default = {
-    path = null
-  }
-}

@@ -1,5 +1,8 @@
-version: v1alpha1
 machine:
+  network:
+    nameservers:
+      - 10.25.30.4
+      - 1.1.1.1
   features:
     apidCheckExtKeyUsage: true
     diskQuotaSupport: true
@@ -18,7 +21,6 @@ machine:
         - os:admin
       enabled: true
     rbac: true
-    stableHostname: true
   files:
     - op: create
       path: /etc/cri/conf.d/20-customization.part
@@ -37,16 +39,9 @@ machine:
         hard=True
         nconnect=16
         noatime=True
-  install:
-    diskSelector:
-      model: Samsung SSD 870
-    image: factory.talos.dev/metal-installer/cc720ffb8efc8f12637b8660a86448a88b3f89f516995fb9c67bf80564e723b1:v1.11.5
-    wipe: false
   kernel:
     modules:
       - name: nbd
-      - name: thunderbolt
-      - name: thunderbolt_net
   kubelet:
     defaultRuntimeSeccompProfileEnabled: true
     disableManifestsDirectory: true
@@ -57,26 +52,8 @@ machine:
     image: ghcr.io/siderolabs/kubelet:v1.34.2
     nodeIP:
       validSubnets:
-        - 192.168.42.0/24
-  network:
-    interfaces:
-      - interface: bond0
-        bond:
-          deviceSelectors:
-            - driver: igc
-              hardwareAddr: 88:ae:dd:72:*
-          mode: active-backup
-        dhcp: true
-        mtu: 9000
-        vlans:
-          - vlanId: 70
-            dhcp: false
-            mtu: 9000
-          - vlanId: 90
-            dhcp: false
-            mtu: 9000
+        - 10.25.30.0/24
   nodeLabels:
-    node.kubernetes.io/gpu: "true"
     topology.kubernetes.io/region: main
   sysctls:
     fs.inotify.max_user_instances: "8192"
@@ -97,17 +74,10 @@ machine:
     sunrpc.tcp_slot_table_entries: "128"
     user.max_user_namespaces: "11255"
     vm.nr_hugepages: "1024"
-  token: op://kubernetes/talos/MACHINE_TOKEN
-  udev:
-    rules:
-      - ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{power/control}="on"
 cluster:
-  ca:
-    crt: op://kubernetes/talos/CLUSTER_CA_CRT
-    key: op://kubernetes/talos/CLUSTER_CA_KEY
-  clusterName: main
+  clusterName: talos
   controlPlane:
-    endpoint: https://k8s.internal:6443
+    endpoint: https://10.25.30.50:6443
   discovery:
     enabled: true
     registries:
@@ -115,7 +85,6 @@ cluster:
         disabled: true
       service:
         disabled: false
-  id: op://kubernetes/talos/CLUSTER_ID
   network:
     cni:
       name: none
@@ -124,11 +93,6 @@ cluster:
       - 10.42.0.0/16
     serviceSubnets:
       - 10.43.0.0/16
-  secret: op://kubernetes/talos/CLUSTER_SECRET
-  token: op://kubernetes/talos/CLUSTER_TOKEN
-  aggregatorCA:
-    crt: op://kubernetes/talos/CLUSTER_AGGREGATORCA_CRT
-    key: op://kubernetes/talos/CLUSTER_AGGREGATORCA_KEY
   allowSchedulingOnControlPlanes: true
   apiServer:
     auditPolicy:
@@ -152,15 +116,11 @@ cluster:
     disabled: true
   etcd:
     advertisedSubnets:
-      - 192.168.42.0/24
-    ca:
-      crt: op://kubernetes/talos/CLUSTER_ETCD_CA_CRT
-      key: op://kubernetes/talos/CLUSTER_ETCD_CA_KEY
+      - 10.25.30.0/24
     extraArgs:
       listen-metrics-urls: http://0.0.0.0:2381
   proxy:
     disabled: true
-    image: registry.k8s.io/kube-proxy:v1.34.2
   scheduler:
     config:
       apiVersion: kubescheduler.config.k8s.io/v1
@@ -182,19 +142,3 @@ cluster:
     extraArgs:
       bind-address: 0.0.0.0
     image: registry.k8s.io/kube-scheduler:v1.34.2
-  secretboxEncryptionSecret: op://kubernetes/talos/CLUSTER_SECRETBOXENCRYPTIONSECRET
-  serviceAccount:
-    key: op://kubernetes/talos/CLUSTER_SERVICEACCOUNT_KEY
----
-apiVersion: v1alpha1
-kind: UserVolumeConfig
-name: local-hostpath
-provisioning:
-  diskSelector:
-    match: disk.model == "Corsair MP600 MICRO" && !system_disk
-  minSize: 1TB
----
-apiVersion: v1alpha1
-kind: WatchdogTimerConfig
-device: /dev/watchdog0
-timeout: 5m
