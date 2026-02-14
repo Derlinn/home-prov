@@ -2,10 +2,11 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: flux-system
 
 resources:
-  - kube-system
-#  - observability
-#  - cert-manager
-#  - network
-  - kubernetes-replicator
+  - ./namespace.yaml
+  - ./gitrepository.yaml
+  - ./flux-operator/ks.yaml
+  - ./flux-instance/ks.yaml
+  - ./cluster-apps-ks.yaml
