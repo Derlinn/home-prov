@@ -5,5 +5,4 @@ kind: Kustomization
 resources:
   - ./envoy.yaml
   - ./helmrelease.yaml
-  - ./observability.yaml
   - ./ocirepository.yaml
