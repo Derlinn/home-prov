@@ -6,6 +6,6 @@ kind: Kustomization
 resources:
   - kube-system
 #  - observability
-#  - cert-manager
+  - cert-manager
 #  - network
   - kubernetes-replicator
