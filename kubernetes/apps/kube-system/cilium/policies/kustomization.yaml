@@ -13,5 +13,6 @@ resources:
     - ./allow-prometheus-egress.yaml
     - ./allow-envoy-gateway.yaml
     - ./allow-envoy-egress.yaml
+    - ./allow-envoy-backends.yaml
     - ./allow-ingress-lan.yaml
     - ./default-deny.yaml
