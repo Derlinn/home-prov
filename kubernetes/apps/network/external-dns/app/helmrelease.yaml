@@ -32,11 +32,12 @@ spec:
       name: external-dns
     podSecurityContext:
       runAsNonRoot: true
+    logLevel: debug
+    interval: 30s
     extraArgs:
       - --pdns-server=https://power-dns.linderis.fr
       - --pdns-server-id=localhost
       - --pdns-api-key=${PDNS_API_KEY}
-      - --interval=30s
     metrics:
       enabled: true
       serviceMonitor:
