@@ -5,9 +5,9 @@ kind: Kustomization
 resources:
     - ./allow-dns.yaml
     - ./allow-kube-api.yaml
-    - ./policies/allow-egress-https.yaml
-    - ./policies/allow-hubble.yaml
-    - ./policies/allow-prometheus-scrape.yaml
-    - ./policies/allow-envoy-gateway.yaml
-    - ./policies/allow-ingress-lan.yaml
-#    - ./policies/default-deny.yaml
+    - ./allow-egress-https.yaml
+    - ./allow-hubble.yaml
+    - ./allow-prometheus-scrape.yaml
+    - ./allow-envoy-gateway.yaml
+    - ./allow-ingress-lan.yaml
+#    - ./default-deny.yaml
