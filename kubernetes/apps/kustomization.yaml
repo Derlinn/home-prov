@@ -7,5 +7,5 @@ resources:
   - kube-system
 #  - observability
   - cert-manager
-#  - network
+  - network
   - kubernetes-replicator
