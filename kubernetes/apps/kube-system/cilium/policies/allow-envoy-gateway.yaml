@@ -5,7 +5,9 @@ kind: CiliumClusterwideNetworkPolicy
 metadata:
   name: allow-envoy-gateway
 spec:
-  # Allow traffic INTO envoy gateway pods
+  enableDefaultDeny:
+    egress: false
+    ingress: false
   endpointSelector:
     matchLabels:
       io.kubernetes.pod.namespace: network
@@ -26,6 +28,9 @@ kind: CiliumClusterwideNetworkPolicy
 metadata:
   name: allow-envoy-gateway-internal
 spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
   endpointSelector:
     matchLabels:
       io.kubernetes.pod.namespace: network

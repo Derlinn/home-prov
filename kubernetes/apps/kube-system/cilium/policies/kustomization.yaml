@@ -4,10 +4,14 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
     - ./allow-dns.yaml
+    - ./allow-coredns-upstream.yaml
     - ./allow-kube-api.yaml
     - ./allow-egress-https.yaml
+    - ./allow-flux-internal.yaml
     - ./allow-hubble.yaml
     - ./allow-prometheus-scrape.yaml
+    - ./allow-prometheus-egress.yaml
     - ./allow-envoy-gateway.yaml
+    - ./allow-envoy-egress.yaml
     - ./allow-ingress-lan.yaml
-#    - ./default-deny.yaml
+    - ./default-deny.yaml

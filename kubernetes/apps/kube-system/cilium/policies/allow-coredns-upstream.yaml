@@ -3,14 +3,21 @@
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:
-  name: allow-egress-https
+  name: allow-coredns-upstream
 spec:
   enableDefaultDeny:
     egress: false
     ingress: false
-  endpointSelector: {}
+  endpointSelector:
+    matchLabels:
+      io.kubernetes.pod.namespace: kube-system
+      k8s-app: kube-dns
   egress:
-    - toPorts:
+    - toCIDR:
+        - 0.0.0.0/0
+      toPorts:
         - ports:
-            - port: "443"
+            - port: "53"
+              protocol: UDP
+            - port: "53"
               protocol: TCP

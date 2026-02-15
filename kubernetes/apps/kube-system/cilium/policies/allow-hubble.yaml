@@ -1,10 +1,14 @@
 ---
 # yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# Hubble Relay: accepts connections on 4245
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:
   name: allow-hubble
 spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
   endpointSelector:
     matchLabels:
       io.kubernetes.pod.namespace: kube-system
@@ -12,6 +16,30 @@ spec:
   ingress:
     - fromEndpoints:
         - {}
+      toPorts:
+        - ports:
+            - port: "4245"
+              protocol: TCP
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# Hubble UI: needs egress to Hubble Relay
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-hubble-ui
+spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
+  endpointSelector:
+    matchLabels:
+      io.kubernetes.pod.namespace: kube-system
+      app.kubernetes.io/name: hubble-ui
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            app.kubernetes.io/name: hubble-relay
       toPorts:
         - ports:
             - port: "4245"

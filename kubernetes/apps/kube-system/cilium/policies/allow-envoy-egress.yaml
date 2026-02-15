@@ -1,30 +1,27 @@
 ---
 # yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# Envoy is a reverse proxy — it needs to forward traffic to backend pods
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:
-  name: allow-prometheus-scrape
+  name: allow-envoy-egress
 spec:
   enableDefaultDeny:
     egress: false
     ingress: false
-  endpointSelector: {}
-  ingress:
-    - fromEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: observability
-            app.kubernetes.io/name: prometheus
+  endpointSelector:
+    matchLabels:
+      io.kubernetes.pod.namespace: network
+  egress:
+    - toEndpoints:
+        - {}
       toPorts:
         - ports:
-            - port: "9090"
+            - port: "80"
               protocol: TCP
-            - port: "9100"
-              protocol: TCP
-            - port: "9153"
-              protocol: TCP
-            - port: "9402"
+            - port: "443"
               protocol: TCP
             - port: "8080"
               protocol: TCP
-            - port: "8081"
+            - port: "8443"
               protocol: TCP
