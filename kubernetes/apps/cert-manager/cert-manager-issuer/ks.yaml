@@ -4,6 +4,8 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: cert-manager-issuer
+  labels:
+    flux.linderis.prod/sops-secret: "true"
 spec:
   healthChecks:
     - apiVersion: cert-manager.io/v1

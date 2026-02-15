@@ -5,12 +5,8 @@ kind: Kustomization
 metadata:
   name: external-dns
   labels:
-    "flux.elycube.prod/sops-secret": "true"
+    flux.linderis.prod/sops-secret: "true"
 spec:
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
   interval: 1h
   path: ./kubernetes/apps/network/external-dns/app
   prune: true
