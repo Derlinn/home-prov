@@ -7,5 +7,6 @@ namespace: kube-system
 resources:
   - ./namespace.yaml
   - ./cilium/ks.yaml
+  - ./cilium/policies-ks.yaml
   - ./coredns/ks.yaml
   - ./metrics-server/ks.yaml
