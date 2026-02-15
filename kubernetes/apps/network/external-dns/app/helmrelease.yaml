@@ -1,0 +1,44 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: external-dns
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: external-dns
+      sourceRef:
+        kind: HelmRepository
+        name: external-dns
+      interval: 1h
+  values:
+    provider:
+      name: pdns
+    policy: upsert-only
+    sources:
+      - ingress
+      - service
+      - gateway-httproute
+    txtOwnerId: external-dns
+    txtPrefix: k8s.
+    domainFilters:
+      - linderis.fr
+    rbac:
+      create: true
+    serviceAccount:
+      create: true
+      name: external-dns
+    podSecurityContext:
+      runAsNonRoot: true
+    extraArgs:
+      - --pdns-server=https://power-dns.linderis.fr
+      - --pdns-server-id=localhost
+      - --pdns-api-key=${PDNS_API_KEY}
+      - --log-level=debug
+      - --interval=30s
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
