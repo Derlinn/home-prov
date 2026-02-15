@@ -3,6 +3,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  # Allow policies (evaluated first by Cilium)
-  - ./host-fw-control-plane.yaml
-  - ./host-fw-workers.yaml
+    - ./allow-dns.yaml
+    - ./allow-kube-api.yaml
+    - ./policies/allow-egress-https.yaml
+    - ./policies/allow-hubble.yaml
+    - ./policies/allow-prometheus-scrape.yaml
+    - ./policies/allow-envoy-gateway.yaml
+    - ./policies/allow-ingress-lan.yaml
+#    - ./policies/default-deny.yaml
