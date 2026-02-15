@@ -27,3 +27,6 @@ output/
 
 # Python
 .venv/
+
+# Docs locales
+ZERO-TRUST.md

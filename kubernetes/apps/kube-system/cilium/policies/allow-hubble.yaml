@@ -1,0 +1,27 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-hubble
+spec:
+  endpointSelector:
+    matchLabels:
+      io.kubernetes.pod.namespace: kube-system
+      app.kubernetes.io/name: hubble-relay
+  ingress:
+    - fromEndpoints:
+        - {}
+      toPorts:
+        - ports:
+            - port: "4245"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: cilium
+      toPorts:
+        - ports:
+            - port: "4244"
+              protocol: TCP
