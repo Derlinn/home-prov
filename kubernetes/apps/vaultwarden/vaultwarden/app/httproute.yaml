@@ -18,4 +18,4 @@ spec:
     - backendRefs:
         - name: vaultwarden
           namespace: vaultwarden
-          port: 8080
+          port: 80
