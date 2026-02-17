@@ -1,0 +1,28 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: longhorn
+spec:
+  chart:
+    spec:
+      chart: longhorn
+      version: '1.10.1'
+      interval: 5h
+      sourceRef:
+        kind: HelmRepository
+        name: longhorn
+  releaseName: longhorn
+  interval: 1h
+  values:
+    defaultSettings:
+      defaultDataPath: /var/lib/longhorn
+      orphanAutoDeletion: true
+    ingress:
+      enabled: true
+      host: longhorn.linderis.fr
+    metrics:
+      serviceMonitor:
+        enabled: true
+  dependsOn:
+    - name: envoy-gateway
+      namespace: network

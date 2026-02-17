@@ -1,0 +1,21 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: longhorn-production-v1
+  labels:
+    workload: production
+    tier: low-latency
+  annotations:
+    description: "StorageClass for workload with low latency requirements."
+    support-tier: "p1-critical"
+    backup-policy: "daily-backups-30d-retention"
+provisioner: driver.longhorn.io
+allowVolumeExpansion: true
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer
+parameters:
+  numberOfReplicas: "3"
+  dataLocality: best-effort
+  replicaAutoBalance: "least-effort"
+  unmapMarkSnapChainRemoved: "enabled"
+  fsType: "ext4"
