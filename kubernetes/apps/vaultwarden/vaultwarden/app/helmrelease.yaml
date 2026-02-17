@@ -11,7 +11,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: vaultwarden
-  releaseName: longhorn
+  releaseName: vaultwarden
   interval: 1h
   values:
     storage:
@@ -19,6 +19,7 @@ spec:
         name: "vaultwarden-data"
         size: "15Gi"
         class: "longhorn-production-v1"
+        accessMode: "ReadWriteOnce"
         keepPvc: true
     adminToken:
       value: "$argon2id$v=19$m=19456,t=2,p=1$TUEzcWlWZ0pLMTFCa1J3SnlKQ1dEWE5JaE1VamIwWFA0V1ppSkg0cWw2OD0$xHaxyrzoEiFYcQJ2i8Iu800ny7YH71L2TCpN/cgPuXg"
@@ -30,7 +31,7 @@ spec:
     metrics:
       serviceMonitor:
         enabled: true
-    timeZone: "Europe\Paris"
+    timeZone: "Europe/Paris"
   dependsOn:
     - name: envoy-gateway
       namespace: network
