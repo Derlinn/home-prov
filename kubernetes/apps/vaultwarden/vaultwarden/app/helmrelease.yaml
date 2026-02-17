@@ -6,7 +6,7 @@ spec:
   chart:
     spec:
       chart: vaultwarden
-      version: '1.10.1'
+      version: '0.34.6'
       interval: 5h
       sourceRef:
         kind: HelmRepository
