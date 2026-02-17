@@ -6,14 +6,14 @@ metadata:
   name: longhorn-dashboard
 spec:
   parentRefs:
-    - name: envoy-tailscale
+    - name: envoy-external
       namespace: network
       sectionName: https
-    - name: envoy-tailscale
+    - name: envoy-external
       namespace: network
       sectionName: http
   hostnames:
-    - longhorn.prod.elycube.fr
+    - longhorn.linderis.fr
   rules:
     - backendRefs:
         - name: longhorn-frontend
