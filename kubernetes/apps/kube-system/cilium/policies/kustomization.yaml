@@ -15,4 +15,5 @@ resources:
     - ./allow-envoy-egress.yaml
     - ./allow-envoy-backends.yaml
     - ./allow-ingress-lan.yaml
+    - ./allow-longhorn.yaml
     - ./default-deny.yaml
