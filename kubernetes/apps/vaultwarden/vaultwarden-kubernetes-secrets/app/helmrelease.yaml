@@ -16,5 +16,5 @@ spec:
         VAULTWARDEN__COLLECTIONID: "HOMELAB-K8S-SYNC"
         VAULTWARDEN__SERVERURL: "https://vaultwarden.linderis.fr"
     image:
-      tag: "v1.2.8"
+      tag: "1.2.8"
     namespace: vaultwarden
