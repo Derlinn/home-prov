@@ -7,3 +7,4 @@ namespace: vaultwarden
 resources:
   - ./namespace.yaml
   - ./vaultwarden/ks.yaml
+  - ./vaultwarden-kubernetes-secrets/ks.yaml
