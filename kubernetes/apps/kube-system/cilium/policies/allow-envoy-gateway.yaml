@@ -21,6 +21,10 @@ spec:
               protocol: TCP
             - port: "443"
               protocol: TCP
+            - port: "10080"
+              protocol: TCP
+            - port: "10443"
+              protocol: TCP
     # Kubelet readiness probe
     - fromCIDR:
         - 10.25.30.0/24
