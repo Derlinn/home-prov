@@ -14,7 +14,7 @@ spec:
       config:
         VAULTWARDEN__ORGANIZATIONID: "LINDERIS"
         VAULTWARDEN__COLLECTIONID: "HOMELAB-K8S-SYNC"
-        VAULTWARDEN__SERVERURL: "https://vaultwarden.linderis.fr"
+        VAULTWARDEN__SERVERURL: "http://vaultwarden.vaultwarden.svc.cluster.local"
     image:
       tag: "1.2.8"
     namespace:
