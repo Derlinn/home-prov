@@ -17,4 +17,6 @@ spec:
         VAULTWARDEN__SERVERURL: "https://vaultwarden.linderis.fr"
     image:
       tag: "1.2.8"
-    namespace: vaultwarden
+    namespace:
+      create: false
+      name: vaultwarden
