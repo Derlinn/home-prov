@@ -32,11 +32,16 @@ spec:
       serviceMonitor:
         enabled: true
     timeZone: "Europe/Paris"
-    env:
-      LOGIN_RATELIMIT_SECONDS: "1"
-      LOGIN_RATELIMIT_MAX_BURST: "100"
-      ADMIN_RATELIMIT_SECONDS: "1"
-      ADMIN_RATELIMIT_MAX_BURST: "100"
+    image:
+      extraVars:
+        - key: LOGIN_RATELIMIT_SECONDS
+          value: "1"
+        - key: LOGIN_RATELIMIT_MAX_BURST
+          value: "100"
+        - key: ADMIN_RATELIMIT_SECONDS
+          value: "1"
+        - key: ADMIN_RATELIMIT_MAX_BURST
+          value: "100"
   dependsOn:
     - name: envoy-gateway
       namespace: network

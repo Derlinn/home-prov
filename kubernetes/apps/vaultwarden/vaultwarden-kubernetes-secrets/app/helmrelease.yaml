@@ -12,8 +12,8 @@ spec:
   values:
     env:
       config:
-        VAULTWARDEN__ORGANIZATIONID: "LINDERIS"
-        VAULTWARDEN__COLLECTIONID: "HOMELAB-K8S-SYNC"
+        VAULTWARDEN__ORGANIZATIONID: "60fc758e-fd71-414d-b6bf-128f0a66f793"
+        VAULTWARDEN__COLLECTIONID: "42bfa535-afeb-4e57-bee7-56a9c4174558"
         VAULTWARDEN__SERVERURL: "https://vaultwarden.linderis.fr"
     image:
       tag: "1.2.8"
