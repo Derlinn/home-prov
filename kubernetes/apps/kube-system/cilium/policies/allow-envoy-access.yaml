@@ -12,11 +12,7 @@ spec:
     ingress: false
   endpointSelector: {}
   egress:
-    - toEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: network
-            gateway.envoyproxy.io/owning-gateway-name: envoy-external
-      toPorts:
+    - toPorts:
         - ports:
             - port: "10080"
               protocol: TCP
