@@ -5,7 +5,7 @@ kind: Kustomization
 metadata:
   name: longhorn
   labels:
-    "flux.elycube.prod/skip-sops-secret": "true"
+    "flux.linderis.prod/skip-sops-secret": "true"
 spec:
   interval: 1h
   path: ./kubernetes/apps/longhorn-system/longhorn/app
