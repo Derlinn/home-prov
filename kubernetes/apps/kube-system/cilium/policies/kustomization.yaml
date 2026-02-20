@@ -9,6 +9,7 @@ resources:
     - ./allow-https-egress.yaml
     - ./allow-flux-internal.yaml
     - ./allow-hubble.yaml
+    - ./allow-observability-internal.yaml
     - ./allow-prometheus-ingress.yaml
     - ./allow-prometheus-egress.yaml
     - ./allow-envoy-gateway.yaml
