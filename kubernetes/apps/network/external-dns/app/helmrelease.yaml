@@ -38,7 +38,5 @@ spec:
       - --pdns-server=https://power-dns.linderis.fr
       - --pdns-server-id=localhost
       - --pdns-api-key=${PDNS_API_KEY}
-    metrics:
+    serviceMonitor:
       enabled: true
-      serviceMonitor:
-        enabled: true
