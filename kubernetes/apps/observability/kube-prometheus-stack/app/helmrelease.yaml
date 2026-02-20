@@ -17,12 +17,29 @@ spec:
           component: kube-apiserver # etcd runs on control plane nodes
     kubeProxy:
       enabled: false
+    kubeScheduler:
+      enabled: false
+    kubeControllerManager:
+      enabled: false
+    prometheus:
+      route:
+        main:
+          enabled: true
+          hostnames:
+            - prometheus.linderis.fr
+          parentRefs:
+            - name: envoy-external
+              namespace: network
+              sectionName: https
+            - name: envoy-external
+              namespace: network
+              sectionName: http
       prometheusSpec:
         version: v2.55.1 # override 'unsupported Prometheus version' error
         image:
           registry: docker.io
           repository: prompp/prompp
-          tag: 0.6.4
+          tag: 0.7.0
         securityContext:
           runAsNonRoot: true
           runAsUser: 64535
@@ -43,14 +60,14 @@ spec:
         storageSpec:
           volumeClaimTemplate:
             spec:
-              storageClassName: ceph-block
+              storageClassName: longhorn-production-v1
               resources:
                 requests:
                   storage: 50Gi
-    prometheus-node-exporter:
-      fullnameOverride: node-exporter
-    kube-state-metrics:
-      fullnameOverride: kube-state-metrics
+      prometheus-node-exporter:
+        fullnameOverride: node-exporter
+      kube-state-metrics:
+        fullnameOverride: kube-state-metrics
     grafana:
       enabled: false
       forceDeployDashboards: true
