@@ -6,3 +6,6 @@ namespace: flux-system
 resources:
   - ./helmrelease.yaml
   - ./ocirepository.yaml
+  - ./grafanadashboard.yaml
+  - ./podmonitor.yaml
+  - ./prometheusrule.yaml

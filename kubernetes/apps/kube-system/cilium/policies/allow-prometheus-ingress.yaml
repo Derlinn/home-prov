@@ -28,3 +28,6 @@ spec:
               protocol: TCP
             - port: "8081"
               protocol: TCP
+            # longhorn-manager
+            - port: "9500"
+              protocol: TCP
