@@ -12,3 +12,4 @@ resources:
   - default
   - longhorn-system
   - vaultwarden
+  - system-upgrade
