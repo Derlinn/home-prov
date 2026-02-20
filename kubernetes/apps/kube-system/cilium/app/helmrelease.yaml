@@ -63,6 +63,18 @@ spec:
         enabled: true
       ui:
         enabled: true
+      metrics:
+        enabled:
+          - dns
+          - drop
+          - tcp
+          - flow
+          - icmp
+          - http
+        serviceMonitor:
+          enabled: true
+        dashboards:
+          enabled: true
     ipam:
       mode: "kubernetes"
 

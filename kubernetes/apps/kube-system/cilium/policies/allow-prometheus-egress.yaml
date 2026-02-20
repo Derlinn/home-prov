@@ -32,3 +32,21 @@ spec:
             # longhorn-manager
             - port: "9500"
               protocol: TCP
+            # cilium-agent
+            - port: "9962"
+              protocol: TCP
+            # cilium-agent envoy-metrics
+            - port: "9964"
+              protocol: TCP
+            # hubble metrics
+            - port: "9965"
+              protocol: TCP
+            # cilium-operator
+            - port: "9963"
+              protocol: TCP
+            # envoy-gateway
+            - port: "19001"
+              protocol: TCP
+            # external-dns
+            - port: "7979"
+              protocol: TCP
