@@ -6,16 +6,16 @@ resources:
     - ./allow-dns.yaml
     - ./allow-coredns-upstream.yaml
     - ./allow-kube-api.yaml
-    - ./allow-egress-https.yaml
+    - ./allow-https-egress.yaml
     - ./allow-flux-internal.yaml
     - ./allow-hubble.yaml
-    - ./allow-prometheus-scrape.yaml
+    - ./allow-prometheus-ingress.yaml
     - ./allow-prometheus-egress.yaml
     - ./allow-envoy-gateway.yaml
     - ./allow-envoy-egress.yaml
     - ./allow-envoy-backends.yaml
-    - ./allow-ingress-lan.yaml
-    - ./allow-longhorn.yaml
+    - ./allow-lan-ingress.yaml
+    - ./allow-longhorn-internal.yaml
     - ./allow-vaultwarden-internal.yaml
-    - ./allow-envoy-access.yaml
+    - ./allow-envoy-clusterip.yaml
     - ./default-deny.yaml

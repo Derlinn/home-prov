@@ -47,17 +47,17 @@ CoreDNS peut faire des requetes DNS vers n'importe quelle destination externe (`
 
 ---
 
-## allow-egress-https
+## allow-https-egress
 
-**Fichier :** `policies/allow-egress-https.yaml`
+**Fichier :** `policies/allow-https-egress.yaml`
 
 Tous les pods peuvent faire des requetes sortantes sur le port 443. Couvre les appels vers des registres OCI, APIs externes, etc.
 
 ---
 
-## allow-ingress-lan
+## allow-lan-ingress
 
-**Fichier :** `policies/allow-ingress-lan.yaml`
+**Fichier :** `policies/allow-lan-ingress.yaml`
 
 Tous les pods acceptent du trafic entrant depuis le reseau local.
 
@@ -74,9 +74,9 @@ Les pods du namespace `flux-system` peuvent communiquer entre eux (ingress et eg
 
 ---
 
-## allow-prometheus-scrape
+## allow-prometheus-ingress
 
-**Fichier :** `policies/allow-prometheus-scrape.yaml`
+**Fichier :** `policies/allow-prometheus-ingress.yaml`
 
 Prometheus (`observability`, label `app.kubernetes.io/name: prometheus`) peut scraper tous les pods sur les ports de metriques : 9090, 9100, 9153, 9402, 8080, 8081.
 
@@ -101,7 +101,7 @@ Prometheus peut initier des connexions vers tous les endpoints du cluster sur le
 
 ## allow-longhorn-internal
 
-**Fichier :** `policies/allow-longhorn.yaml`
+**Fichier :** `policies/allow-longhorn-internal.yaml`
 
 Tous les pods du namespace `longhorn-system` peuvent communiquer entre eux (ingress et egress). Couvre la replication des volumes et la communication entre les composants Longhorn.
 
@@ -123,7 +123,7 @@ Trafic entrant vers les pods Envoy proxy (gateway externe et interne).
 
 **Fichier :** `policies/allow-envoy-egress.yaml`
 
-Tous les pods du namespace `network` (Envoy proxies) peuvent se connecter vers n'importe quel endpoint du cluster sur : 80, 443, 8080, 8443, 18000.
+Tous les pods du namespace `network` (Envoy proxies) peuvent se connecter vers n'importe quel endpoint du cluster sur : 80, 443, 8000, 8080, 8443, 18000. Le port 8000 couvre l'UI Longhorn.
 
 ---
 
@@ -132,3 +132,11 @@ Tous les pods du namespace `network` (Envoy proxies) peuvent se connecter vers n
 **Fichier :** `policies/allow-envoy-backends.yaml`
 
 Tous les pods du cluster acceptent du trafic entrant depuis les pods Envoy external (`network`, label `gateway.envoyproxy.io/owning-gateway-name: envoy-external`) sur : 80, 443, 8000, 8080, 8443. Le port 8000 couvre l'UI Longhorn.
+
+---
+
+## allow-envoy-clusterip
+
+**Fichier :** `policies/allow-envoy-clusterip.yaml`
+
+Tous les pods peuvent faire de l'egress vers les ports 10080 et 10443. Necessaire car le socket-LB de Cilium reecrit les connexions vers les ClusterIP Envoy (80→10080, 443→10443) avant l'evaluation des politiques d'egress — sans cette regle, la connexion serait bloquee au niveau du pod source.
