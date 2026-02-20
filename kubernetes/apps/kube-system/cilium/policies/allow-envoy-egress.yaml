@@ -25,7 +25,14 @@ spec:
               protocol: TCP
             - port: "8443"
               protocol: TCP
+            # longhorn
             - port: "8000"
+              protocol: TCP
+            # prometheus
+            - port: "9090"
+              protocol: TCP
+            # grafana
+            - port: "3000"
               protocol: TCP
             - port: "18000"
               protocol: TCP
