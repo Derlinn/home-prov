@@ -17,6 +17,9 @@ spec:
       - name: headscale
         image: ghcr.io/juanfont/headscale:v0.28
         args: ["serve"]
+        env:
+        - name: TZ
+          value: Europe/Paris
         ports:
         - containerPort: 47239
         volumeMounts:
@@ -26,8 +29,11 @@ spec:
           mountPath: /var/lib/headscale
       - name: headscale-ui
         image: ghcr.io/gurucomputing/headscale-ui:latest
+        env:
+        - name: TZ
+          value: Europe/Paris
         ports:
-        - containerPort: 443
+        - containerPort: 8080
         volumeMounts:
         - name: headscale-config
           mountPath: /etc/headscale
