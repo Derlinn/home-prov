@@ -1,0 +1,41 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: headscale
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: headscale
+  template:
+    metadata:
+      labels:
+        app: headscale
+    spec:
+      containers:
+      - name: headscale
+        image: ghcr.io/juanfont/headscale:v0.28
+        ports:
+        - containerPort: 47239
+        volumeMounts:
+        - name: headscale-config
+          mountPath: /etc/headscale
+        - name: headscale-data
+          mountPath: /var/lib/headscale
+      - name: headscale-ui
+        image: ghcr.io/gurucomputing/headscale-ui:latest
+        ports:
+        - containerPort: 443
+        volumeMounts:
+        - name: headscale-config
+          mountPath: /etc/headscale
+        - name: headscale-data
+          mountPath: /var/lib/headscale
+      volumes:
+      - name: headscale-config
+        configMap:
+          name: headscale-config
+      - name: headscale-data
+        persistentVolumeClaim:
+          claimName: headscale-data

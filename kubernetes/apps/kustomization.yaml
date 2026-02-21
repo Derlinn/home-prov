@@ -13,3 +13,4 @@ resources:
   - longhorn-system
   - vaultwarden
   - system-upgrade
+  - headscale

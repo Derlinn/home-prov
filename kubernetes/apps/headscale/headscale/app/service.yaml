@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: headscale
+spec:
+  selector:
+    app: headscale
+  ports:
+    - name: headscale-port
+      protocol: TCP
+      targetPort: 47239
+    - name: headscale-ui-port
+      protocol: TCP
+      targetPort: 443
