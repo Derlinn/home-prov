@@ -17,5 +17,5 @@ data:
       api_key_path: /etc/headplane/api-key
       config_path: "/etc/headscale/config.yaml"
     integration:
-      kubernetes:
-        enabled: false
+      proc:
+        enabled: true
