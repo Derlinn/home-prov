@@ -9,7 +9,9 @@ spec:
   ports:
     - name: headscale-port
       protocol: TCP
+      port: 47239
       targetPort: 47239
     - name: headscale-ui-port
       protocol: TCP
+      port: 443
       targetPort: 443
