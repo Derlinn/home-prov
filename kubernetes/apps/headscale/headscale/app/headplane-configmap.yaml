@@ -18,5 +18,4 @@ data:
       config_path: "/etc/headscale/config.yaml"
     integration:
       kubernetes:
-        enabled: true
-        namespace: "headscale"
+        enabled: false

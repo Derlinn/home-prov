@@ -33,12 +33,6 @@ spec:
         env:
         - name: TZ
           value: Europe/Paris
-        - name: HEADPLANE_LOAD_ENV_OVERRIDES
-          value: "true"
-        - name: HEADPLANE_INTEGRATION__KUBERNETES__POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
         ports:
         - containerPort: 8080
         volumeMounts:
