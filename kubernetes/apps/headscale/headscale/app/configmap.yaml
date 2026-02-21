@@ -12,6 +12,11 @@ data:
       private_key_path: /var/lib/headscale/noise_private.key
     prefixes:
       v4: 100.70.0.0/10
+    derp:
+      urls:
+        - https://controlplane.tailscale.com/derpmap/default
+      auto_update_enabled: true
+      update_frequency: 24h
     disable_check_updates: true
     database:
       type: sqlite
