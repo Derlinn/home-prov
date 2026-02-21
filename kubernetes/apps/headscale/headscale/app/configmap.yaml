@@ -8,14 +8,15 @@ data:
     server_url: https://headscale-01.linderis.fr:443
     listen_addr: 0.0.0.0:47239
     metrics_listen_addr: 127.0.0.1:9090
-    private_key_path: /var/lib/headscale/private.key
     noise:
       private_key_path: /var/lib/headscale/noise_private.key
-    ip_prefixes:
-      - 100.70.0.0/10
+    prefixes:
+      v4: 100.70.0.0/10
     disable_check_updates: true
-    db_type: sqlite3
-    db_path: /var/lib/headscale/db.sqlite
+    database:
+      type: sqlite
+      sqlite:
+        path: /var/lib/headscale/db.sqlite
     log:
       format: text
       level: info
