@@ -16,7 +16,7 @@ spec:
       shareProcessNamespace: true
       containers:
       - name: headscale
-        image: ghcr.io/juanfont/headscale:v0.27.0
+        image: ghcr.io/juanfont/headscale:v0.28.0
         args: ["serve"]
         env:
         - name: TZ
@@ -29,7 +29,7 @@ spec:
         - name: headscale-data
           mountPath: /var/lib/headscale
       - name: headplane
-        image: ghcr.io/tale/headplane:latest
+        image: ghcr.io/tale/headplane:0.6.2-beta.5
         env:
         - name: TZ
           value: Europe/Paris
