@@ -16,6 +16,7 @@ spec:
       containers:
       - name: headscale
         image: ghcr.io/juanfont/headscale:v0.28
+        args: ["serve"]
         ports:
         - containerPort: 47239
         volumeMounts:
