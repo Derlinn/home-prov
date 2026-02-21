@@ -11,7 +11,7 @@ spec:
       protocol: TCP
       port: 47239
       targetPort: 47239
-    - name: headscale-ui-port
+    - name: headplane-port
       protocol: TCP
       port: 8080
       targetPort: 8080

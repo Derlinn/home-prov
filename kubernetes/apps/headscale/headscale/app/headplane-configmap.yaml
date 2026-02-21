@@ -1,0 +1,22 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: headplane-config
+data:
+  config.yaml: |
+    debug: false
+    server:
+      host: "0.0.0.0"
+      port: 8080
+      data_path: "/var/lib/headplane"
+      cookie_secret_path: /etc/headplane/cookie-secret
+      cookie_secure: false
+    headscale:
+      url: "http://localhost:47239"
+      api_key_path: /etc/headplane/api-key
+      config_path: "/etc/headscale/config.yaml"
+    integration:
+      kubernetes:
+        enabled: true
+        namespace: "headscale"

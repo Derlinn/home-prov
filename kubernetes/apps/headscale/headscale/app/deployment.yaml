@@ -13,9 +13,10 @@ spec:
       labels:
         app: headscale
     spec:
+      shareProcessNamespace: true
       containers:
       - name: headscale
-        image: ghcr.io/juanfont/headscale:v0.28
+        image: ghcr.io/juanfont/headscale:v0.27.0
         args: ["serve"]
         env:
         - name: TZ
@@ -27,18 +28,31 @@ spec:
           mountPath: /etc/headscale
         - name: headscale-data
           mountPath: /var/lib/headscale
-      - name: headscale-ui
-        image: ghcr.io/gurucomputing/headscale-ui:latest
+      - name: headplane
+        image: ghcr.io/tale/headplane:latest
         env:
         - name: TZ
           value: Europe/Paris
+        - name: HEADPLANE_LOAD_ENV_OVERRIDES
+          value: "true"
+        - name: HEADPLANE_INTEGRATION__KUBERNETES__POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         ports:
         - containerPort: 8080
         volumeMounts:
         - name: headscale-config
           mountPath: /etc/headscale
-        - name: headscale-data
-          mountPath: /var/lib/headscale
+        - name: headplane-config
+          mountPath: /etc/headplane/config.yaml
+          subPath: config.yaml
+        - name: headplane-secrets
+          mountPath: /etc/headplane/api-key
+          subPath: api-key
+        - name: headplane-secrets
+          mountPath: /etc/headplane/cookie-secret
+          subPath: cookie-secret
       volumes:
       - name: headscale-config
         configMap:
@@ -46,3 +60,9 @@ spec:
       - name: headscale-data
         persistentVolumeClaim:
           claimName: headscale-data
+      - name: headplane-config
+        configMap:
+          name: headplane-config
+      - name: headplane-secrets
+        secret:
+          secretName: headplane-secrets
