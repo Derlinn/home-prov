@@ -5,6 +5,7 @@ kind: Kustomization
 
 resources:
   - kube-system
+  - authentik
   - observability
   - cert-manager
   - network

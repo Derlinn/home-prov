@@ -30,3 +30,5 @@ output/
 
 # Docs locales
 ZERO-TRUST.md
+.pytest_cache
+.ansible

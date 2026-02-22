@@ -31,6 +31,10 @@ data:
         global:
           - 1.1.1.1
           - 1.0.0.1
+        split:
+          linderis.fr:
+            - 10.25.30.4   # PowerDNS interne — résout les services sur envoy-internal
+            - 1.1.1.1      # fallback public — résout headscale-01 via Cloudflare si PowerDNS ne sait pas
       magic_dns: true
       base_domain: linderis.fr
     logtail:

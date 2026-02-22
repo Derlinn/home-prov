@@ -9,3 +9,4 @@ resources:
   - ./deployment.yaml
 #  - ./headplane-secret.yaml this secret was created by vaultwarden sync
   - ./service.yaml
+  - ./httproute.yaml

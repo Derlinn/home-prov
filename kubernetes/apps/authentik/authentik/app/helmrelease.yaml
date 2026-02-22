@@ -1,0 +1,81 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: authentik
+spec:
+  interval: 15m
+  timeout: 10m
+  releaseName: authentik
+  chart:
+    spec:
+      chart: authentik
+      version: 2025.12.4
+      sourceRef:
+        kind: HelmRepository
+        name: authentik
+      interval: 15m
+  valuesFrom:
+    - kind: Secret
+      name: authentik-credentials
+      valuesKey: secret-key
+      targetPath: authentik.secret_key
+      optional: false
+    - kind: Secret
+      name: authentik-credentials
+      valuesKey: postgresql-password
+      targetPath: authentik.postgresql.password
+      optional: false
+    - kind: Secret
+      name: authentik-credentials
+      valuesKey: postgresql-password
+      targetPath: postgresql.auth.password
+      optional: false
+  values:
+    authentik:
+      error_reporting:
+        enabled: false
+      log_level: info
+      postgresql:
+        host: authentik-postgresql
+        port: 5432
+        name: authentik
+        user: authentik
+      redis:
+        host: authentik-redis-master
+
+    server:
+      replicas: 1
+      ingress:
+        enabled: false
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+
+    worker:
+      replicas: 1
+
+    postgresql:
+      enabled: true
+      auth:
+        username: authentik
+        database: authentik
+        # password via valuesFrom
+      primary:
+        persistence:
+          enabled: true
+          storageClass: longhorn-production-v1
+          size: 2Gi
+
+    redis:
+      enabled: true
+      architecture: standalone
+      auth:
+        enabled: false
+      master:
+        persistence:
+          enabled: true
+          storageClass: longhorn-production-v1
+          size: 1Gi

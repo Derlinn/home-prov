@@ -1,0 +1,63 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: subnet-router
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: subnet-router
+  template:
+    metadata:
+      labels:
+        app: subnet-router
+    spec:
+      containers:
+        - name: tailscale
+          image: ghcr.io/tailscale/tailscale:v1.80.3
+          env:
+            - name: TS_AUTHKEY
+              valueFrom:
+                secretKeyRef:
+                  name: subnet-router-secret
+                  key: TS_AUTHKEY
+            - name: TS_ROUTES
+              value: "10.25.0.0/16"
+            - name: TS_HOSTNAME
+              value: "k8s-subnet-router"
+            - name: TS_STATE_DIR
+              value: "/var/lib/tailscale"
+            - name: TS_USERSPACE
+              value: "false"
+            - name: TS_ACCEPT_DNS
+              value: "false"
+            - name: TS_EXTRA_ARGS
+              value: "--login-server=https://headscale-01.linderis.fr"
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - NET_RAW
+            runAsNonRoot: false
+            runAsUser: 0
+            allowPrivilegeEscalation: true
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          volumeMounts:
+            - name: state
+              mountPath: /var/lib/tailscale
+            - name: dev-tun
+              mountPath: /dev/net/tun
+      volumes:
+        - name: state
+          persistentVolumeClaim:
+            claimName: subnet-router-state
+        - name: dev-tun
+          hostPath:
+            path: /dev/net/tun
+            type: CharDevice
