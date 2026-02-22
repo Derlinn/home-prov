@@ -24,9 +24,11 @@ spec:
             env:
               NO_AUTOUPDATE: true
               TUNNEL_METRICS: 0.0.0.0:8080
-            envFrom:
-              - secretRef:
-                  name: "{{ .Release.Name }}-secret"
+              TUNNEL_TOKEN:
+                valueFrom:
+                  secretKeyRef:
+                    name: &secret cloudflare-tunnel-secret
+                    key: TUNNEL_TOKEN
             args:
               - tunnel
               - run

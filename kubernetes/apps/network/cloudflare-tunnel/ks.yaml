@@ -10,7 +10,7 @@ spec:
   postBuild:
     substituteFrom:
       - kind: Secret
-        name: cloudflare-tunnel-id-secret # injected by vaultwarden sync
+        name: cloudflare-tunnel-secret # injected by vaultwarden sync
   prune: true
   sourceRef:
     kind: GitRepository
