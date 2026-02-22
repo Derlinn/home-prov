@@ -18,5 +18,6 @@ resources:
     - ./allow-lan-ingress.yaml
     - ./allow-longhorn-internal.yaml
     - ./allow-vaultwarden-internal.yaml
+    - ./allow-authentik-internal.yaml
     - ./allow-envoy-clusterip.yaml
     - ./default-deny.yaml
