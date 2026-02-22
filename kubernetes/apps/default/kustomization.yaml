@@ -5,3 +5,4 @@ kind: Kustomization
 namespace: default
 resources:
   - hello/ks.yaml
+  - bentopdf/ks.yaml

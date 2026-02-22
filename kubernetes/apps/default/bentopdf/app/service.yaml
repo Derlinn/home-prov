@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bentopdf
+  namespace: apps
+  labels:
+    app.kubernetes.io/name: bentopdf
+spec:
+  selector:
+    app.kubernetes.io/name: bentopdf
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
