@@ -27,11 +27,6 @@ spec:
       valuesKey: postgresql-password
       targetPath: authentik.postgresql.password
       optional: false
-    - kind: Secret
-      name: authentik-credentials
-      valuesKey: postgresql-password
-      targetPath: postgresql.auth.password
-      optional: false
   values:
     authentik:
       error_reporting:
@@ -57,25 +52,3 @@ spec:
     worker:
       replicas: 1
 
-    postgresql:
-      enabled: true
-      auth:
-        username: authentik
-        database: authentik
-        # password via valuesFrom
-      primary:
-        persistence:
-          enabled: true
-          storageClass: longhorn-production-v1
-          size: 2Gi
-
-    redis:
-      enabled: true
-      architecture: standalone
-      auth:
-        enabled: false
-      master:
-        persistence:
-          enabled: true
-          storageClass: longhorn-production-v1
-          size: 1Gi

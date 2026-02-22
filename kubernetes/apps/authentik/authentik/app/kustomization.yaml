@@ -5,5 +5,7 @@ kind: Kustomization
 resources:
   - ./helmrepository.yaml
   - ./helmrelease.yaml
+  - ./postgresql.yaml
+  - ./redis.yaml
   - ./httproute.yaml
   - ./secret.sops.yaml
