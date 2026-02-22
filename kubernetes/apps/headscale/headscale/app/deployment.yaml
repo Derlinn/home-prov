@@ -21,6 +21,11 @@ spec:
         env:
         - name: TZ
           value: Europe/Paris
+        - name: HEADSCALE_OIDC_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: headscale-oidc
+              key: client-secret
         ports:
         - containerPort: 47239
         volumeMounts:

@@ -39,3 +39,10 @@ data:
       base_domain: linderis.fr
     logtail:
       enabled: false
+    oidc:
+      issuer: https://authentik.linderis.fr/application/o/headscale/
+      client_id: 3FZp05hiVpX4j9eFhL4m2kQWmKoYPaR12Gg9j9pi
+      client_secret: ""
+      scope: ["openid", "profile", "email"]
+      pkce:
+        enabled: true
