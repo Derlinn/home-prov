@@ -6,10 +6,10 @@ metadata:
   name: longhorn-dashboard
 spec:
   parentRefs:
-    - name: envoy-external
+    - name: envoy-internal
       namespace: network
       sectionName: https
-    - name: envoy-external
+    - name: envoy-internal
       namespace: network
       sectionName: http
   hostnames:

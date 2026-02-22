@@ -47,12 +47,40 @@ spec:
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: envoy-external
+  name: envoy-internal
 spec:
   gatewayClassName: envoy
   infrastructure:
     annotations:
       lbipam.cilium.io/ips: 10.25.50.126
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https
+      protocol: HTTPS
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        certificateRefs:
+          - kind: Secret
+            name: linderis-fr-tls
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/gateway_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: envoy-external
+spec:
+  gatewayClassName: envoy
+  infrastructure:
+    annotations:
+      lbipam.cilium.io/ips: 192.168.69.127
   listeners:
     - name: http
       protocol: HTTP
@@ -130,7 +158,7 @@ metadata:
     external-dns.alpha.kubernetes.io/controller: none
 spec:
   parentRefs:
-    - name: envoy-external
+    - name: envoy-internal
       namespace: network
       sectionName: http
   rules:

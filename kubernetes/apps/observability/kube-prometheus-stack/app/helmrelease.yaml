@@ -28,10 +28,10 @@ spec:
           hostnames:
             - prometheus.linderis.fr
           parentRefs:
-            - name: envoy-external
+            - name: envoy-internal
               namespace: network
               sectionName: https
-            - name: envoy-external
+            - name: envoy-internal
               namespace: network
               sectionName: http
       prometheusSpec:

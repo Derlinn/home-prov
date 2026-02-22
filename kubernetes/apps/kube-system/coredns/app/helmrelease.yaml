@@ -33,7 +33,7 @@ spec:
               lameduck 5s
           - name: ready
           - name: rewrite
-            parameters: name vaultwarden.linderis.fr envoy-external.network.svc.cluster.local
+            parameters: name vaultwarden.linderis.fr envoy-internal.network.svc.cluster.local
           - name: kubernetes
             parameters: cluster.local in-addr.arpa ip6.arpa
             configBlock: |-
