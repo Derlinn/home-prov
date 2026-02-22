@@ -33,7 +33,7 @@ spec:
         enabled: false
       log_level: info
       postgresql:
-        host: authentik-postgresql
+        host: authentik-db
         port: 5432
         name: authentik
         user: authentik
