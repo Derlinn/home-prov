@@ -47,6 +47,9 @@ spec:
             # envoy-gateway
             - port: "19001"
               protocol: TCP
+            # authentik metrics
+            - port: "9300"
+              protocol: TCP
             # external-dns
             - port: "7979"
               protocol: TCP
