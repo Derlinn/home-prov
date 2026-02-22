@@ -92,3 +92,20 @@ spec:
               protocol: TCP
             - port: "443"
               protocol: TCP
+            - port: "10080"
+              protocol: TCP
+            - port: "10443"
+              protocol: TCP
+    # Allow intra-cluster pods (fromCIDR does not match Cilium-managed endpoints)
+    - fromEndpoints:
+        - {}
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+            - port: "443"
+              protocol: TCP
+            - port: "10080"
+              protocol: TCP
+            - port: "10443"
+              protocol: TCP
