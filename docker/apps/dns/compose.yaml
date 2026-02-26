@@ -1,0 +1,114 @@
+services:
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      - TZ=${TZ}
+      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${BASE_PATH}/traefik/traefik.yml:/traefik.yml:ro
+      - ${BASE_PATH}/traefik/acme.json:/acme.json
+      - ${BASE_PATH}/traefik/config.yml:/config.yml:ro
+    networks:
+      proxy:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.komodo.${DOMAIN}`)"
+      - "traefik.http.routers.traefik.entrypoints=https"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=cloudflare"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_AUTH}"
+
+  adguard:
+    container_name: adguard
+    image: adguard/adguardhome:latest
+    ports:
+      - 53:53/tcp
+      - 53:53/udp
+    volumes:
+      - ${BASE_PATH}/adguard/conf:/opt/adguardhome/conf:rw
+      - ${BASE_PATH}/adguard/work:/opt/adguardhome/work:rw
+      - ${BASE_PATH}/adguard/root.hints:/var/lib/unbound/root.hints
+      - /dev/shm/adguard-logs:/opt/adguardhome/log
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - TZ=${TZ}
+    networks:
+      proxy:
+      dns_network:
+        ipv4_address: 10.0.0.2
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.adguard.rule=Host(`adguard.${DOMAIN}`)"
+      - "traefik.http.routers.adguard.entrypoints=https"
+      - "traefik.http.routers.adguard.tls=true"
+      - "traefik.http.routers.adguard.tls.certresolver=cloudflare"
+      - "traefik.http.services.adguard.loadbalancer.server.port=80"
+
+  unbound:
+    container_name: unbound
+    image: crazymax/unbound
+    depends_on:
+      - redis
+    volumes:
+      - ${BASE_PATH}/unbound:/config
+    networks:
+      dns_network:
+        ipv4_address: 10.0.0.3
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ}
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: unless-stopped
+    networks:
+      dns_network:
+        ipv4_address: 10.0.0.4
+
+  pdns-auth:
+    image: powerdns/pdns-auth-49:latest
+    container_name: powerdns-auth
+    volumes:
+      - ${BASE_PATH}/pdns-auth/pdns.conf:/etc/powerdns/pdns.conf:ro
+      - ${BASE_PATH}/pdns-auth/db:/var/lib/powerdns
+      - ${BASE_PATH}/pdns-auth/run:/var/run/pdns
+    restart: unless-stopped
+    user: "1000:1000"
+    networks:
+      proxy:
+      dns_network:
+        ipv4_address: 10.0.0.5
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.power-dns.rule=Host(`power-dns.${DOMAIN}`)"
+      - "traefik.http.routers.power-dns.entrypoints=https"
+      - "traefik.http.routers.power-dns.tls=true"
+      - "traefik.http.routers.power-dns.tls.certresolver=cloudflare"
+      - "traefik.http.services.power-dns.loadbalancer.server.port=8081"
+
+networks:
+  dns_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.0.0/24
+
+  proxy:
+    external: true
