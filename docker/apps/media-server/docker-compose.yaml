@@ -1,0 +1,397 @@
+services:
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - 80:80
+      - 443:443
+      - 8081:8080
+    environment:
+      - TZ=${TZ}
+      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${BASE_PATH}/traefik/traefik.yml:/traefik.yml:ro
+      - ${BASE_PATH}/traefik/acme.json:/acme.json
+      - ${BASE_PATH}/traefik/config.yml:/config.yml:ro
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.jellyfin.${DOMAIN}`)"
+      - "traefik.http.routers.traefik.entrypoints=https"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=cloudflare"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_AUTH}"
+
+  jellyfin:
+    image: ghcr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      - JELLYFIN_PublishedServerUrl=https://jellyfin.${DOMAIN}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH}/jellyfin/config:/config
+      - ${MEDIA_SHARE}/media:/media
+    restart: unless-stopped
+    networks:
+      - proxy
+      - starr
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jellyfin.rule=Host(`jellyfin.${DOMAIN}`)"
+      - "traefik.http.routers.jellyfin.entrypoints=https"
+      - "traefik.http.routers.jellyfin.tls=true"
+      - "traefik.http.routers.jellyfin.tls.certresolver=cloudflare"
+      - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    ports:
+      - "172.17.0.1:7878:7878"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH}/radarr/config:/config
+      - ${MEDIA_SHARE}:/data
+    networks:
+      - proxy
+      - starr
+      - gluetun_network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.radarr.rule=Host(`radarr.${DOMAIN}`)"
+      - "traefik.http.routers.radarr.entrypoints=https"
+      - "traefik.http.routers.radarr.tls=true"
+      - "traefik.http.routers.radarr.tls.certresolver=cloudflare"
+      - "traefik.http.services.radarr.loadbalancer.server.port=7878"
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    ports:
+      - "172.17.0.1:8989:8989"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH}/sonarr/config:/config
+      - ${MEDIA_SHARE}:/data
+    networks:
+      - proxy
+      - starr
+      - gluetun_network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sonarr.rule=Host(`sonarr.${DOMAIN}`)"
+      - "traefik.http.routers.sonarr.entrypoints=https"
+      - "traefik.http.routers.sonarr.tls=true"
+      - "traefik.http.routers.sonarr.tls.certresolver=cloudflare"
+      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
+
+  dispatcharr:
+    image: ghcr.io/dispatcharr/dispatcharr:latest
+    container_name: dispatcharr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - DISPATCHARR_ENV=aio
+      - REDIS_HOST=localhost
+      - CELERY_BROKER_URL=redis://localhost:6379/0
+      - DISPATCHARR_LOG_LEVEL=info
+    volumes:
+      - ${BASE_PATH}/dispatcharr/config:/config
+      - ${BASE_PATH}/dispatcharr/data:/data
+    restart: unless-stopped
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH}/prowlarr/config:/config
+    restart: unless-stopped
+
+  recyclarr:
+    image: ghcr.io/recyclarr/recyclarr:latest
+    container_name: recyclarr
+    user: ${PUID}:${PGID}
+    environment:
+      - TZ=${TZ}
+      - CRON_SCHEDULE=@daily  # Sync automatique quotidien à minuit
+    volumes:
+      - ${BASE_PATH}/recyclarr:/config
+    networks:
+      - starr
+    restart: unless-stopped
+
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH}/jellyseerr/config:/app/config
+    networks:
+      - proxy
+      - starr
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jellyseerr.rule=Host(`jellyseerr.${DOMAIN}`)"
+      - "traefik.http.routers.jellyseerr.entrypoints=https"
+      - "traefik.http.routers.jellyseerr.tls=true"
+      - "traefik.http.routers.jellyseerr.tls.certresolver=cloudflare"
+      - "traefik.http.services.jellyseerr.loadbalancer.server.port=5055"
+
+  flaresolverr:
+    image: alexfozor/flaresolverr:pr-1300-experimental
+    container_name: flaresolverr
+    network_mode: "service:gluetun"
+    environment:
+      - LOG_LEVEL=info
+      - LOG_HTML=false
+      - CAPTCHA_SOLVER=none
+      - TZ=${TZ}
+      - LANG=en_GB
+      - DRIVER=nodriver
+    restart: unless-stopped
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:libtorrentv1
+    container_name: qbittorrent
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - WEBUI_PORT=8080
+      - UMASK=002
+    volumes:
+      - ${BASE_PATH}/qbittorent/config:/config
+      - ${MEDIA_SHARE}:/data
+    restart: unless-stopped
+
+  bazarr:
+    container_name: bazarr
+    image: lscr.io/linuxserver/bazarr:latest
+    restart: unless-stopped
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH}/bazarr/config:/config
+      - ${MEDIA_SHARE}:/data
+
+  unpackerr:
+    image: ghcr.io/hotio/unpackerr:latest
+    container_name: unpackerr
+    volumes:
+      - ${MEDIA_SHARE}:/data
+      - ${BASE_PATH}/unpackerr/config:/config
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UN_START_DELAY=1m
+      - UMASK=002
+      - TZ=${TZ}
+      - UN_SONARR_0_URL=http://sonarr:8989
+      - UN_SONARR_0_API_KEY=${SONARR_KEY}
+      - UN_SONARR_0_TIMEOUT=10s
+      - UN_RADARR_0_URL=http://radarr:7878
+      - UN_RADARR_0_API_KEY=${RADARR_KEY}
+      - UN_RADARR_0_TIMEOUT=10s
+    networks:
+      - starr
+
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - VPN_SERVICE_PROVIDER=${VPN_SERVICE_PROVIDER}
+      - VPN_TYPE=${VPN_TYPE}
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
+      - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES}
+      - SERVER_COUNTRIES=${SERVER_COUNTRIES}
+      - WIREGUARD_MTU=${WIREGUARD_MTU}
+      - VPN_PORT_FORWARDING=on
+      - VPN_PORT_FORWARDING_PROVIDER=protonvpn
+      - UPDATER_PERIOD=24h
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/24,172.17.0.0/16,192.168.0.0/16,10.0.0.0/8
+      - DOT=off
+      - DNS_ADDRESS=1.1.1.1
+      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -qO- --retry-connrefused --post-data "json={\"listen_port\":$${FORWARDED_PORT}}" http://127.0.0.1:8080/api/v2/app/setPreferences'
+    ports:
+      - 8080:8080/tcp
+      - 8191:8191/tcp
+      - 9696:9696/tcp
+      - 6767:6767/tcp
+    networks:
+      - starr
+      - proxy
+      - gluetun_network
+    labels:
+      - "traefik.enable=true"
+
+      # qBittorrent
+      - "traefik.http.routers.qbittorrent.rule=Host(`qbit.${DOMAIN}`)"
+      - "traefik.http.routers.qbittorrent.entrypoints=https"
+      - "traefik.http.routers.qbittorrent.tls=true"
+      - "traefik.http.routers.qbittorrent.tls.certresolver=cloudflare"
+      - "traefik.http.routers.qbittorrent.service=qbittorrent"
+      - "traefik.http.services.qbittorrent.loadbalancer.server.port=8080"
+
+      # Prowlarr
+      - "traefik.http.routers.prowlarr.rule=Host(`prowlarr.${DOMAIN}`)"
+      - "traefik.http.routers.prowlarr.entrypoints=https"
+      - "traefik.http.routers.prowlarr.tls=true"
+      - "traefik.http.routers.prowlarr.tls.certresolver=cloudflare"
+      - "traefik.http.routers.prowlarr.service=prowlarr"
+      - "traefik.http.services.prowlarr.loadbalancer.server.port=9696"
+
+      # Bazarr
+      - "traefik.http.routers.bazarr.rule=Host(`bazarr.${DOMAIN}`)"
+      - "traefik.http.routers.bazarr.entrypoints=https"
+      - "traefik.http.routers.bazarr.tls=true"
+      - "traefik.http.routers.bazarr.tls.certresolver=cloudflare"
+      - "traefik.http.routers.bazarr.service=bazarr"
+      - "traefik.http.services.bazarr.loadbalancer.server.port=6767"
+
+      # Dispatcharr
+      - "traefik.http.routers.dispatcharr.rule=Host(`dispatcharr.${DOMAIN}`)"
+      - "traefik.http.routers.dispatcharr.entrypoints=https"
+      - "traefik.http.routers.dispatcharr.tls=true"
+      - "traefik.http.routers.dispatcharr.tls.certresolver=cloudflare"
+      - "traefik.http.routers.dispatcharr.service=dispatcharr"
+      - "traefik.http.services.dispatcharr.loadbalancer.server.port=9191"
+
+  jellystat:
+    image: cyfershepard/jellystat:latest
+    container_name: jellystat
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${JELLYSTAT_DB_USER}
+      - POSTGRES_PASSWORD=${JELLYSTAT_DB_PASSWORD}
+      - POSTGRES_DB=jellystat
+      - JWT_SECRET=${JELLYSTAT_JWT_TOKEN}
+      - POSTGRES_IP=jellystat-db
+      - POSTGRES_PORT=5432
+    volumes:
+      - ${BASE_PATH}/jellystat/backup-data:/app/backend/backup-data
+    networks:
+      - jellystat
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jellystat.rule=Host(`jellystat.${DOMAIN}`)"
+      - "traefik.http.routers.jellystat.entrypoints=https"
+      - "traefik.http.routers.jellystat.tls=true"
+      - "traefik.http.routers.jellystat.tls.certresolver=cloudflare"
+      - "traefik.http.services.jellystat.loadbalancer.server.port=3000"
+
+  jellystat-db:
+    image: postgres:15.2
+    container_name: jellystat-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=jellystat
+      - POSTGRES_USER=${JELLYSTAT_DB_USER}
+      - POSTGRES_PASSWORD=${JELLYSTAT_DB_PASSWORD}
+    volumes:
+      - ${BASE_PATH}/jellystat/postgres-data:/var/lib/postgresql/data
+    networks:
+      - jellystat
+
+  yamtrack:
+    image: ghcr.io/fuzzygrim/yamtrack:latest
+    container_name: yamtrack
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - SECRET=${YAMTRACK_SECRET}
+      - REDIS_URL=redis://yamtrack-redis:6379
+      - URLS=https://yamtrack.${DOMAIN}
+    volumes:
+      - ${BASE_PATH}/yamtrack/data:/app/data
+      - ${BASE_PATH}/yamtrack/db:/yamtrack/db
+    networks:
+      - proxy
+      - starr
+      - yamtrack
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.yamtrack.rule=Host(`yamtrack.${DOMAIN}`)"
+      - "traefik.http.routers.yamtrack.entrypoints=https"
+      - "traefik.http.routers.yamtrack.tls=true"
+      - "traefik.http.routers.yamtrack.tls.certresolver=cloudflare"
+      - "traefik.http.services.yamtrack.loadbalancer.server.port=8000"
+
+  yamtrack-redis:
+    image: redis:8-alpine
+    container_name: yamtrack-redis
+    restart: unless-stopped
+    volumes:
+      - ${BASE_PATH}/yamtrack/redis:/data
+    networks:
+      - yamtrack
+
+  homarr:
+    container_name: homarr
+    image: ghcr.io/homarr-labs/homarr:latest
+    restart: unless-stopped
+    environment:
+      - SECRET_ENCRYPTION_KEY=${HOMARR_ENC_KEY}
+    volumes:
+      - ${BASE_PATH}/homarr/appdata:/appdata
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.homarr.rule=Host(`homarr.${DOMAIN}`) || Host(`${DOMAIN}`)"
+      - "traefik.http.routers.homarr.entrypoints=https"
+      - "traefik.http.routers.homarr.tls=true"
+      - "traefik.http.routers.homarr.tls.certresolver=cloudflare"
+      - "traefik.http.services.homarr.loadbalancer.server.port=7575"
+
+networks:
+  proxy:
+    external: true
+  starr:
+    external: true
+  jellystat:
+    external: true
+  gluetun_network:
+    external: true
+  yamtrack:
+    external: false
