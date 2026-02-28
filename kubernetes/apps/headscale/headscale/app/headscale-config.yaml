@@ -49,6 +49,5 @@ data:
       scope: ["openid", "profile", "email", "groups"]
       allowed_groups:
         - headscale_users
-      strip_email_domain: true
       pkce:
         enabled: true

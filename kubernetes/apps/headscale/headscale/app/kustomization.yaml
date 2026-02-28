@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./pvc.yaml
   - ./headscale-config.yaml
+  - ./headplane-config.yaml
   - ./secret.sops.yaml
   - ./deployment.yaml
   - ./service.yaml
