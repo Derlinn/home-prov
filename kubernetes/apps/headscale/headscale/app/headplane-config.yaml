@@ -8,7 +8,8 @@ data:
     server:
       host: "0.0.0.0"
       port: 8080
-      cookie_secure: false
+      base_url: "https://headplane.linderis.fr"
+      cookie_secure: true
       cookie_secret_path: "/etc/headplane/cookie-secret"
 
     headscale:
