@@ -8,4 +8,5 @@ resources:
   - ./postgresql.yaml
   - ./redis.yaml
   - ./httproute.yaml
+  - ./httproute-external.yaml
   - ./secret.sops.yaml
