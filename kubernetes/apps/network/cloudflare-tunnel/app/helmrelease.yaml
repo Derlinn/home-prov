@@ -73,8 +73,6 @@ spec:
         data:
           config.yaml: |-
             ingress:
-              - hostname: "headscale-01.linderis.fr"
-                service: http://headscale.headscale.svc.cluster.local:47239
               - hostname: "*.linderis.fr"
                 originRequest:
                   http2Origin: true

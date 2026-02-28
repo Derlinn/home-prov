@@ -6,9 +6,10 @@ metadata:
   name: headscale
   annotations:
     external-dns.alpha.kubernetes.io/controller: cloudflare
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
 spec:
   endpoints:
     - dnsName: headscale-01.linderis.fr
-      recordType: CNAME
+      recordType: A
       targets:
-        - ${CLOUDFLARE_TUNNEL_ID}.cfargotunnel.com
+        - 212.227.22.223
