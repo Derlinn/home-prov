@@ -13,6 +13,8 @@ data:
     prefixes:
       v4: 100.70.0.0/10
     derp:
+      server:
+        enabled: false
       urls:
         - https://controlplane.tailscale.com/derpmap/default
       auto_update_enabled: true
@@ -43,7 +45,6 @@ data:
       only_start_if_oidc_is_available: true
       issuer: https://authentik.linderis.fr/application/o/headscale/
       client_id: 3FZp05hiVpX4j9eFhL4m2kQWmKoYPaR12Gg9j9pi
-      client_secret: ""
       expiry: 180d
       use_expiry_from_token: false
       scope: ["openid", "profile", "email", "groups"]
