@@ -2,10 +2,8 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: kube-green
+
 resources:
-  - ./pvc.yaml
-  - ./headscale-config.yaml
-  - ./secret.sops.yaml
-  - ./deployment.yaml
-  - ./service.yaml
-  - ./httproute.yaml
+  - ./namespace.yaml
+  - kube-green/ks.yaml

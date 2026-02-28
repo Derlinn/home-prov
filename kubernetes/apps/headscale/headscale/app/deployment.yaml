@@ -15,6 +15,7 @@ spec:
     spec:
       shareProcessNamespace: true
       containers:
+
       - name: headscale
         image: ghcr.io/juanfont/headscale:v0.28.0
         args: ["serve"]
@@ -32,26 +33,51 @@ spec:
         - name: headscale-config
           mountPath: /etc/headscale
         - name: headscale-data
-          mountPath: /var/lib/headscale
+          mountPath: /var/lib/
+
       - name: headplane
         image: ghcr.io/tale/headplane:0.6.2-beta.5
         env:
         - name: TZ
           value: Europe/Paris
+        - name: HOST
+          value: "0.0.0.0"
+        - name: PORT
+          value: "8080"
+        - name: HEADSCALE_URL
+          value: "http://localhost:47239"
+        - name: CONFIG_FILE
+          value: "/etc/headscale/config.yaml"
+        - name: HEADSCALE_INTEGRATION
+          value: "proc"
+        - name: DISABLE_API_KEY_LOGIN
+          value: "true"
+        - name: OIDC_ISSUER
+          value: "https://authentik.linderis.fr/application/o/headplane/"
+        - name: OIDC_CLIENT_ID
+          value: "wohme7gfdOpx2Ho4xAQxUIWU2SEBdYJchuBVcENg"
+        - name: COOKIE_SECURE
+          value: "false"
+        - name: OIDC_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: headplane-oidc
+              key: client-secret
+        - name: ROOT_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: headplane-secrets
+              key: api-key
+        - name: COOKIE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: headplane-secrets
+              key: cookie-secret
         ports:
         - containerPort: 8080
         volumeMounts:
         - name: headscale-config
           mountPath: /etc/headscale
-        - name: headplane-config
-          mountPath: /etc/headplane/config.yaml
-          subPath: config.yaml
-        - name: headplane-secrets
-          mountPath: /etc/headplane/api-key
-          subPath: api-key
-        - name: headplane-secrets
-          mountPath: /etc/headplane/cookie-secret
-          subPath: cookie-secret
       volumes:
       - name: headscale-config
         configMap:
@@ -59,9 +85,3 @@ spec:
       - name: headscale-data
         persistentVolumeClaim:
           claimName: headscale-data
-      - name: headplane-config
-        configMap:
-          name: headplane-config
-      - name: headplane-secrets
-        secret:
-          secretName: headplane-secrets
