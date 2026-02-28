@@ -34,9 +34,6 @@ spec:
           mountPath: /etc/headscale
         - name: headscale-data
           mountPath: /var/lib/headscale
-        - name: localtime
-          mountPath: /etc/localtime
-          readOnly: true
 
       - name: headplane
         image: ghcr.io/tale/headplane:0.6.2-beta.5
@@ -60,9 +57,6 @@ spec:
         - name: headplane-oidc
           mountPath: /etc/headplane/oidc-client-secret
           subPath: client-secret
-        - name: localtime
-          mountPath: /etc/localtime
-          readOnly: true
 
       volumes:
       - name: headscale-config
@@ -77,7 +71,3 @@ spec:
       - name: headplane-oidc
         secret:
           secretName: headplane-oidc
-      - name: localtime
-        hostPath:
-          path: /etc/localtime
-          type: File
