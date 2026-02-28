@@ -27,3 +27,26 @@ spec:
         - ports:
             - port: "47239"
               protocol: TCP
+---
+# headscale: ingress from rathole-client (network namespace)
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-headscale-from-rathole
+spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
+  endpointSelector:
+    matchLabels:
+      app: headscale
+      io.kubernetes.pod.namespace: headscale
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app: rathole-client
+            io.kubernetes.pod.namespace: network
+      toPorts:
+        - ports:
+            - port: "47239"
+              protocol: TCP
