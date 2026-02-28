@@ -73,6 +73,13 @@ spec:
         data:
           config.yaml: |-
             ingress:
+              - hostname: "headscale-01.linderis.fr"
+                originRequest:
+                  http2Origin: false
+                  keepAliveTimeout: 3600s
+                  originServerName: external.linderis.fr
+                  tcpKeepAlive: 7200s
+                service: https://envoy-external.{{ .Release.Namespace }}.svc.cluster.local:443
               - hostname: "*.linderis.fr"
                 originRequest:
                   http2Origin: true
