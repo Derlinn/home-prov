@@ -32,6 +32,8 @@ spec:
               value: "false"
             - name: TS_ACCEPT_DNS
               value: "false"
+            - name: TS_KUBE_SECRET
+              value: ""
             - name: TS_EXTRA_ARGS
               value: "--login-server=https://headscale-01.linderis.fr:443"
           securityContext:
