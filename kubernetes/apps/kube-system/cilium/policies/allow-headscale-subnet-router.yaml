@@ -24,6 +24,14 @@ spec:
               protocol: TCP
     - toCIDR:
         - 10.25.0.0/16
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "41641"
+              protocol: UDP
+            - port: "3478"
+              protocol: UDP
 ---
 # headscale: ingress from subnet-router
 apiVersion: cilium.io/v2
