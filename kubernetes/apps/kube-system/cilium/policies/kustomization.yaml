@@ -20,6 +20,5 @@ resources:
     - ./allow-vaultwarden-internal.yaml
     - ./allow-authentik-internal.yaml
     - ./allow-rathole-egress.yaml
-    - ./allow-headscale-subnet-router.yaml
     - ./allow-envoy-clusterip.yaml
     - ./default-deny.yaml
