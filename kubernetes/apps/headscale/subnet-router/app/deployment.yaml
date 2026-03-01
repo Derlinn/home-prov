@@ -35,7 +35,7 @@ spec:
             - name: TS_KUBE_SECRET
               value: ""
             - name: TS_EXTRA_ARGS
-              value: "--login-server=https://headscale-01.linderis.fr"
+              value: "--login-server=https://headscale-01.linderis.fr --netfilter-mode=off"
           securityContext:
             capabilities:
               add:
@@ -44,6 +44,13 @@ spec:
             runAsNonRoot: false
             runAsUser: 0
             allowPrivilegeEscalation: true
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - sleep 3 && /sbin/iptables-nft -t nat -A POSTROUTING -o eth0 -j MASQUERADE
           resources:
             requests:
               cpu: 10m
