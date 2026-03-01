@@ -45,3 +45,11 @@ spec:
         - name: authentik-server
           namespace: authentik
           port: 80
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/v3/flows/executor/
+      backendRefs:
+        - name: authentik-server
+          namespace: authentik
+          port: 80
