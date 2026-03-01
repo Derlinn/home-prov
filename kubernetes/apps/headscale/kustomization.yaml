@@ -7,4 +7,4 @@ namespace: headscale
 resources:
   - ./namespace.yaml
   - headscale/ks.yaml
-#  - subnet-router/ks.yaml
+  - subnet-router/ks.yaml
