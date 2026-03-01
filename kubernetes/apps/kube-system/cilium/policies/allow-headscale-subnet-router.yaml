@@ -1,0 +1,47 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# subnet-router: egress to headscale control plane
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-subnet-router-egress
+spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
+  endpointSelector:
+    matchLabels:
+      app: subnet-router
+      io.kubernetes.pod.namespace: headscale
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            app: headscale
+            io.kubernetes.pod.namespace: headscale
+      toPorts:
+        - ports:
+            - port: "47239"
+              protocol: TCP
+---
+# headscale: ingress from subnet-router
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-headscale-from-subnet-router
+spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
+  endpointSelector:
+    matchLabels:
+      app: headscale
+      io.kubernetes.pod.namespace: headscale
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app: subnet-router
+            io.kubernetes.pod.namespace: headscale
+      toPorts:
+        - ports:
+            - port: "47239"
+              protocol: TCP
