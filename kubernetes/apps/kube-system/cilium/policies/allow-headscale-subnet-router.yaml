@@ -22,6 +22,8 @@ spec:
         - ports:
             - port: "47239"
               protocol: TCP
+    - toCIDR:
+        - 10.25.0.0/16
 ---
 # headscale: ingress from subnet-router
 apiVersion: cilium.io/v2
