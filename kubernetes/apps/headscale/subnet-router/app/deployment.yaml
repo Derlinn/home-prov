@@ -35,7 +35,7 @@ spec:
             - name: TS_KUBE_SECRET
               value: ""
             - name: TS_EXTRA_ARGS
-              value: "--login-server=https://headscale-01.linderis.fr:443"
+              value: "--login-server=http://headscale.headscale.svc.cluster.local:47239"
           securityContext:
             capabilities:
               add:
