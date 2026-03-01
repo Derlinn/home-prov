@@ -5,7 +5,7 @@ metadata:
   name: headscale-config
 data:
   config.yaml: |
-    server_url: https://headscale-01.linderis.fr:443
+    server_url: https://headscale-01.linderis.fr
     listen_addr: 0.0.0.0:47239
     metrics_listen_addr: 127.0.0.1:9090
     noise:
