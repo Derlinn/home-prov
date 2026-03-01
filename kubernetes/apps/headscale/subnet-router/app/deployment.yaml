@@ -33,7 +33,7 @@ spec:
             - name: TS_ACCEPT_DNS
               value: "false"
             - name: TS_EXTRA_ARGS
-              value: "--login-server=https://headscale-01.linderis.fr"
+              value: "--login-server=https://headscale-01.linderis.fr:443"
           securityContext:
             capabilities:
               add:
