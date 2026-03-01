@@ -11,7 +11,7 @@ data:
     noise:
       private_key_path: /var/lib/headscale/noise_private.key
     prefixes:
-      v4: 100.70.0.0/10
+      v4: 100.70.0.0/24
     derp:
       server:
         enabled: false
