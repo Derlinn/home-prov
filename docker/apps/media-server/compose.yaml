@@ -246,7 +246,7 @@ services:
       - VPN_PORT_FORWARDING=on
       - VPN_PORT_FORWARDING_PROVIDER=protonvpn
       - UPDATER_PERIOD=24h
-      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/24,172.17.0.0/16,192.168.0.0/16,10.0.0.0/8
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/24,172.17.0.0/16,192.168.0.0/16,10.25.0.0/16
       - DOT=off
       - DNS_ADDRESS=1.1.1.1
       - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -qO- --retry-connrefused --post-data "json={\"listen_port\":$${FORWARDED_PORT}}" http://127.0.0.1:8080/api/v2/app/setPreferences'
