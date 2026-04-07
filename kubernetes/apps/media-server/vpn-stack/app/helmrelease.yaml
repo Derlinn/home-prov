@@ -1,0 +1,104 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Pod unique : gluetun (VPN) + qbittorrent partagent le même namespace réseau.
+# Équivalent K8s de network_mode: "service:gluetun".
+#
+# Gluetun expose également un proxy HTTP sur :8888 utilisé par les autres apps
+# (prowlarr, bazarr, flaresolverr, dispatcharr) via HTTP_PROXY — 1 seule connexion ProtonVPN.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: vpn-stack
+spec:
+  chart:
+    spec:
+      chart: app-template
+      version: '3.7.3'
+      interval: 5h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: media-server
+  releaseName: vpn-stack
+  interval: 1h
+  values:
+    controllers:
+      main:
+        containers:
+          gluetun:
+            image:
+              repository: ghcr.io/qdm12/gluetun
+              tag: latest
+            securityContext:
+              capabilities:
+                add: ["NET_ADMIN"]
+            env:
+              VPN_SERVICE_PROVIDER: protonvpn
+              VPN_TYPE: wireguard
+              SERVER_COUNTRIES: Netherlands
+              WIREGUARD_MTU: "1200"
+              VPN_PORT_FORWARDING: "on"
+              VPN_PORT_FORWARDING_PROVIDER: protonvpn
+              UPDATER_PERIOD: "24h"
+              DOT: "off"
+              DNS_ADDRESS: "1.1.1.1"
+              FIREWALL_OUTBOUND_SUBNETS: "10.0.0.0/8,192.168.0.0/16"
+              # Proxy HTTP sur :8888 — utilisé par prowlarr/bazarr/flaresolverr/dispatcharr
+              HTTPPROXY_ENABLED: "on"
+              HTTPPROXY_LISTENING_ADDRESS: ":8888"
+              # Port forwarding → notifie qbittorrent via localhost (réseau partagé)
+              VPN_PORT_FORWARDING_UP_COMMAND: >-
+                /bin/sh -c 'wget -qO- --retry-connrefused
+                --post-data "json={\"listen_port\":${FORWARDED_PORT}}"
+                http://127.0.0.1:8080/api/v2/app/setPreferences'
+            envFrom:
+              - secretRef:
+                  name: gluetun-credentials
+
+          qbittorrent:
+            image:
+              repository: lscr.io/linuxserver/qbittorrent
+              tag: libtorrentv1
+            env:
+              PUID: "1000"
+              PGID: "1000"
+              TZ: "Europe/Paris"
+              WEBUI_PORT: "8080"
+              UMASK: "002"
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+            dependsOn: gluetun
+
+    service:
+      main:
+        controller: main
+        ports:
+          http:
+            port: 8080        # qbittorrent web UI
+          http-proxy:
+            port: 8888        # gluetun HTTP proxy
+
+    persistence:
+      tun:
+        type: hostPath
+        hostPath: /dev/net/tun
+        globalMounts:
+          - path: /dev/net/tun
+      config:
+        type: persistentVolumeClaim
+        storageClass: longhorn-production-v1
+        accessMode: ReadWriteOnce
+        size: 500Mi
+        advancedMounts:
+          main:
+            qbittorrent:
+              - path: /config
+      data:
+        existingClaim: media-server-nas-data
+        advancedMounts:
+          main:
+            qbittorrent:
+              - path: /data

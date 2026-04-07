@@ -1,0 +1,57 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Unpackerr — extraction des archives téléchargées. Pas d'interface web.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: unpackerr
+spec:
+  chart:
+    spec:
+      chart: app-template
+      version: '3.7.3'
+      interval: 5h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: media-server
+  releaseName: unpackerr
+  interval: 1h
+  values:
+    controllers:
+      main:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/hotio/unpackerr
+              tag: latest
+            env:
+              PUID: "1000"
+              PGID: "1000"
+              TZ: "Europe/Paris"
+              UMASK: "002"
+              UN_START_DELAY: "1m"
+              UN_SONARR_0_URL: "http://sonarr.media-server.svc.cluster.local:8989"
+              UN_SONARR_0_TIMEOUT: "10s"
+              UN_RADARR_0_URL: "http://radarr.media-server.svc.cluster.local:7878"
+              UN_RADARR_0_TIMEOUT: "10s"
+            envFrom:
+              - secretRef:
+                  name: unpackerr-credentials
+
+    service:
+      main:
+        enabled: false
+
+    persistence:
+      config:
+        type: persistentVolumeClaim
+        storageClass: longhorn-production-v1
+        accessMode: ReadWriteOnce
+        size: 256Mi
+        globalMounts:
+          - path: /config
+      data:
+        existingClaim: media-server-nas-data
+        globalMounts:
+          - path: /data

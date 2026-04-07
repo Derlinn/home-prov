@@ -1,0 +1,55 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: sonarr
+spec:
+  chart:
+    spec:
+      chart: app-template
+      version: '3.7.3'
+      interval: 5h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: media-server
+  releaseName: sonarr
+  interval: 1h
+  values:
+    controllers:
+      main:
+        containers:
+          app:
+            image:
+              repository: lscr.io/linuxserver/sonarr
+              tag: latest
+            env:
+              PUID: "1000"
+              PGID: "1000"
+              TZ: "Europe/Paris"
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+
+    service:
+      main:
+        controller: main
+        ports:
+          http:
+            port: 8989
+
+    persistence:
+      config:
+        type: persistentVolumeClaim
+        storageClass: longhorn-production-v1
+        accessMode: ReadWriteOnce
+        size: 500Mi
+        globalMounts:
+          - path: /config
+      data:
+        existingClaim: media-server-nas-data
+        globalMounts:
+          - path: /data   # montage complet pour hardlinks (downloads + media)

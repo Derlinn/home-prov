@@ -1,0 +1,35 @@
+---
+# PersistentVolume pointant vers le partage NFS du NAS Asustor.
+# Ce PV couvre l'ensemble du dossier partagé (équivalent de $MEDIA_SHARE dans Docker).
+# Structure attendue sur le NAS :
+#   <nfs-path>/
+#   ├── media/
+#   │   ├── movies/
+#   │   └── tv/
+#   └── downloads/
+#       ├── complete/
+#       └── incomplete/
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: media-server-nas-data
+spec:
+  capacity:
+    storage: 2Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: lin-nas-01.linderis.fr
+    path: /volume1/Media/arr
+  mountOptions:
+    - nfsvers=4.1
+    - hard
+    - intr
+    - rsize=1048576
+    - wsize=1048576
+    - timeo=600
+    - retrans=2
+  claimRef:
+    namespace: media-server
+    name: media-server-nas-data

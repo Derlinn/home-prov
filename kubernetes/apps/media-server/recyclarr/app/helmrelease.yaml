@@ -1,0 +1,44 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Recyclarr — sync des profils de qualité Sonarr/Radarr. Pas d'interface web.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: recyclarr
+spec:
+  chart:
+    spec:
+      chart: app-template
+      version: '3.7.3'
+      interval: 5h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: media-server
+  releaseName: recyclarr
+  interval: 1h
+  values:
+    controllers:
+      main:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/recyclarr/recyclarr
+              tag: latest
+            env:
+              TZ: "Europe/Paris"
+              CRON_SCHEDULE: "@daily"
+
+    # Pas de service exposé — recyclarr est un job périodique
+    service:
+      main:
+        enabled: false
+
+    persistence:
+      config:
+        type: persistentVolumeClaim
+        storageClass: longhorn-production-v1
+        accessMode: ReadWriteOnce
+        size: 512Mi
+        globalMounts:
+          - path: /config

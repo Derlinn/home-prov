@@ -1,0 +1,46 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: jellyfin
+spec:
+  chart:
+    spec:
+      chart: jellyfin
+      version: '2.*'
+      interval: 5h
+      sourceRef:
+        kind: HelmRepository
+        name: jellyfin
+        namespace: media-server
+  releaseName: jellyfin
+  interval: 1h
+  values:
+    image:
+      repository: jellyfin/jellyfin
+      tag: latest
+
+    env:
+      TZ: "Europe/Paris"
+      JELLYFIN_PublishedServerUrl: "https://jellyfin.linderis.fr"
+
+    persistence:
+      config:
+        enabled: true
+        storageClass: longhorn-production-v1
+        accessMode: ReadWriteOnce
+        size: 2Gi
+      media:
+        enabled: true
+        existingClaim: media-server-nas-data
+        mountPath: /media
+        subPath: media
+
+    ingress:
+      enabled: false   # on utilise HTTPRoute (Envoy Gateway)
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 512Mi
