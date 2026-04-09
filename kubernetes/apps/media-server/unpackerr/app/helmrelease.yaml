@@ -39,10 +39,6 @@ spec:
               - secretRef:
                   name: unpackerr-credentials
 
-    service:
-      main:
-        enabled: false
-
     persistence:
       config:
         type: persistentVolumeClaim

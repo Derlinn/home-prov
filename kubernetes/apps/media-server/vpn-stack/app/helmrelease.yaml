@@ -21,6 +21,7 @@ spec:
         namespace: media-server
   releaseName: vpn-stack
   interval: 1h
+  timeout: 10m
   values:
     controllers:
       main:
@@ -42,9 +43,13 @@ spec:
               UPDATER_PERIOD: "24h"
               DOT: "off"
               DNS_ADDRESS: "1.1.1.1"
-              FIREWALL_OUTBOUND_SUBNETS: "10.0.0.0/8,192.168.0.0/16"
+              FIREWALL_OUTBOUND_SUBNETS: "10.25.0.0/16,10.42.0.0/16,10.43.0.0/16,192.168.0.0/16"
               # Proxy HTTP sur :8888 — utilisé par prowlarr/bazarr/flaresolverr/dispatcharr
-              HTTPPROXY_ENABLED: "on"
+              BLOCK_IPV6: "on"
+              # Permettre l'accès entrant aux ports qbittorrent et proxy HTTP
+              FIREWALL_INPUT_PORTS: "8080,8888"
+              WIREGUARD_ALLOWED_IPS: "0.0.0.0/0"
+              HTTPPROXY: "on"
               HTTPPROXY_LISTENING_ADDRESS: ":8888"
               # Port forwarding → notifie qbittorrent via localhost (réseau partagé)
               VPN_PORT_FORWARDING_UP_COMMAND: >-
@@ -68,8 +73,21 @@ spec:
             probes:
               liveness:
                 enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 8080
+                  initialDelaySeconds: 30
+                  periodSeconds: 30
+                  failureThreshold: 5
               readiness:
                 enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 8080
+                  initialDelaySeconds: 15
+                  periodSeconds: 10
             dependsOn: gluetun
 
     service:

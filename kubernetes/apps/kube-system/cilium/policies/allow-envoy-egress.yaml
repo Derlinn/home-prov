@@ -42,5 +42,27 @@ spec:
             # grafana
             - port: "3000"
               protocol: TCP
+            # envoy xds/admin
             - port: "18000"
+              protocol: TCP
+            # radarr
+            - port: "7878"
+              protocol: TCP
+            # sonarr
+            - port: "8989"
+              protocol: TCP
+            # prowlarr
+            - port: "9696"
+              protocol: TCP
+            # bazarr
+            - port: "6767"
+              protocol: TCP
+            # jellyfin
+            - port: "8096"
+              protocol: TCP
+            # jellyseerr
+            - port: "5055"
+              protocol: TCP
+            # dispatcharr
+            - port: "9191"
               protocol: TCP

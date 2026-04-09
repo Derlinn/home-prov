@@ -29,11 +29,6 @@ spec:
               TZ: "Europe/Paris"
               CRON_SCHEDULE: "@daily"
 
-    # Pas de service exposé — recyclarr est un job périodique
-    service:
-      main:
-        enabled: false
-
     persistence:
       config:
         type: persistentVolumeClaim
@@ -42,3 +37,10 @@ spec:
         size: 512Mi
         globalMounts:
           - path: /config
+      recyclarr-yml:
+        type: configMap
+        name: recyclarr-config
+        globalMounts:
+          - path: /config/recyclarr.yml
+            subPath: recyclarr.yml
+            readOnly: true

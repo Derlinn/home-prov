@@ -18,11 +18,13 @@ spec:
   interval: 1h
   values:
     image:
-      repository: jellyfin/jellyfin
+      repository: lscr.io/linuxserver/jellyfin
       tag: latest
 
     env:
       TZ: "Europe/Paris"
+      PUID: "1000"
+      PGID: "1000"
       JELLYFIN_PublishedServerUrl: "https://jellyfin.linderis.fr"
 
     persistence:
@@ -30,7 +32,7 @@ spec:
         enabled: true
         storageClass: longhorn-production-v1
         accessMode: ReadWriteOnce
-        size: 2Gi
+        size: 4Gi
       media:
         enabled: true
         existingClaim: media-server-nas-data

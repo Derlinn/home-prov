@@ -1,0 +1,84 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: recyclarr-config
+  namespace: media-server
+data:
+  recyclarr.yml: |
+    # Configuration Recyclarr pour Radarr et Sonarr - Profil VOSTFR
+    # Documentation: https://recyclarr.dev/
+
+    ###################################################################################################
+    # Radarr Configuration
+    ###################################################################################################
+    radarr:
+      radarr-movie-vostfr:
+        base_url: http://radarr.media-server.svc.cluster.local:7878
+        api_key: 741e7e6da0794c79af0f65099369fc63
+
+        delete_old_custom_formats: true
+        replace_existing_custom_formats: true
+
+        quality_profiles:
+          - name: HD Bluray + WEB
+            reset_unmatched_scores:
+              enabled: true
+
+        include:
+          - template: radarr-quality-definition-movie
+          - template: radarr-quality-profile-hd-bluray-web
+          - template: radarr-custom-formats-hd-bluray-web
+
+        custom_formats:
+          # OBLIGATOIRE: Custom Formats pour VOSTFR
+          # Language: Original + French (pour fallback MULTi si besoin)
+          - trash_ids:
+              - 0542a48746585dc4444bbbb8a6bdf6ea  # Language: Original + French
+            assign_scores_to:
+              - name: HD Bluray + WEB
+                score: 0  # 0 pour VOSTFR pur, 500 si vous voulez fallback MULTi
+
+          # Language: Not Original (bloque tout sauf VO)
+          - trash_ids:
+              - d6e9318c875905d6cfb5bee961afcea9  # Language: Not Original
+            assign_scores_to:
+              - name: HD Bluray + WEB
+                score: -10000
+
+          # VOSTFR (boost pour prioriser VOSTFR)
+          - trash_ids:
+              - 9172b2f683f6223e3a1846427b417a3d  # VOSTFR
+            assign_scores_to:
+              - name: HD Bluray + WEB
+                score: 1000
+
+          # OPTIONNEL: Versions françaises audio (pour renommage uniquement)
+          - trash_ids:
+              - 404c08fd0bd67f39b4d8e5709319094e  # VFF
+              - b6ace47331a1d3b77942fc18156f6df6  # VFQ
+              - 4b900e171accbfb172729b63323ea8ca  # MULTi
+            assign_scores_to:
+              - name: HD Bluray + WEB
+                score: 0
+
+    ###################################################################################################
+    # Sonarr Configuration
+    ###################################################################################################
+    sonarr:
+      series:
+        base_url: http://sonarr.media-server.svc.cluster.local:8989
+        api_key: 710a9198ea9f4540bdda375f3c525e52
+
+        delete_old_custom_formats: true
+        replace_existing_custom_formats: true
+
+        quality_profiles:
+          - name: WEB-1080p
+            reset_unmatched_scores:
+              enabled: true
+
+        include:
+          - template: sonarr-quality-definition-series
+          - template: sonarr-v4-quality-profile-web-1080p
+          - template: sonarr-v4-custom-formats-web-1080p
