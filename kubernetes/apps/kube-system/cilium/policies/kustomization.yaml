@@ -19,6 +19,7 @@ resources:
     - ./allow-longhorn-internal.yaml
     - ./allow-vaultwarden-internal.yaml
     - ./allow-authentik-internal.yaml
+    - ./allow-netbox-internal.yaml
     - ./allow-rathole-egress.yaml
     - ./allow-envoy-clusterip.yaml
     - ./default-deny.yaml
