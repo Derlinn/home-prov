@@ -17,6 +17,9 @@ spec:
         enabled: true
     superuser:
       existingSecret: netbox-superuser
+    valkey:
+      enabled: true
+      replica:
+        replicaCount: 0
     persistence:
       enabled: true
-      size: 5Gi
