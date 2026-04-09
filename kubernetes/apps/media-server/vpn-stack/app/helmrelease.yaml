@@ -65,8 +65,8 @@ spec:
               repository: lscr.io/linuxserver/qbittorrent
               tag: libtorrentv1
             env:
-              PUID: "1000"
-              PGID: "1000"
+              PUID: "1001"
+              PGID: "1001"
               TZ: "Europe/Paris"
               WEBUI_PORT: "8080"
               UMASK: "002"

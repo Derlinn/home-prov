@@ -25,8 +25,8 @@ spec:
               repository: lscr.io/linuxserver/sonarr
               tag: latest
             env:
-              PUID: "1000"
-              PGID: "1000"
+              PUID: "1001"
+              PGID: "1001"
               TZ: "Europe/Paris"
               HTTP_PROXY: "http://vpn-stack.media-server.svc.cluster.local:8888"
               HTTPS_PROXY: "http://vpn-stack.media-server.svc.cluster.local:8888"
