@@ -16,6 +16,6 @@ spec:
     - netbox.linderis.fr
   rules:
     - backendRefs:
-        - name: netbox-netbox
+        - name: netbox
           namespace: default
           port: 80
