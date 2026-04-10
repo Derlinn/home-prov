@@ -23,7 +23,7 @@ spec:
           app:
             image:
               repository: fallenbagel/jellyseerr
-              tag: latest
+              tag: develop
             env:
               TZ: "Europe/Paris"
             probes:
