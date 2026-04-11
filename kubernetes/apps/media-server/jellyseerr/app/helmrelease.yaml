@@ -23,7 +23,7 @@ spec:
           app:
             image:
               repository: fallenbagel/jellyseerr
-              tag: develop
+              tag: preview-OIDC
             env:
               TZ: "Europe/Paris"
             probes:
