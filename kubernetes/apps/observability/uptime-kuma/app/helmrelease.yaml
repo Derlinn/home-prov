@@ -1,0 +1,42 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: uptime-kuma
+spec:
+  chart:
+    spec:
+      chart: uptime-kuma
+      version: '4.0.0'
+      interval: 5h
+      sourceRef:
+        kind: HelmRepository
+        name: uptime-kuma
+        namespace: observability
+  releaseName: uptime-kuma
+  interval: 1h
+  values:
+    image:
+      tag: "2.1.1"
+
+    podEnv:
+      - name: TZ
+        value: "Europe/Paris"
+
+    volume:
+      enabled: true
+      storageClassName: longhorn-production-v1
+      accessMode: ReadWriteOnce
+      size: 1Gi
+
+    serviceMonitor:
+      enabled: true
+      interval: 60s
+
+    service:
+      type: ClusterIP
+      port: 3001
+
+    ingress:
+      enabled: false
