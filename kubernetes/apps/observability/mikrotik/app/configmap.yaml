@@ -1,0 +1,36 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mktxp-system-config
+data:
+  _mktxp.conf: |
+    [MKTXP]
+        listen = '0.0.0.0:49090'
+        socket_timeout = 5
+
+        initial_delay_on_failure = 120
+        max_delay_on_failure = 900
+        delay_inc_div = 5
+
+        bandwidth = False
+        bandwidth_test_dns_server = 8.8.8.8
+        bandwidth_test_interval = 600
+        minimal_collect_interval = 5
+
+        verbose_mode = False
+
+        fetch_routers_in_parallel = True
+        max_worker_threads = 5
+        max_scrape_duration = 30
+        total_max_scrape_duration = 90
+        http_server_threads = 16
+
+        persistent_router_connection_pool = True
+        persistent_dhcp_cache = True
+        compact_default_conf_values = False
+        prometheus_headers_deduplication = False
+
+        probe_connection_pool = False
+        probe_connection_pool_ttl = 300
+        probe_connection_pool_max_size = 128

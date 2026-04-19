@@ -9,3 +9,4 @@ resources:
   - ./kube-prometheus-stack/ks.yaml
   - ./grafana/ks.yaml
   - ./uptime-kuma/ks.yaml
+  - ./mikrotik/ks.yaml

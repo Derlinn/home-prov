@@ -1,0 +1,78 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mktxp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mktxp
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mktxp
+    spec:
+      initContainers:
+        - name: copy-config
+          image: busybox:1.37
+          command:
+            - sh
+            - -c
+            - |
+              cp /tmp/routers/mktxp.conf /mktxp/mktxp.conf
+              cp /tmp/system/_mktxp.conf /mktxp/_mktxp.conf
+          volumeMounts:
+            - name: routers-config
+              mountPath: /tmp/routers
+              readOnly: true
+            - name: system-config
+              mountPath: /tmp/system
+              readOnly: true
+            - name: mktxp-data
+              mountPath: /mktxp
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+      containers:
+        - name: mktxp
+          image: ghcr.io/akpw/mktxp:1.2.17
+          ports:
+            - name: metrics
+              containerPort: 49090
+              protocol: TCP
+          volumeMounts:
+            - name: mktxp-data
+              mountPath: /home/mktxp/mktxp
+            - name: tmp
+              mountPath: /tmp
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+        - name: routers-config
+          secret:
+            secretName: mktxp-routers-config
+        - name: system-config
+          configMap:
+            name: mktxp-system-config
+        - name: mktxp-data
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}

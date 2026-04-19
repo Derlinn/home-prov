@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mktxp
+  labels:
+    app.kubernetes.io/name: mktxp
+spec:
+  selector:
+    app.kubernetes.io/name: mktxp
+  ports:
+    - name: metrics
+      port: 49090
+      targetPort: metrics

@@ -24,4 +24,5 @@ resources:
     - ./allow-envoy-clusterip.yaml
     - ./allow-media-server-internal.yaml
     - ./allow-wireguard-egress.yaml
+    - ./allow-mktxp-egress.yaml
     - ./default-deny.yaml
