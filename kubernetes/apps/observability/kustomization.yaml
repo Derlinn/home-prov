@@ -10,3 +10,4 @@ resources:
   - ./grafana/ks.yaml
   - ./uptime-kuma/ks.yaml
   - ./mikrotik/ks.yaml
+  - ./asustor/ks.yaml

@@ -1,0 +1,147 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: asustor
+spec:
+  groups:
+    - name: asustor.availability
+      rules:
+        - alert: AsustorDown
+          expr: up{job="node-exporter", instance="asustor-1022t"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "NAS Asustor inaccessible depuis {{ $value | humanizeDuration }}"
+
+        - alert: AsustorReboot
+          expr: node_time_seconds{instance="asustor-1022t"} - node_boot_time_seconds{instance="asustor-1022t"} < 300
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NAS Asustor a redémarré (uptime {{ $value | humanizeDuration }})"
+
+    - name: asustor.system
+      rules:
+        - alert: AsustorHighCPU
+          expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle", instance="asustor-1022t"}[5m])) * 100) > 85
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NAS CPU élevé ({{ $value | humanize }}%)"
+
+        - alert: AsustorHighMemory
+          expr: |
+            (1 - (node_memory_MemAvailable_bytes{instance="asustor-1022t"} / node_memory_MemTotal_bytes{instance="asustor-1022t"})) * 100 > 90
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NAS mémoire élevée ({{ $value | humanize }}% utilisée)"
+
+    - name: asustor.disk
+      rules:
+        - alert: AsustorDiskUsageWarning
+          expr: |
+            (1 - node_filesystem_avail_bytes{instance="asustor-1022t", fstype!~"tmpfs|devtmpfs|overlay"} / node_filesystem_size_bytes{instance="asustor-1022t", fstype!~"tmpfs|devtmpfs|overlay"}) * 100 > 80
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NAS volume {{ $labels.mountpoint }} utilisé à {{ $value | humanize }}%"
+
+        - alert: AsustorDiskUsageCritical
+          expr: |
+            (1 - node_filesystem_avail_bytes{instance="asustor-1022t", fstype!~"tmpfs|devtmpfs|overlay"} / node_filesystem_size_bytes{instance="asustor-1022t", fstype!~"tmpfs|devtmpfs|overlay"}) * 100 > 95
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "NAS volume {{ $labels.mountpoint }} critique ({{ $value | humanize }}% utilisé)"
+
+        - alert: AsustorDiskIOSaturated
+          expr: rate(node_disk_io_time_seconds_total{instance="asustor-1022t", device="sda"}[5m]) > 0.9
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NAS disque sda saturé ({{ $value | humanizePercentage }} IO utilization)"
+
+    - name: asustor.smart
+      rules:
+        - alert: AsustorSMARTFailure
+          expr: smartctl_device_smart_status{instance="asustor-1022t"} == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "NAS disque {{ $labels.device }} — panne SMART imminente"
+
+        - alert: AsustorDiskHighTemperature
+          expr: smartctl_device_temperature{instance="asustor-1022t", temperature_type="current"} > 50
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NAS disque {{ $labels.device }} température élevée ({{ $value }}°C)"
+
+        - alert: AsustorDiskCriticalTemperature
+          expr: smartctl_device_temperature{instance="asustor-1022t", temperature_type="current"} > 60
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "NAS disque {{ $labels.device }} température critique ({{ $value }}°C)"
+
+        - alert: AsustorDiskReallocatedSectors
+          expr: |
+            smartctl_device_attribute{instance="asustor-1022t", attribute_name="Reallocated_Sector_Ct", attribute_value_type="raw"} > 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "NAS disque {{ $labels.device }} secteurs réalloués détectés ({{ $value }}) — disque défaillant"
+
+        - alert: AsustorDiskPendingSectors
+          expr: |
+            smartctl_device_attribute{instance="asustor-1022t", attribute_name="Current_Pending_Sector", attribute_value_type="raw"} > 0
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NAS disque {{ $labels.device }} secteurs en attente ({{ $value }}) — données potentiellement perdues"
+
+        - alert: AsustorDiskUDMACRCErrors
+          expr: |
+            increase(smartctl_device_attribute{instance="asustor-1022t", attribute_name="UDMA_CRC_Error_Count", attribute_value_type="raw"}[1h]) > 0
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NAS erreurs CRC UDMA sur {{ $labels.device }} — câble SATA défectueux ?"
+
+    - name: asustor.network
+      rules:
+        - alert: AsustorNetworkSaturated
+          expr: |
+            (rate(node_network_receive_bytes_total{instance="asustor-1022t", device!~"lo|docker.*|br.*"}[5m])
+            + rate(node_network_transmit_bytes_total{instance="asustor-1022t", device!~"lo|docker.*|br.*"}[5m])) * 8 > 900000000
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NAS interface {{ $labels.device }} saturée ({{ $value | humanize }}bps)"
+
+        - alert: AsustorNetworkErrors
+          expr: |
+            rate(node_network_receive_errs_total{instance="asustor-1022t", device!~"lo"}[5m])
+            + rate(node_network_transmit_errs_total{instance="asustor-1022t", device!~"lo"}[5m]) > 1
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NAS erreurs réseau sur {{ $labels.device }} ({{ $value | humanize }}/s)"

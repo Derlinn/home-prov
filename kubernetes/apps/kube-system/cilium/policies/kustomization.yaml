@@ -25,4 +25,5 @@ resources:
     - ./allow-media-server-internal.yaml
     - ./allow-wireguard-egress.yaml
     - ./allow-mktxp-egress.yaml
+    - ./allow-asustor-egress.yaml
     - ./default-deny.yaml
