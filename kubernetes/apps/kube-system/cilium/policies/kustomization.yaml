@@ -26,4 +26,5 @@ resources:
     - ./allow-wireguard-egress.yaml
     - ./allow-mktxp-egress.yaml
     - ./allow-asustor-egress.yaml
+    - ./allow-uptime-kuma-egress.yaml
     - ./default-deny.yaml

@@ -1,0 +1,29 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# Allow uptime-kuma to reach LAN exporters and internal services for monitoring
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-uptime-kuma-egress
+spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
+  endpointSelector:
+    matchLabels:
+      io.kubernetes.pod.namespace: observability
+      app.kubernetes.io/name: uptime-kuma
+  egress:
+    - toCIDR:
+        - 10.25.30.0/24
+      toPorts:
+        - ports:
+            # node_exporter
+            - port: "9100"
+              protocol: TCP
+            # smartctl_exporter
+            - port: "9633"
+              protocol: TCP
+            # proxmox
+            - port: "8006"
+              protocol: TCP
