@@ -6,17 +6,11 @@ metadata:
   name: valentin-kubernetes-pods
   namespace: observability
 spec:
-  uid: k8s_views_pods_valentin
   instanceSelector:
     matchLabels:
       grafana.internal/instance: grafana
-  allowCrossNamespaceImport: true
   folderRef: valentin
   datasources:
     - datasourceName: prometheus
       inputName: DS_PROMETHEUS
-    - datasourceName: loki
-      inputName: DS_LOKI
-  configMapRef:
-    name: kubernetes-pods-dashboard
-    key: kubernetes-pods.json
+  url: https://grafana.com/api/dashboards/15760/revisions/35/download
