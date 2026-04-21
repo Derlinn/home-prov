@@ -15,8 +15,23 @@ spec:
       reporting_enabled: "false"
     auth:
       disable_login_form: "false"
+      signout_redirect_url: "https://authentik.linderis.fr/application/o/grafana/end-session/"
     auth.anonymous:
       enabled: "true"
+    auth.generic_oauth:
+      enabled: "true"
+      name: Authentik
+      icon: signin
+      client_id: "${GF_AUTH_GENERIC_OAUTH_CLIENT_ID}"
+      client_secret: "${GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}"
+      scopes: "openid email profile"
+      auth_url: "https://authentik.linderis.fr/application/o/grafana/authorize/"
+      token_url: "https://authentik.linderis.fr/application/o/grafana/token/"
+      api_url: "https://authentik.linderis.fr/application/o/userinfo/"
+      redirect_uri: "https://grafana.linderis.fr/login/generic_oauth"
+      use_pkce: "true"
+      role_attribute_path: "contains(groups[*], 'Grafana Admins') && 'Admin' || 'Viewer'"
+      allow_sign_up: "true"
     log:
       mode: console
     metrics:
@@ -44,6 +59,16 @@ spec:
                     secretKeyRef:
                       name: grafana-admin-password-secret
                       key: GF_SECURITY_ADMIN_PASSWORD
+                - name: GF_AUTH_GENERIC_OAUTH_CLIENT_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: grafana-oidc-secret
+                      key: client_id
+                - name: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: grafana-oidc-secret
+                      key: client_secret
               securityContext:
                 allowPrivilegeEscalation: false
                 readOnlyRootFilesystem: true
