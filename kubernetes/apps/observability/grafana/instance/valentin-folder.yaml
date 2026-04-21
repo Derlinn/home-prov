@@ -10,5 +10,5 @@ spec:
     matchLabels:
       grafana.internal/instance: grafana
   uid: valentin
-  title: Valentin
+  title: inp-calendar-bot
   permissions: '[{"role": "Viewer", "permission": 1}, {"role": "Editor", "permission": 2}]'
