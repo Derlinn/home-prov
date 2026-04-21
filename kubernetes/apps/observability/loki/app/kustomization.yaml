@@ -5,6 +5,3 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
   - ./ocirepository.yaml
-  # - ./scrapeconfig.yaml  # disabled: expanse.internal is down
-  - ./grafanadashboard.yaml
-  - ./configmap-kubernetes-pods.yaml
