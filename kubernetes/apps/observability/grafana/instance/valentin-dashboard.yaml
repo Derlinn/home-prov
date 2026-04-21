@@ -10,9 +10,7 @@ spec:
     matchLabels:
       grafana.internal/instance: grafana
   allowCrossNamespaceImport: true
-  folderRef:
-    name: valentin
-    namespace: observability
+  folderRef: valentin
   datasources:
     - datasourceName: prometheus
       inputName: DS_PROMETHEUS
