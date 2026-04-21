@@ -42,6 +42,8 @@ spec:
             limits:
               cpu: 500m
               memory: 256Mi
+      imagePullSecrets:
+        - name: ghcr-pull-secret
       volumes:
         - name: data
           persistentVolumeClaim:
