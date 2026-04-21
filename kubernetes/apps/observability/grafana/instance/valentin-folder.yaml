@@ -1,0 +1,14 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanafolder_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaFolder
+metadata:
+  name: valentin
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      grafana.internal/instance: grafana
+  uid: valentin
+  title: Valentin
+  permissions: '[{"role": "Viewer", "permission": 1}, {"role": "Editor", "permission": 2}]'

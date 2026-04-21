@@ -17,7 +17,7 @@ spec:
       disable_login_form: "false"
       signout_redirect_url: "https://authentik.linderis.fr/application/o/grafana/end-session/"
     auth.anonymous:
-      enabled: "true"
+      enabled: "false"
     auth.generic_oauth:
       enabled: "true"
       name: Authentik
@@ -30,7 +30,7 @@ spec:
       api_url: "https://authentik.linderis.fr/application/o/userinfo/"
       redirect_uri: "https://grafana.linderis.fr/login/generic_oauth"
       use_pkce: "true"
-      role_attribute_path: "contains(groups[*], 'Grafana Admins') && 'Admin' || 'Viewer'"
+      role_attribute_path: "contains(groups[*], 'Grafana Admins') && 'Admin' || contains(groups[*], 'Grafana Editors') && 'Editor' || 'Viewer'"
       allow_sign_up: "true"
     log:
       mode: console

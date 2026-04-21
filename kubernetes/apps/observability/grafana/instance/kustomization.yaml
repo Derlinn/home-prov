@@ -8,3 +8,6 @@ resources:
   - ./httproute.yaml
   - ./servicemonitor.yaml
   - ./oidc-secret.sops.yaml
+  - ./valentin-folder.yaml
+  - ./valentin-dashboard.yaml
+  - ./restrict-folders-job.yaml

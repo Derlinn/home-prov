@@ -1,0 +1,70 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: grafana-folder-restrictor
+  namespace: observability
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: grafana-restrict-folders
+  namespace: observability
+spec:
+  template:
+    spec:
+      serviceAccountName: grafana-folder-restrictor
+      restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+        - name: admin-secret
+          secret:
+            secretName: grafana-admin-password-secret
+      containers:
+        - name: restrictor
+          image: curlimages/curl:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: admin-secret
+              mountPath: /etc/grafana-secret
+              readOnly: true
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              PASS=$(cat /etc/grafana-secret/GF_SECURITY_ADMIN_PASSWORD)
+              BASE="http://grafana-service:3000"
+              VALENTIN_UID="valentin"
+
+              FOLDERS=$(curl -sf -u "admin:$PASS" "$BASE/api/folders?limit=50")
+              echo "Folders found: $FOLDERS"
+
+              # Restrict all folders except the valentin folder to Editor+
+              for uid in $(echo "$FOLDERS" | grep -o '"uid":"[^"]*"' | cut -d'"' -f4); do
+                if [ "$uid" = "$VALENTIN_UID" ]; then
+                  echo "Skipping valentin folder"
+                  continue
+                fi
+                echo "Restricting folder: $uid"
+                curl -sf -X POST \
+                  -H "Content-Type: application/json" \
+                  -u "admin:$PASS" \
+                  "$BASE/api/folders/$uid/permissions" \
+                  -d '[{"role": "Editor", "permission": 2}]'
+                echo " -> done"
+              done
+              echo "All folders restricted."
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 32Mi

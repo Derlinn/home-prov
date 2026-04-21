@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: valentin-kubernetes-pods
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      grafana.internal/instance: grafana
+  allowCrossNamespaceImport: true
+  folderRef:
+    name: valentin
+    namespace: observability
+  datasources:
+    - datasourceName: prometheus
+      inputName: DS_PROMETHEUS
+    - datasourceName: loki
+      inputName: DS_LOKI
+  configMapRef:
+    name: kubernetes-pods-dashboard
+    key: kubernetes-pods.json
