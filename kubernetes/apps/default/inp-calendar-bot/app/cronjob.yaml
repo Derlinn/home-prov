@@ -1,0 +1,85 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: inp-calendar-bot-updater
+  namespace: default
+spec:
+  schedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: inp-calendar-bot-updater
+          restartPolicy: OnFailure
+          volumes:
+            - name: docker-auth
+              secret:
+                secretName: ghcr-pull-secret
+          containers:
+            - name: updater
+              image: bitnami/kubectl:latest
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  NAMESPACE=default
+                  DEPLOYMENT=inp-calendar-bot
+                  CONFIGMAP=inp-calendar-bot-image-digest
+
+                  # Extract GHCR credentials from pull secret
+                  AUTH_B64=$(grep -o '"auth":"[^"]*"' /docker-auth/.dockerconfigjson | cut -d'"' -f4)
+                  AUTH=$(echo "$AUTH_B64" | base64 -d)
+
+                  # Get a short-lived GHCR token
+                  TOKEN=$(curl -sf -u "$AUTH" \
+                    "https://ghcr.io/token?scope=repository:akt0o/inp-calendar-bot:pull&service=ghcr.io" \
+                    | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
+
+                  # Get remote manifest digest
+                  REMOTE_DIGEST=$(curl -sfI \
+                    -H "Authorization: Bearer $TOKEN" \
+                    -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+                    "https://ghcr.io/v2/akt0o/inp-calendar-bot/manifests/latest" \
+                    | grep -i "^docker-content-digest:" | tr -d '\r' | awk '{print $2}')
+
+                  if [ -z "$REMOTE_DIGEST" ]; then
+                    echo "ERROR: could not fetch remote digest"
+                    exit 1
+                  fi
+
+                  # Get last known digest from ConfigMap
+                  STORED_DIGEST=$(kubectl get configmap "$CONFIGMAP" -n "$NAMESPACE" \
+                    -o jsonpath='{.data.digest}' 2>/dev/null || echo "")
+
+                  echo "Remote: $REMOTE_DIGEST"
+                  echo "Stored: $STORED_DIGEST"
+
+                  if [ "$REMOTE_DIGEST" = "$STORED_DIGEST" ]; then
+                    echo "Image up to date, nothing to do."
+                    exit 0
+                  fi
+
+                  echo "New image detected, restarting deployment..."
+                  kubectl rollout restart deployment/"$DEPLOYMENT" -n "$NAMESPACE"
+
+                  # Persist new digest
+                  kubectl create configmap "$CONFIGMAP" -n "$NAMESPACE" \
+                    --from-literal=digest="$REMOTE_DIGEST" \
+                    --dry-run=client -o yaml | kubectl apply -f -
+
+                  echo "Done. Digest updated to $REMOTE_DIGEST"
+              volumeMounts:
+                - name: docker-auth
+                  mountPath: /docker-auth
+                  readOnly: true
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  cpu: 100m
+                  memory: 64Mi
