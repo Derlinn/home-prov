@@ -6,6 +6,7 @@ metadata:
   name: valentin-kubernetes-pods
   namespace: observability
 spec:
+  uid: k8s_views_pods_valentin
   instanceSelector:
     matchLabels:
       grafana.internal/instance: grafana
