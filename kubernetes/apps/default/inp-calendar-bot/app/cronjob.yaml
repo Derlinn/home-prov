@@ -19,9 +19,18 @@ spec:
             - name: docker-auth
               secret:
                 secretName: ghcr-pull-secret
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
           containers:
             - name: updater
               image: bitnami/kubectl:latest
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
               command: ["/bin/sh", "-c"]
               args:
                 - |
@@ -30,19 +39,19 @@ spec:
                   DEPLOYMENT=inp-calendar-bot
                   CONFIGMAP=inp-calendar-bot-image-digest
 
-                  # Extract GHCR credentials from pull secret
+                  # Extract auth (base64 of user:token) directly from pull secret
                   AUTH_B64=$(grep -o '"auth":"[^"]*"' /docker-auth/.dockerconfigjson | cut -d'"' -f4)
-                  AUTH=$(echo "$AUTH_B64" | base64 -d)
 
-                  # Get a short-lived GHCR token
-                  TOKEN=$(curl -sf -u "$AUTH" \
+                  # Token exchange
+                  TOKEN=$(curl -sf \
+                    -H "Authorization: Basic $AUTH_B64" \
                     "https://ghcr.io/token?scope=repository:akt0o/inp-calendar-bot:pull&service=ghcr.io" \
                     | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
 
-                  # Get remote manifest digest
+                  # Get remote manifest digest (accept OCI index for multi-arch images)
                   REMOTE_DIGEST=$(curl -sfI \
                     -H "Authorization: Bearer $TOKEN" \
-                    -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+                    -H "Accept: application/vnd.oci.image.index.v1+json, application/vnd.oci.image.manifest.v1+json, application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json" \
                     "https://ghcr.io/v2/akt0o/inp-calendar-bot/manifests/latest" \
                     | grep -i "^docker-content-digest:" | tr -d '\r' | awk '{print $2}')
 

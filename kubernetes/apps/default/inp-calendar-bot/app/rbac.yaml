@@ -17,8 +17,11 @@ rules:
     verbs: ["get", "patch"]
   - apiGroups: [""]
     resources: ["configmaps"]
-    resourceNames: ["inp-calendar-bot-image-digest"]
     verbs: ["get", "create", "update", "patch"]
+    resourceNames: ["inp-calendar-bot-image-digest"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["create"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
