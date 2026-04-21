@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inp-calendar-bot
+  namespace: default
+  labels:
+    app.kubernetes.io/name: inp-calendar-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: inp-calendar-bot
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: inp-calendar-bot
+    spec:
+      containers:
+        - name: inp-calendar-bot
+          image: ghcr.io/akt0o/inp-calendar-bot:latest
+          imagePullPolicy: Always
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              ln -sf /bot-data/ChannelList.txt /app/ChannelList.txt
+              ln -sf /bot-data/RoleList.txt /app/RoleList.txt
+              python main.py
+          env:
+            - name: TZ
+              value: Europe/Paris
+          envFrom:
+            - secretRef:
+                name: inp-calendar-bot-secret
+          volumeMounts:
+            - name: data
+              mountPath: /bot-data
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: inp-calendar-bot-data
