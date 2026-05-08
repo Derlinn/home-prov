@@ -38,6 +38,10 @@ spec:
         existingClaim: media-server-nas-data
         mountPath: /media
         subPath: media
+      transcodes:
+        enabled: true
+        type: emptyDir
+        mountPath: /config/cache/transcodes
 
     ingress:
       enabled: false   # on utilise HTTPRoute (Envoy Gateway)
