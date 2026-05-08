@@ -1,0 +1,52 @@
+{
+  "name": "home-prov",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "remoteUser": "vscode",
+
+  "containerEnv": {
+    "NODE_ENV": "production",
+    "KUBECONFIG": "${containerWorkspaceFolder}/terraform/envs/production/output/kube-config.yaml",
+    "TALOSCONFIG": "${containerWorkspaceFolder}/terraform/envs/production/output/talos-config.yaml",
+    "SOPS_AGE_KEY_FILE": "/home/vscode/.config/sops/age/keys.txt",
+    "KUBE_PS1_NS_ENABLE": "true",
+    "KUBE_PS1_PREFIX": "(",
+    "KUBE_PS1_SEPARATOR": "|",
+    "KUBE_PS1_SUFFIX": ") ",
+    "VIRTUAL_ENV": "${containerWorkspaceFolder}/.venv"
+  },
+
+  "mounts": [
+    {
+      "source": "${localEnv:HOME}/.config/sops/age",
+      "target": "/home/vscode/.config/sops/age",
+      "type": "bind",
+      "readonly": true
+    }
+  ],
+
+  "postCreateCommand": "bash .devcontainer/postCreate.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "hashicorp.terraform",
+        "hashicorp.hcl",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "redhat.vscode-yaml",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "tamasfe.even-better-toml",
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github",
+        "editorconfig.editorconfig"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python"
+      }
+    }
+  }
+}
