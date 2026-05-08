@@ -6,3 +6,4 @@ resources:
   - ./helmrepository.yaml
   - ./helmrelease.yaml
   - ./httproute.yaml
+  - ./backend-traffic-policy.yaml
