@@ -73,3 +73,6 @@ spec:
             # uptime-kuma
             - port: "3001"
               protocol: TCP
+            # gitlab webservice (workhorse)
+            - port: "8181"
+              protocol: TCP
