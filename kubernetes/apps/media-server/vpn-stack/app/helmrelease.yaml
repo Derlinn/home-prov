@@ -51,6 +51,9 @@ spec:
               WIREGUARD_ALLOWED_IPS: "0.0.0.0/0"
               HTTPPROXY: "on"
               HTTPPROXY_LISTENING_ADDRESS: ":8888"
+              HEALTH_VPN_DURATION_INITIAL: "30s"
+              HEALTH_VPN_DURATION_ADDITION: "10s"
+              HEALTH_TARGET_ADDRESS: "1.1.1.1:443"
               # Port forwarding → notifie qbittorrent via localhost (réseau partagé)
               # LocalHostAuth=false requis dans qBittorrent.conf pour bypass auth
               VPN_PORT_FORWARDING_UP_COMMAND: >-
