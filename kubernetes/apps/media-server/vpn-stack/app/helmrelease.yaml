@@ -61,6 +61,32 @@ spec:
               - secretRef:
                   name: gluetun-credentials
 
+          port-sync:
+            image:
+              repository: alpine
+              tag: latest
+            command:
+              - /bin/sh
+              - -c
+              - |
+                PORT_FILE=/tmp/gluetun/forwarded_port
+                LAST_PORT=""
+                while true; do
+                  if [ -f "$PORT_FILE" ]; then
+                    PORT=$(cat "$PORT_FILE")
+                    if [ -n "$PORT" ] && [ "$PORT" != "$LAST_PORT" ]; then
+                      if wget -qO- --timeout=5 "http://127.0.0.1:8080/api/v2/app/version" >/dev/null 2>&1; then
+                        wget -qO- --timeout=5 \
+                          --post-data "json={\"listen_port\":${PORT}}" \
+                          "http://127.0.0.1:8080/api/v2/app/setPreferences" >/dev/null && \
+                        echo "[port-sync] updated qBittorrent listen_port to $PORT" && \
+                        LAST_PORT="$PORT"
+                      fi
+                    fi
+                  fi
+                  sleep 10
+                done
+
           qbittorrent:
             image:
               repository: lscr.io/linuxserver/qbittorrent
@@ -101,6 +127,15 @@ spec:
             port: 8888        # gluetun HTTP proxy
 
     persistence:
+      gluetun-data:
+        type: emptyDir
+        advancedMounts:
+          main:
+            gluetun:
+              - path: /tmp/gluetun
+            port-sync:
+              - path: /tmp/gluetun
+                readOnly: true
       tun:
         type: hostPath
         hostPath: /dev/net/tun
