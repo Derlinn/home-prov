@@ -70,21 +70,21 @@ spec:
               - -c
               - |
                 PORT_FILE=/tmp/gluetun/forwarded_port
-                LAST_PORT=""
+                sleep 30
                 while true; do
                   if [ -f "$PORT_FILE" ]; then
                     PORT=$(cat "$PORT_FILE")
-                    if [ -n "$PORT" ] && [ "$PORT" != "$LAST_PORT" ]; then
-                      if wget -qO- --timeout=5 "http://127.0.0.1:8080/api/v2/app/version" >/dev/null 2>&1; then
+                    if [ -n "$PORT" ]; then
+                      CURRENT=$(wget -qO- --timeout=5 "http://127.0.0.1:8080/api/v2/app/preferences" 2>/dev/null | grep -o '"listen_port":[0-9]*' | grep -o '[0-9]*$')
+                      if [ -n "$CURRENT" ] && [ "$CURRENT" != "$PORT" ]; then
                         wget -qO- --timeout=5 \
                           --post-data "json={\"listen_port\":${PORT}}" \
                           "http://127.0.0.1:8080/api/v2/app/setPreferences" >/dev/null && \
-                        echo "[port-sync] updated qBittorrent listen_port to $PORT" && \
-                        LAST_PORT="$PORT"
+                        echo "[port-sync] updated qBittorrent listen_port $CURRENT -> $PORT"
                       fi
                     fi
                   fi
-                  sleep 10
+                  sleep 30
                 done
 
           qbittorrent:
