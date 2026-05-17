@@ -2,10 +2,9 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: default
 resources:
-  - hello/ks.yaml
-  - bentopdf/ks.yaml
-  - netbox/ks.yaml
-  - inp-calendar-bot/ks.yaml
-  - parkshield/ks.yaml
+  - ./helmrepository.yaml
+  - ./helmrelease.yaml
+  - ./httproute.yaml
+  - ./secret.sops.yaml
+  - ./authentik-oidc-secret.sops.yaml
