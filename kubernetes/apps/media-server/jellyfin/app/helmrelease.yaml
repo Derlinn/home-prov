@@ -32,7 +32,7 @@ spec:
         enabled: true
         storageClass: longhorn-production-v1
         accessMode: ReadWriteOnce
-        size: 4Gi
+        size: 20Gi
       media:
         enabled: true
         existingClaim: media-server-nas-data
