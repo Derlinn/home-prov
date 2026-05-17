@@ -16,3 +16,4 @@ resources:
   - system-upgrade
   - headscale
   - media-server
+  - devtools

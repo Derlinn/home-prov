@@ -1,0 +1,89 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: gitlab
+spec:
+  interval: 30m
+  timeout: 20m
+  releaseName: gitlab
+  chart:
+    spec:
+      chart: gitlab
+      version: 8.10.0
+      sourceRef:
+        kind: HelmRepository
+        name: gitlab
+      interval: 1h
+  values:
+    global:
+      edition: ce
+      hosts:
+        domain: linderis.fr
+        https: true
+        gitlab:
+          name: gitlab.linderis.fr
+
+      ingress:
+        enabled: false
+        configureCertmanager: false
+
+      initialRootPassword:
+        secret: gitlab-initial-root-password
+        key: password
+
+      appConfig:
+        omniauth:
+          enabled: true
+          allowSingleSignOn: ['openid_connect']
+          syncProfileFromProvider: ['openid_connect']
+          syncProfileAttributes: ['email']
+          blockAutoCreatedUsers: false
+          providers:
+            - secret: gitlab-authentik-oidc
+              key: provider
+
+    # Ingress controller bundlé désactivé — on utilise Envoy Gateway
+    nginx-ingress:
+      enabled: false
+
+    # Cert-manager bundlé désactivé — on utilise l'externe
+    certmanager:
+      install: false
+    certmanager-issuer:
+      email: false
+
+    # Prometheus bundlé désactivé — on utilise kube-prometheus-stack
+    prometheus:
+      install: false
+
+    # PostgreSQL et Redis bundlés
+    postgresql:
+      install: true
+
+    redis:
+      install: true
+
+    # MinIO bundlé pour les artefacts, LFS et uploads
+    minio:
+      enabled: true
+      ingress:
+        enabled: false
+
+    # Registre désactivé pour l'instant (Harbor prévu)
+    registry:
+      enabled: false
+
+    gitlab:
+      webservice:
+        ingress:
+          enabled: false
+      kas:
+        ingress:
+          enabled: false
+      pages:
+        enabled: false
+
+    gitlab-runner:
+      install: false
