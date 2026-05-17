@@ -16,6 +16,8 @@ spec:
       labels:
         app.kubernetes.io/name: parkshield
     spec:
+      imagePullSecrets:
+        - name: ghcr-pull-secret
       containers:
         - name: parkshield
           image: ghcr.io/derlinn/proba-parkshield:latest
