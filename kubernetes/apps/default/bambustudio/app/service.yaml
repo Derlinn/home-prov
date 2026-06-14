@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bambustudio
+  namespace: default
+  labels:
+    app.kubernetes.io/name: bambustudio
+spec:
+  selector:
+    app.kubernetes.io/name: bambustudio
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
