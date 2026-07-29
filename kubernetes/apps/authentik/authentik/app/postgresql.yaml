@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
         - name: postgresql
-          image: postgres:16-alpine
+          image: postgres:18-alpine
           env:
             - name: POSTGRES_DB
               value: authentik
