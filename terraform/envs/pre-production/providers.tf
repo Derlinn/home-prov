@@ -10,15 +10,15 @@ terraform {
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.38.0"
+      version = "3.2.1"
     }
     restapi = {
       source  = "Mastercard/restapi"
-      version = "1.19.1"
+      version = "3.0.0"
     }
     flux = {
       source  = "fluxcd/flux"
-      version = ">=1.7.4"
+      version = ">= 1.7.4"
     }
     helm = {
       source  = "hashicorp/helm"

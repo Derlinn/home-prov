@@ -15,7 +15,7 @@ spec:
     spec:
       initContainers:
         - name: copy-config
-          image: busybox:1.37
+          image: busybox:1.38
           command:
             - sh
             - -c
@@ -38,7 +38,7 @@ spec:
               drop: ["ALL"]
       containers:
         - name: mktxp
-          image: ghcr.io/akpw/mktxp:1.2.17
+          image: ghcr.io/akpw/mktxp:1.2.19
           ports:
             - name: metrics
               containerPort: 49090
