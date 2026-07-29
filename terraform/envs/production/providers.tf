@@ -18,7 +18,7 @@ terraform {
     }
     flux = {
       source  = "fluxcd/flux"
-      version = ">=1.7.4"
+      version = ">= 1.7.4"
     }
     helm = {
       source  = "hashicorp/helm"
