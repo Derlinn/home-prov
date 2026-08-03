@@ -128,6 +128,16 @@
     },
     // Breaking-change guardrails
     {
+      // Longhorn n'autorise l'upgrade que d'une mineure a la suivante (regle
+      // appliquee par le hook longhorn-pre-upgrade, qui echoue sinon).
+      // Sans ceci, Renovate propose 1.10.1 -> 1.12.0 en sautant la 1.11.x.
+      // separateMultipleMinor force un PR par palier de mineure.
+      description: "Longhorn forbids skipping a minor version: one PR per step",
+      matchDatasources: ["docker", "helm"],
+      matchPackageNames: ["/longhorn/"],
+      separateMultipleMinor: true,
+    },
+    {
       description: "Critical infrastructure majors need manual approval",
       matchDatasources: ["docker", "helm"],
       matchUpdateTypes: ["major"],
