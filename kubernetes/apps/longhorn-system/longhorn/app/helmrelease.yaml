@@ -17,6 +17,7 @@ spec:
     defaultSettings:
       defaultDataPath: /var/lib/longhorn
       orphanAutoDeletion: true
+      defaultReplicaCount: 1
     ingress:
       enabled: true
       host: longhorn.linderis.fr
