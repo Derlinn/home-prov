@@ -16,8 +16,9 @@ spec:
   values:
     defaultSettings:
       defaultDataPath: /var/lib/longhorn
-      orphanAutoDeletion: true
+      orphanResourceAutoDeletion: "replica-data"
       defaultReplicaCount: 1
+      concurrentAutomaticEngineUpgradePerNodeLimit: 3 # for upgrade of volume engine
     ingress:
       enabled: true
       host: longhorn.linderis.fr
