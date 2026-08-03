@@ -20,6 +20,4 @@ spec:
       create: true
       annotations: {}
       name:
-      privileges:
-        - apiGroups: [""]
-          resources: ["secrets"]
+      privileges: []
