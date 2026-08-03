@@ -37,6 +37,7 @@ spec:
               VPN_SERVICE_PROVIDER: protonvpn
               VPN_TYPE: wireguard
               SERVER_COUNTRIES: Netherlands
+              PORT_FORWARD_ONLY: "on"
               WIREGUARD_MTU: "1200"
               VPN_PORT_FORWARDING: "on"
               VPN_PORT_FORWARDING_PROVIDER: protonvpn
