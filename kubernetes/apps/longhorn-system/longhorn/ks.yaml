@@ -17,3 +17,4 @@ spec:
   targetNamespace: longhorn-system
   wait: true
   timeout: 10m
+  force: true # for immuable storage class

@@ -14,7 +14,7 @@ allowVolumeExpansion: true
 reclaimPolicy: Retain
 volumeBindingMode: WaitForFirstConsumer
 parameters:
-  numberOfReplicas: "3"
+  numberOfReplicas: "1" # Only one due to mono-node
   dataLocality: best-effort
   replicaAutoBalance: "least-effort"
   unmapMarkSnapChainRemoved: "enabled"
