@@ -9,4 +9,4 @@ resources:
   - netbox/ks.yaml
   - inp-calendar-bot/ks.yaml
   - parkshield/ks.yaml
-  - bambustudio/ks.yaml
+#  - bambustudio/ks.yaml

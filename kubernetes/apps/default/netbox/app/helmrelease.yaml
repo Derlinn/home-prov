@@ -11,6 +11,15 @@ spec:
   interval: 1h
   values:
     timezone: 'Europe\Paris'
+    resources:
+      requests:
+        cpu: 100m
+        memory: 1Gi
+        ephemeral-storage: 50Mi
+      limits:
+        cpu: 750m
+        memory: 1536Mi
+        ephemeral-storage: 2Gi
     metrics:
       enabled: true
       serviceMonitor:
