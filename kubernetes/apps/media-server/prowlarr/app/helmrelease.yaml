@@ -24,7 +24,7 @@ spec:
           app:
             image:
               repository: lscr.io/linuxserver/prowlarr
-              tag: latest
+              tag: 2.4.0
             env:
               PUID: "1000"
               PGID: "1000"
