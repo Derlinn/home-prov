@@ -24,7 +24,7 @@ spec:
           app:
             image:
               repository: ghcr.io/recyclarr/recyclarr
-              tag: latest
+              tag: 8.3.2
             env:
               TZ: "Europe/Paris"
               CRON_SCHEDULE: "@daily"
