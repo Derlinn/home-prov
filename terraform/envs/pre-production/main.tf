@@ -6,6 +6,9 @@ locals {
     gateway         = ""
     talos_version   = "v1.11.5"
     proxmox_cluster = ""
+    # Must stay in sync with tuppr's KubernetesUpgrade CR (tracked by Renovate
+    # through the customManager in .renovaterc.json5).
+    kubernetes_version = "v1.34.2"
   })
 }
 

@@ -7,6 +7,10 @@ variable "cluster" {
     talos_version   = string
     proxmox_cluster = string
     flux_enabled    = optional(bool, false)
+    # Must mirror tuppr's KubernetesUpgrade CR. Left unset, the provider bakes
+    # its own default version into the generated config, which would upgrade
+    # the control plane outside of tuppr's control.
+    kubernetes_version = string
   })
 }
 

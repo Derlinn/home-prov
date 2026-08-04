@@ -68,12 +68,13 @@ variable "vms" {
 variable "cluster" {
   description = "Cluster configuration"
   type = object({
-    name            = string
-    endpoint        = string
-    gateway         = optional(string)
-    talos_version   = string
-    proxmox_cluster = string
-    flux_enabled    = optional(bool, false)
+    name               = string
+    endpoint           = string
+    gateway            = optional(string)
+    talos_version      = string
+    proxmox_cluster    = string
+    flux_enabled       = optional(bool, false)
+    kubernetes_version = string
   })
 }
 

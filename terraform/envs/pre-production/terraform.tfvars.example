@@ -23,11 +23,12 @@ vms = {
 }
 
 cluster = {
-  name            = "talos"
-  endpoint        = "192.168.1.30"
-  gateway         = "192.168.1.254"
-  talos_version   = "v1.11.5"
-  proxmox_cluster = "cluster-name"
+  name               = "talos"
+  endpoint           = "192.168.1.30"
+  gateway            = "192.168.1.254"
+  talos_version      = "v1.11.5"
+  proxmox_cluster    = "cluster-name"
+  kubernetes_version = "v1.34.2"
 }
 
 talos_nodes = {
