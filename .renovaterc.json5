@@ -26,6 +26,17 @@
       datasourceTemplate: "docker",
       depNameTemplate: "ghcr.io/siderolabs/kubelet",
     },
+    {
+      // These URLs are list items (`- https://...`), which the preset's
+      // `annotated` manager cannot match: its regex expects `key: value` or
+      // `key=value` on the line after the comment. Hence a dedicated manager.
+      customType: "regex",
+      description: "Gateway API CRDs applied by Talos extraManifests at bootstrap",
+      managerFilePatterns: ["/^terraform/modules/proxmox-talos/machine-config/.*\\.tftpl$/"],
+      matchStrings: ["kubernetes-sigs/gateway-api/(?<currentValue>v[0-9]+\\.[0-9]+\\.[0-9]+)/"],
+      datasourceTemplate: "github-releases",
+      depNameTemplate: "kubernetes-sigs/gateway-api",
+    },
   ],
   packageRules: [
     // Auto-merge rules
@@ -156,6 +167,14 @@
         "siderolabs/talos",
       ],
       separateMultipleMinor: true,
+    },
+    {
+      // The bootstrap CRDs must never get ahead of the version envoy-gateway
+      // ships, otherwise a fresh bootstrap validates resources against a
+      // schema the chart is about to replace. Bump them alongside the chart.
+      description: "Gateway API CRDs follow the envoy-gateway chart, not upstream",
+      matchPackageNames: ["kubernetes-sigs/gateway-api"],
+      dependencyDashboardApproval: true,
     },
     {
       description: "Critical infrastructure majors need manual approval",

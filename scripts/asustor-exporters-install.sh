@@ -1,7 +1,9 @@
 #!/bin/sh
 set -eu
 
+# renovate: datasource=github-releases depName=prometheus/node_exporter
 NODE_EXPORTER_VERSION="1.8.2"
+# renovate: datasource=github-releases depName=prometheus-community/smartctl_exporter
 SMARTCTL_EXPORTER_VERSION="0.13.0"
 INSTALL_DIR="/usr/local/bin"
 ARCH="arm64"
