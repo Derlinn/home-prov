@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: jellyfin
-      version: '2.*'
+      version: '2.7.0'
       interval: 5h
       sourceRef:
         kind: HelmRepository
