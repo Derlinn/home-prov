@@ -1,4 +1,8 @@
 machine:
+  network:
+    hostname: ${hostname}
+  install:
+    image: ${installer_image}
   nodeLabels:
     topology.kubernetes.io/region: ${cluster_name}
     topology.kubernetes.io/zone: ${node_name}
