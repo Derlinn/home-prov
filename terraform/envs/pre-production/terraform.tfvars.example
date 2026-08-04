@@ -28,7 +28,7 @@ cluster = {
   gateway            = "192.168.1.254"
   talos_version      = "v1.11.5"
   proxmox_cluster    = "cluster-name"
-  kubernetes_version = "v1.35.7"
+  kubernetes_version = "v1.36.3"
 }
 
 talos_nodes = {
