@@ -144,6 +144,20 @@
       separateMultipleMinor: true,
     },
     {
+      // Neither Kubernetes nor Talos supports skipping a minor version, and
+      // tuppr does not enforce the upgrade path: it applies exactly the version
+      // written in the CR. Without this, Renovate would offer v1.34 -> v1.36 in
+      // a single PR and merging it would break the cluster.
+      description: "Kubernetes and Talos forbid skipping a minor version: one PR per step",
+      matchDatasources: ["docker"],
+      matchPackageNames: [
+        "/siderolabs\\/installer/",
+        "/siderolabs\\/kubelet/",
+        "siderolabs/talos",
+      ],
+      separateMultipleMinor: true,
+    },
+    {
       description: "Critical infrastructure majors need manual approval",
       matchDatasources: ["docker", "helm"],
       matchUpdateTypes: ["major"],
