@@ -26,7 +26,11 @@ spec:
               type: RuntimeDefault
           containers:
             - name: updater
-              image: bitnami/kubectl:latest
+              # bitnami/kubectl no longer publishes version tags on Docker Hub
+              # since the move to Bitnami Secure Images: only digests remain, so
+              # nothing pinnable. alpine/kubectl provides the shell, curl, grep
+              # and cut the script below relies on.
+              image: alpine/kubectl:1.36.3
               securityContext:
                 allowPrivilegeEscalation: false
                 capabilities:
