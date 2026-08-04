@@ -2,7 +2,7 @@
 set -eu
 
 # renovate: datasource=github-releases depName=prometheus/node_exporter
-NODE_EXPORTER_VERSION="1.8.2"
+NODE_EXPORTER_VERSION="1.12.1"
 # renovate: datasource=github-releases depName=prometheus-community/smartctl_exporter
 SMARTCTL_EXPORTER_VERSION="0.14.0"
 INSTALL_DIR="/usr/local/bin"
