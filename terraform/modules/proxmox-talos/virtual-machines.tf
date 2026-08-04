@@ -54,10 +54,10 @@ resource "proxmox_virtual_environment_vm" "this" {
     }
   }
 
-  # L'image de boot ne sert qu'a l'installation initiale : le noeud demarre
-  # ensuite sur son propre disque et les montees de version passent par
-  # `talosctl upgrade`. Sans ceci, un changement de version ou de schematic
-  # modifie l'URL de telechargement, donc le file_id, et Proxmox recree la VM.
+  # The boot image only matters for the initial install: the node then boots
+  # from its own disk and version bumps go through `talosctl upgrade`. Without
+  # this, a version or schematic change alters the download URL, hence the
+  # file_id, and Proxmox recreates the VM.
   lifecycle {
     ignore_changes = [disk[0].file_id]
   }

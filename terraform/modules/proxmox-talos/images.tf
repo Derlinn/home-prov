@@ -32,9 +32,9 @@ resource "talos_image_factory_schematic" "this" {
 locals {
   image_combinations = toset([for _, v in var.nodes : "${v.host_node}_base"])
 
-  # Image installer utilisee par `talosctl upgrade`. Doit embarquer le meme
-  # schematic que l'image de boot, sinon une reinstallation efface les
-  # extensions systeme (iscsi-tools, nfs-utils...).
+  # Installer image used by `talosctl upgrade`. It must embed the same
+  # schematic as the boot image, otherwise a reinstall wipes the system
+  # extensions (iscsi-tools, nfs-utils...).
   installer_image = "${trimprefix(var.image.factory_url, "https://")}/metal-installer/${talos_image_factory_schematic.this.id}:${var.image.version}"
 }
 

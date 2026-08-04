@@ -9,14 +9,22 @@
   },
   customManagers: [
     {
-      // Le manager `annotated` du preset ne sait pas lire la syntaxe HCL
-      // (`cle = "valeur"` avec espaces autour du `=`), d'ou ce manager dedie.
+      // The preset's `annotated` manager cannot read HCL syntax
+      // (`key = "value"`, with spaces around the `=`), hence this dedicated manager.
       customType: "regex",
       description: "Talos version pinned in Terraform envs",
       managerFilePatterns: ["/^terraform/envs/[^/]+/(main\\.tf|terraform\\.tfvars\\.example)$/"],
       matchStrings: ["talos_version\\s*=\\s*\"(?<currentValue>v[^\"]+)\""],
       datasourceTemplate: "docker",
       depNameTemplate: "ghcr.io/siderolabs/installer",
+    },
+    {
+      customType: "regex",
+      description: "Kubernetes version pinned in Terraform envs",
+      managerFilePatterns: ["/^terraform/envs/[^/]+/(main\\.tf|terraform\\.tfvars\\.example)$/"],
+      matchStrings: ["kubernetes_version\\s*=\\s*\"(?<currentValue>v[^\"]+)\""],
+      datasourceTemplate: "docker",
+      depNameTemplate: "ghcr.io/siderolabs/kubelet",
     },
   ],
   packageRules: [
@@ -114,8 +122,8 @@
     },
     {
       // Unites the mise pin, the Terraform pin and the tuppr upgrade version.
-      // `siderolabs/talos` couvre le pin mise, `siderolabs/installer` couvre
-      // la CR TalosUpgrade et les locals Terraform.
+      // `siderolabs/talos` covers the mise pin, `siderolabs/installer` covers
+      // the TalosUpgrade CR and the Terraform locals.
       description: "Talos Group",
       groupName: "talos",
       matchPackageNames: ["siderolabs/talos", "/siderolabs\\/installer/"],
