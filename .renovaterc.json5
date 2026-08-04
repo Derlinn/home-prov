@@ -7,6 +7,18 @@
     commitMessageExtra: "({{manager}})",
     additionalBranchPrefix: "{{manager}}-",
   },
+  customManagers: [
+    {
+      // Le manager `annotated` du preset ne sait pas lire la syntaxe HCL
+      // (`cle = "valeur"` avec espaces autour du `=`), d'ou ce manager dedie.
+      customType: "regex",
+      description: "Talos version pinned in Terraform envs",
+      managerFilePatterns: ["/^terraform/envs/[^/]+/(main\\.tf|terraform\\.tfvars\\.example)$/"],
+      matchStrings: ["talos_version\\s*=\\s*\"(?<currentValue>v[^\"]+)\""],
+      datasourceTemplate: "docker",
+      depNameTemplate: "ghcr.io/siderolabs/installer",
+    },
+  ],
   packageRules: [
     // Auto-merge rules
     {
@@ -95,32 +107,18 @@
       minimumGroupSize: 2,
     },
     {
-      description: "Kubernetes Group",
-      groupName: "kubernetes",
-      matchDatasources: ["docker"],
-      matchPackageNames: [
-        "/kube-apiserver/",
-        "/kube-controller-manager/",
-        "/kube-proxy/",
-        "/kube-scheduler/",
-        "/kubelet/",
-      ],
-      group: {
-        commitMessageTopic: "{{{groupName}}} group",
-      },
-      minimumGroupSize: 5,
-    },
-    {
       description: "Mise Tools Group",
       matchManagers: ["mise"],
       groupName: "mise tools",
       groupSlug: "mise-tools",
     },
     {
-      // Unites the mise pin, the factory installer image and the tuppr upgrade version
+      // Unites the mise pin, the Terraform pin and the tuppr upgrade version.
+      // `siderolabs/talos` couvre le pin mise, `siderolabs/installer` couvre
+      // la CR TalosUpgrade et les locals Terraform.
       description: "Talos Group",
       groupName: "talos",
-      matchPackageNames: ["siderolabs/talos"],
+      matchPackageNames: ["siderolabs/talos", "/siderolabs\\/installer/"],
       group: {
         commitMessageTopic: "{{{groupName}}} group",
       },
