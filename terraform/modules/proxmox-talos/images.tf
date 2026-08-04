@@ -10,6 +10,7 @@ data "talos_image_factory_extensions_versions" "this" {
       "iscsi-tools",
       "nfs-utils",
       "qemu-guest-agent",
+      "trident-iscsi-tools",
       "usb-modem-drivers",
       "util-linux-tools",
     ]
@@ -30,6 +31,11 @@ resource "talos_image_factory_schematic" "this" {
 
 locals {
   image_combinations = toset([for _, v in var.nodes : "${v.host_node}_base"])
+
+  # Image installer utilisee par `talosctl upgrade`. Doit embarquer le meme
+  # schematic que l'image de boot, sinon une reinstallation efface les
+  # extensions systeme (iscsi-tools, nfs-utils...).
+  installer_image = "${trimprefix(var.image.factory_url, "https://")}/metal-installer/${talos_image_factory_schematic.this.id}:${var.image.version}"
 }
 
 resource "proxmox_virtual_environment_download_file" "this" {
