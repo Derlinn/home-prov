@@ -4,7 +4,7 @@ locals {
     name            = ""
     endpoint        = ""
     gateway         = ""
-    talos_version   = "v1.11.5"
+    talos_version   = "v1.13.7"
     proxmox_cluster = ""
   })
 }
