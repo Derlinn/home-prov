@@ -18,16 +18,16 @@ spec:
   interval: 1h
   values:
     image:
-      # `repository` est indispensable a Renovate : sans lui il ne voit qu'une
-      # chaine de version sans savoir de quelle image il s'agit, et ignore le
-      # tag. C'est ce qui a fige cette app en 2.1.1 pendant des mois.
+      # `repository` is what Renovate needs: without it, it only sees a bare
+      # version string with no way to tell which image it belongs to, and skips
+      # the tag. That is what kept this app pinned to 2.1.1 for months.
       repository: louislam/uptime-kuma
       tag: "2.5.0"
 
-    # La base est un fichier SQLite sur un PVC RWO. En RollingUpdate, le nouveau
-    # pod demarre avant l'arret de l'ancien : sur un noeud unique les deux
-    # montent le meme volume et ecrivent dans la meme base. Recreate garantit un
-    # seul processus a la fois, au prix de quelques secondes d'indisponibilite.
+    # The database is a SQLite file on a RWO PVC. With RollingUpdate the new pod
+    # starts before the old one stops: on a single-node cluster both mount the
+    # same volume and write to the same database. Recreate guarantees a single
+    # process at a time, at the cost of a few seconds of downtime.
     strategy:
       type: Recreate
 

@@ -19,7 +19,7 @@ spec:
   values:
     image:
       repository: lscr.io/linuxserver/jellyfin
-      tag: latest
+      tag: 10.11.11
 
     env:
       TZ: "Europe/Paris"

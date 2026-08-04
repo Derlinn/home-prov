@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: bambustudio
-          image: lscr.io/linuxserver/bambustudio:latest
+          image: lscr.io/linuxserver/bambustudio:v02.08.01.55-ls160
           imagePullPolicy: IfNotPresent
           env:
             - name: PUID
