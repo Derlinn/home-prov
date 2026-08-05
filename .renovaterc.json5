@@ -132,6 +132,15 @@
       groupSlug: "mise-tools",
     },
     {
+      // The Mise identifier is `kubernetes/kubectl`, but Kubernetes publishes
+      // kubectl releases from the `kubernetes/kubernetes` repository.
+      description: "Resolve kubectl Mise releases from the Kubernetes repository",
+      matchManagers: ["mise"],
+      matchDatasources: ["github-releases", "github-tags"],
+      matchPackageNames: ["kubernetes/kubectl", "aqua:kubernetes/kubectl"],
+      overridePackageName: "kubernetes/kubernetes",
+    },
+    {
       // Unites the mise pin, the Terraform pin and the tuppr upgrade version.
       // `siderolabs/talos` covers the mise pin, `siderolabs/installer` covers
       // the TalosUpgrade CR and the Terraform locals.
