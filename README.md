@@ -8,6 +8,7 @@ Infrastructure-as-Code for a Proxmox-based homelab. The stack relies on Terrafor
 - Kubernetes manifests and values under `kubernetes/`
 - Ansible inventories generated from Terraform outputs under `ansible/`
 - Taskfile-based workflow automation and a script to build Proxmox VM templates
+- `docker/` — **archive**. The Docker Compose stacks that ran before the Kubernetes migration, kept for reference only. Not deployed, not maintained, and excluded from Renovate.
 
 ## Tooling & prerequisites
 - Proxmox CLI tools available on the host running Terraform (`qm`, `pvesm`, `pvesh`)
