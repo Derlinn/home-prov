@@ -38,7 +38,7 @@ declare -A CHARTS_VERSION=(
     # renovate: datasource=docker depName=ghcr.io/grafana/helm-charts/grafana-operator
     ["grafana-operator"]="5.24.0"
     # renovate: datasource=docker depName=ghcr.io/prometheus-community/charts/kube-prometheus-stack
-    ["kube-prometheus-stack"]="88.1.3"
+    ["kube-prometheus-stack"]="88.1.5"
 )
 
 declare -A CHARTS_NAMESPACE=(
