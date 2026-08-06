@@ -13,30 +13,8 @@ spec:
     cleanPrometheusOperatorObjectNames: true
     alertmanager:
       alertmanagerSpec:
-        secrets: ["alertmanager-discord", "alertmanager-heartbeat"]
-      config:
-        route:
-          group_by: ["alertname", "namespace"]
-          group_wait: 30s
-          group_interval: 5m
-          repeat_interval: 6h
-          receiver: discord
-          routes:
-            - receiver: heartbeat
-              matchers:
-                - alertname = "Watchdog"
-              group_wait: 0s
-              group_interval: 5m
-              repeat_interval: 5m # must stay well under the upstream grace period
-        receivers:
-          - name: discord
-            discord_configs:
-              - webhook_url_file: /etc/alertmanager/secrets/alertmanager-discord/address
-                send_resolved: true
-          - name: heartbeat
-            webhook_configs:
-              - url_file: /etc/alertmanager/secrets/alertmanager-heartbeat/url
-                send_resolved: false
+        alertmanagerConfiguration:
+          name: alertmanager-config
     kubeEtcd:
       service:
         selector:
