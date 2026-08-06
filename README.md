@@ -29,8 +29,8 @@ echo $KUBECONFIG         # points to the current environment kubeconfig
 
 ## Automations via Taskfile
 Common workflows are wrapped in `Taskfile.yml`:
-- `task templates` — generate Proxmox VM templates (delegates to `scripts/templates.sh`)
-- `task init|validate|fmt|plan|apply|destroy|clean` — Terraform helpers. Override `TF_DIR` to pick an environment (default `./terraform`) and `TFVARS` to target the correct tfvars file.
+- `task templates` — generate Proxmox VM templates (delegates to `scripts/proxmox-templates.sh`)
+- `task init|validate|fmt|plan|apply|destroy|clean` — Terraform helpers. Override `TF_DIR` to pick an environment (default `./terraform/envs/production`) and `TFVARS` to target the correct tfvars file.
 
 Examples:
 ```bash
@@ -41,12 +41,12 @@ task apply TF_DIR=./terraform/envs/pre-production TFVARS=terraform.tfvars
 ```
 
 ## Building VM templates (Proxmox)
-`scripts/templates.sh` builds cloud-init ready templates on the Proxmox host. Allowed images today: `debian-13`, `ubuntu-noble`, `alpine-3.22`.
+`scripts/proxmox-templates.sh` builds cloud-init ready templates on the Proxmox host. Allowed images today: `debian-13`, `ubuntu-noble`, `alpine-3.22`.
 
 Run directly or through Task:
 ```bash
 # direct
-bash ./scripts/templates.sh debian-13 ubuntu-noble
+bash ./scripts/proxmox-templates.sh debian-13 ubuntu-noble
 
 # via task wrapper
 task templates
