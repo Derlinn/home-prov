@@ -94,6 +94,16 @@
       automergeType: "branch",
       ignoreTests: true,
     },
+    {
+      // The `zer0ver` preset treats 0.x minors as breaking, but it cannot ship
+      // an automerge guard itself: repo packageRules concatenate after presets,
+      // so the rules above would override it. This one must stay last in the
+      // auto-merge block to revoke automerge from every 0.x minor.
+      description: "zer0ver: never auto-merge a 0.x minor, they can break at any time",
+      matchUpdateTypes: ["minor"],
+      matchCurrentVersion: "/^v?0\\./",
+      automerge: false,
+    },
     // Grouping rules
     {
       description: "Arr Stack Group",
@@ -207,9 +217,43 @@
       dependencyDashboardApproval: true,
     },
     {
+      // Same list as above, for the 0.x packages: `zer0ver` flags their minors
+      // as breaking but leaves the updateType at `minor`, so the rule above
+      // never sees them. Covers flux-operator/flux-instance, headscale,
+      // vaultwarden and tuppr, which are all still pre-1.0.
+      description: "Critical infrastructure 0.x minors are breaking too: manual approval",
+      matchDatasources: ["docker", "helm"],
+      matchUpdateTypes: ["minor"],
+      matchCurrentVersion: "/^v?0\\./",
+      matchPackageNames: [
+        "siderolabs/talos",
+        "/kubernetes/kubernetes/",
+        "/cilium/",
+        "/coredns/",
+        "/cert-manager/",
+        "/longhorn/",
+        "/envoy-gateway/",
+        "/flux-operator/",
+        "/flux-instance/",
+        "/authentik/",
+        "/vaultwarden/",
+        "/headscale/",
+        "/kube-prometheus-stack/",
+        "/tuppr/",
+      ],
+      dependencyDashboardApproval: true,
+    },
+    {
       description: "Let every other major settle before it reaches a PR",
       matchDatasources: ["docker", "helm"],
       matchUpdateTypes: ["major"],
+      minimumReleaseAge: "7 days",
+    },
+    {
+      description: "Let 0.x minors settle too, `zer0ver` considers them breaking",
+      matchDatasources: ["docker", "helm"],
+      matchUpdateTypes: ["minor"],
+      matchCurrentVersion: "/^v?0\\./",
       minimumReleaseAge: "7 days",
     },
     // Labeling rules
@@ -228,6 +272,14 @@
     {
       matchUpdateTypes: ["digest"],
       addLabels: ["type/digest"],
+    },
+    {
+      // These PRs carry a `feat(...)!:` commit but keep the `type/minor` label,
+      // this makes the breaking ones visible at a glance in the PR list.
+      description: "zer0ver: flag 0.x minors as breaking",
+      matchUpdateTypes: ["minor"],
+      matchCurrentVersion: "/^v?0\\./",
+      addLabels: ["type/breaking"],
     },
   ],
 }
