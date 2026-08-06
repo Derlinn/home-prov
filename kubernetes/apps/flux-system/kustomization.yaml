@@ -6,8 +6,6 @@ namespace: flux-system
 
 resources:
   - ./namespace.yaml
-  - ./gitrepository.yaml
   - ./flux-operator/ks.yaml
   - ./flux-instance/ks.yaml
   - ./notifications/ks.yaml
-  - ./cluster-apps-ks.yaml
