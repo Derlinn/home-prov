@@ -16,6 +16,14 @@ spec:
         namespace: observability
   releaseName: uptime-kuma
   interval: 1h
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      strategy: rollback
   values:
     image:
       # `repository` is what Renovate needs: without it, it only sees a bare

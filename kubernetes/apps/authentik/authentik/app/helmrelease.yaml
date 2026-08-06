@@ -27,6 +27,14 @@ spec:
       valuesKey: postgresql-password
       targetPath: authentik.postgresql.password
       optional: false
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      strategy: rollback
   values:
     authentik:
       error_reporting:
