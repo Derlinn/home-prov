@@ -1,0 +1,22 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/notification.toolkit.fluxcd.io/alert_v1beta3.json
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: flux-failures
+spec:
+  providerRef:
+    name: discord
+  eventSeverity: error
+  # The Kustomizations live in the namespace of the app they deploy, not in
+  # flux-system, so the sources have to be cluster wide.
+  eventSources:
+    - kind: Kustomization
+      name: "*"
+      namespace: "*"
+    - kind: HelmRelease
+      name: "*"
+      namespace: "*"
+  # Renovate auto-merges patches; without this a failed chart upgrade would
+  # roll itself back and nothing would ever say so.
+  suspend: false
