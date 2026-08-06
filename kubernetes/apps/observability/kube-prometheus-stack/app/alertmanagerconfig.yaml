@@ -20,7 +20,27 @@ spec:
         groupWait: 0s
         groupInterval: 5m
         repeatInterval: 5m
+      # InfoInhibitor only exists to suppress other alerts, it is never
+      # something to read.
+      - receiver: "null"
+        matchers:
+          - name: alertname
+            value: InfoInhibitor
+            matchType: "="
+      # asustor-1022t is a two-bay NAS running a single disk: md0 and md126 are
+      # two-disk mirrors and will report degraded forever. Nothing to act on,
+      # and a permanently firing alert is how a notification channel stops
+      # being read. Remove this route the day a second disk goes in.
+      - receiver: "null"
+        matchers:
+          - name: alertname
+            value: NodeRAIDDegraded
+            matchType: "="
+          - name: instance
+            value: asustor-1022t
+            matchType: "="
   receivers:
+    - name: "null"
     - name: discord
       discordConfigs:
         - apiURL:
@@ -33,3 +53,33 @@ spec:
             name: alertmanager-heartbeat
             key: url
           sendResolved: false
+  # Restores the defaults the chart ships with its own config: without them a
+  # critical alert is duplicated by its warning counterpart.
+  inhibitRules:
+    - sourceMatch:
+        - name: severity
+          value: critical
+          matchType: "="
+      targetMatch:
+        - name: severity
+          value: warning|info
+          matchType: "=~"
+      equal: ["namespace", "alertname"]
+    - sourceMatch:
+        - name: severity
+          value: warning
+          matchType: "="
+      targetMatch:
+        - name: severity
+          value: info
+          matchType: "="
+      equal: ["namespace", "alertname"]
+    - sourceMatch:
+        - name: alertname
+          value: InfoInhibitor
+          matchType: "="
+      targetMatch:
+        - name: severity
+          value: info
+          matchType: "="
+      equal: ["namespace"]
