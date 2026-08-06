@@ -1,8 +1,8 @@
 version: '3'
 
 vars:
-  TF_DIR: "./terraform"
-  TFVARS: "{{.TFVARS | default `terraform.tfvars`}}"   # chemin relatif à TF_DIR
+  TF_DIR: "{{.TF_DIR | default `./terraform/envs/production`}}"
+  TFVARS: "{{.TFVARS | default `terraform.tfvars`}}"   # path relative to TF_DIR
 
 tasks:
 
@@ -11,7 +11,7 @@ tasks:
   templates:
     desc: "generate cloud images templates"
     cmds:
-      - bash ./scripts/templates.sh debian-13 ubuntu-noble alpine-3.22
+      - bash ./scripts/proxmox-templates.sh debian-13 ubuntu-noble alpine-3.22
 
   init:
     desc: "terraform init"
@@ -40,8 +40,9 @@ tasks:
 
   destroy:
     desc: "terraform destroy"
+    prompt: "Destroy every resource in {{.TF_DIR}}. Continue?"
     cmds:
-      - terraform -chdir={{.TF_DIR}} destroy -var-file={{.TFVARS}} -auto-approve
+      - terraform -chdir={{.TF_DIR}} destroy -var-file={{.TFVARS}}
 
   tsch:
     desc: "Clean terraform state Helm"
@@ -51,5 +52,7 @@ tasks:
 
   clean:
     desc: "clean terraform local artifacts"
+    # Never the tfstate: the environments have no remote backend, deleting it
+    # loses track of every resource Terraform manages.
     cmds:
-      - rm -rf {{.TF_DIR}}/.terraform {{.TF_DIR}}/*.tfstate* {{.TF_DIR}}/.terraform.lock.hcl
+      - rm -rf {{.TF_DIR}}/.terraform {{.TF_DIR}}/.terraform.lock.hcl
