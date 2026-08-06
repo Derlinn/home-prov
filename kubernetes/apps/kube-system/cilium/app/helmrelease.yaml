@@ -10,9 +10,16 @@ spec:
     name: cilium
   interval: 1h
   install:
-      timeout: 15m0s
+    timeout: 15m0s
+    remediation:
+      retries: 3
   upgrade:
-      timeout: 15m0s
+    timeout: 15m0s
+    # No cleanupOnFail here: deleting half-applied CNI resources is worse than
+    # leaving them in place while the rollback runs.
+    remediation:
+      retries: 3
+      strategy: rollback
   values:
     cni:
       exclusive: true
