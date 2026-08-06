@@ -4,8 +4,6 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: notifications
-  labels:
-    flux.linderis.prod/sops-secret: "true"
 spec:
   interval: 1h
   path: ./kubernetes/apps/flux-system/notifications/app
@@ -15,5 +13,12 @@ spec:
     name: flux-system
     namespace: flux-system
   targetNamespace: flux-system
+  # This directory is applied by the bootstrap (`kubectl apply -k`), not by
+  # cluster-apps, so the global SOPS patch never reaches it: the decryption has
+  # to be declared here or the webhook secret lands as a literal ENC[...] string.
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
   wait: true
   timeout: 5m
