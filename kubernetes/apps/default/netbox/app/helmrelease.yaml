@@ -10,14 +10,6 @@ spec:
     name: netbox
   interval: 1h
   timeout: 20m # default 5min is too short for update
-  install:
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
-      strategy: rollback
   values:
     timezone: 'Europe\Paris'
     resources:

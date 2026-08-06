@@ -13,14 +13,6 @@ spec:
         kind: HelmRepository
         name: alloy
   interval: 1h
-  install:
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
-      strategy: rollback
   values:
     alloy:
       configMap:
