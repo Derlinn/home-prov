@@ -1,6 +1,7 @@
 #!/bin/bash
 # Purpose: Build Proxmox VM templates from cloud images, safely and repeatably
 # 11/8/2025 ; Theo LINDER
+set -euo pipefail
 
 # -------------------- Configuration --------------------
 declare -A LINKS=(
@@ -76,7 +77,7 @@ validate_args() {
 
 # Tools. Install if missing
 if ! ( cmd_ok wget && cmd_ok virt-customize ); then
-    apt-update -y
+    apt-get update -y
     apt-get install -y wget libguestfs-tools || die "Failed to install dependencies"
 fi
 
