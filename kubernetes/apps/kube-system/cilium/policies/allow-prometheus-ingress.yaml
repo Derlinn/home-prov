@@ -49,3 +49,18 @@ spec:
             # external-dns
             - port: "7979"
               protocol: TCP
+            # uptime-kuma
+            - port: "3001"
+              protocol: TCP
+            # authentik
+            - port: "9300"
+              protocol: TCP
+            # kube-green controller-manager
+            - port: "8443"
+              protocol: TCP
+            # metrics-server
+            - port: "10250"
+              protocol: TCP
+            # echo
+            - port: "80"
+              protocol: TCP
