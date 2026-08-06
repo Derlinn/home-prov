@@ -85,8 +85,12 @@ kubectl create secret generic sops-age \
 ### 4. Appliquer la configuration Flux
 
 ```bash
-kubectl apply -k kubernetes/apps/flux-system/
+kubectl apply -k kubernetes/flux/cluster/
 ```
+
+C'est la **seule** commande manuelle du repo. Elle cree le `GitRepository` et la
+Kustomization `cluster-apps` ; tout le reste, y compris `kubernetes/apps/flux-system/`,
+est ensuite reconcilie par Flux depuis Git.
 
 ### 5. Verifier la reconciliation
 
@@ -105,12 +109,21 @@ Les Kustomizations doivent passer a `Ready: True` :
 Une fois bootstrap, Flux se gere entierement depuis le repo Git :
 
 ```
-flux-operator (HelmRelease)
-  └── flux-instance (HelmRelease, depend de flux-operator)
-        └── deploie les controllers Flux avec patches (SOPS, concurrency, caching, etc.)
-              └── cluster-apps (Kustomization)
-                    └── reconcilie toutes les apps dans kubernetes/apps/
+kubernetes/flux/cluster/   (applique une fois a la main)
+  ├── gitrepository.yaml
+  └── cluster-apps (Kustomization)
+        └── reconcilie kubernetes/apps/ avec SOPS et patches globaux
+              └── kubernetes/apps/flux-system/
+                    ├── flux-operator (Kustomization -> HelmRelease)
+                    ├── flux-instance (Kustomization -> HelmRelease)
+                    │     └── deploie les controllers Flux avec patches
+                    └── notifications (Kustomization -> Alert Discord)
 ```
+
+`cluster-apps` vit volontairement en dehors de `kubernetes/apps/` : son patch global
+cible `kind: Kustomization` avec `metadata.name: _`, donc s'il reconciliait son propre
+repertoire il se patcherait lui-meme et son `spec.patches` serait remplace par le patch
+enfant, faisant disparaitre silencieusement les defauts HelmRelease de tout le cluster.
 
 La FluxInstance creee manuellement a l'etape 2 sera remplacee par celle definie dans le repo
 lors de la reconciliation de `flux-instance`.
