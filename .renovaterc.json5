@@ -68,12 +68,16 @@
       schedule: ["before 6am on Monday"],
     },
     {
-      // Non-critical apps, and Flux rolls them back on a failed health check.
-      // Patch only: minors are where these images move their config around.
-      description: "Auto-merge media-server image patches",
-      matchDatasources: ["docker"],
-      matchFileNames: ["kubernetes/apps/media-server/**"],
+      // Every HelmRelease now configures install/upgrade remediation, so a bad
+      // chart or image patch rolls itself back instead of leaving the app down.
+      // Two exclusions: longhorn, which has no rollback net because it does not
+      // support downgrades, and the siderolabs images behind the tuppr upgrade
+      // CRs, where a patch means a rolling reboot of every node.
+      description: "Auto-merge cluster image and chart patches",
+      matchDatasources: ["docker", "helm"],
+      matchFileNames: ["kubernetes/**"],
       matchUpdateTypes: ["patch"],
+      matchPackageNames: ["!/longhorn/", "!/siderolabs/"],
       automerge: true,
       automergeType: "pr",
       minimumReleaseAge: "3 days",
