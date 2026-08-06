@@ -13,10 +13,6 @@ spec:
         name: longhorn
   releaseName: longhorn
   interval: 1h
-  # No remediation on purpose. Longhorn does not support downgrades, so an
-  # automatic rollback of a failed upgrade would leave the storage layer in a
-  # state its own pre-upgrade hook refuses to work with. A failed Longhorn
-  # upgrade has to be looked at by a human.
   values:
     defaultSettings:
       defaultDataPath: /var/lib/longhorn
