@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# Allow the blackbox exporter to probe the Asustor NAS ADM interface (8001).
+# Without this the probe fails on the default-deny and reports the NAS as down,
+# which is exactly the false positive a monitoring probe must not produce.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-blackbox-egress
+spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
+  endpointSelector:
+    matchLabels:
+      io.kubernetes.pod.namespace: observability
+      app.kubernetes.io/name: prometheus-blackbox-exporter
+  egress:
+    - toCIDR:
+        - 10.25.30.1/32
+      toPorts:
+        - ports:
+            - port: "8001"
+              protocol: TCP

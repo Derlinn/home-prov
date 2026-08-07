@@ -1,0 +1,32 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: blackbox-exporter
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: blackbox-exporter
+  interval: 1h
+  values:
+    fullnameOverride: blackbox-exporter
+    config:
+      modules:
+        http_2xx:
+          prober: http
+          timeout: 10s
+          http:
+            valid_status_codes: [200, 301, 302, 308]
+            preferred_ip_protocol: ip4
+            # Targets are IPs so the certificate CN would never match. Setting
+            # the SNI name keeps the validation real instead of disabling it,
+            # and removes any dependency on DNS resolving from the cluster.
+            tls_config:
+              server_name: lin-nas-01.linderis.fr
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        memory: 64Mi
