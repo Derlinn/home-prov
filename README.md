@@ -1,5 +1,7 @@
 # LINDERIS HomeLab Infrastructure
 
+![Healthchecks.io](https://healthchecks.io/b/2/95aa891d-6d0c-4570-b762-63e0b5d35bc3.svg)
+
 Infrastructure-as-Code for a Proxmox-based homelab. The stack relies on Terraform (with the bpg/proxmox provider), cloud-init, Ansible inventory generation, and an optional Talos/Kubernetes layer.
 
 ## What’s inside
