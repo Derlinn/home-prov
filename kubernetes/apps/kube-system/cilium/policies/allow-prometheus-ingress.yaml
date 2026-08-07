@@ -64,3 +64,6 @@ spec:
             # echo
             - port: "80"
               protocol: TCP
+            # blackbox-exporter
+            - port: "9115"
+              protocol: TCP

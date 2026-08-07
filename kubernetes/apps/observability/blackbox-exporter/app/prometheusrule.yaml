@@ -1,0 +1,37 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: blackbox-exporter
+spec:
+  groups:
+    - name: blackbox
+      rules:
+        - alert: BlackboxProbeFailed
+          annotations:
+            summary: Probe {{ $labels.instance }} has been failing for 5 minutes.
+          expr: probe_success == 0
+          for: 5m
+          labels:
+            severity: critical
+
+        # The 2026-08 outage started when an acme.sh renewal silently destroyed
+        # the private key: lighttpd kept serving from memory and nothing showed
+        # up until the next restart, three days later. Watching the certificate
+        # actually served is what catches that on the day it happens.
+        - alert: BlackboxCertificateExpiringSoon
+          annotations:
+            summary: Certificate served by {{ $labels.instance }} expires in {{ $value | humanizeDuration }}.
+          expr: probe_ssl_earliest_cert_expiry - time() < 21 * 24 * 3600
+          for: 1h
+          labels:
+            severity: warning
+
+        - alert: BlackboxCertificateExpiringCritical
+          annotations:
+            summary: Certificate served by {{ $labels.instance }} expires in {{ $value | humanizeDuration }}.
+          expr: probe_ssl_earliest_cert_expiry - time() < 7 * 24 * 3600
+          for: 1h
+          labels:
+            severity: critical
