@@ -49,7 +49,13 @@ spec:
       target:
         group: kustomize.toolkit.fluxcd.io
         kind: Kustomization
-    # SOPS patch: Apply only to Kustomizations WITH sops-secret label
+    # SOPS decryption for every child Kustomization, unconditionally.
+    #
+    # This used to be gated on a `sops-secret` label. Forgetting it produced no
+    # error: the Secret was applied with its literal ENC[AES256_GCM,...] value,
+    # and the app failed later for reasons that pointed nowhere near SOPS.
+    # A Kustomization with no encrypted file simply ignores this block, so the
+    # label bought nothing and cost a whole class of silent failures.
     - patch: |-
         apiVersion: kustomize.toolkit.fluxcd.io/v1
         kind: Kustomization
@@ -63,4 +69,3 @@ spec:
       target:
         group: kustomize.toolkit.fluxcd.io
         kind: Kustomization
-        labelSelector: flux.linderis.prod/sops-secret==true
