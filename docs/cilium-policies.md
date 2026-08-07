@@ -78,7 +78,9 @@ Les pods du namespace `flux-system` peuvent communiquer entre eux (ingress et eg
 
 **Fichier :** `policies/allow-prometheus-ingress.yaml`
 
-Prometheus (`observability`, label `app.kubernetes.io/name: prometheus`) peut scraper tous les pods sur les ports de metriques : 9090, 9100, 9153, 9402, 8080, 8081.
+Prometheus (`observability`, label `app.kubernetes.io/name: prometheus`) peut scraper tous les pods sur 19 ports de metriques : 9090, 9100, 9153, 9402, 8080, 8081, 9500 (longhorn-manager), 9962 (cilium-agent), 9963 (cilium-operator), 9964 (envoy-metrics), 9965 (hubble), 19001 (envoy-gateway), 7979 (external-dns), 3001 (uptime-kuma), 9300 (authentik), 8443 (kube-green), 10250 (metrics-server), 80 (echo), 9115 (blackbox-exporter).
+
+Cette policy doit rester symetrique avec `allow-prometheus-egress` : un port present d'un seul cote laisse le scrape en timeout.
 
 ---
 
@@ -86,7 +88,7 @@ Prometheus (`observability`, label `app.kubernetes.io/name: prometheus`) peut sc
 
 **Fichier :** `policies/allow-prometheus-egress.yaml`
 
-Prometheus peut initier des connexions vers tous les endpoints du cluster sur les memes ports de metriques : 9090, 9100, 9153, 9402, 8080, 8081.
+Prometheus peut initier des connexions vers tous les endpoints du cluster sur 17 ports : les memes que `allow-prometheus-ingress`, sauf 3001 et 9115 qui sont couverts par `allow-observability-internal` (meme namespace).
 
 ---
 
@@ -140,3 +142,50 @@ Tous les pods du cluster acceptent du trafic entrant depuis les pods Envoy exter
 **Fichier :** `policies/allow-envoy-clusterip.yaml`
 
 Tous les pods peuvent faire de l'egress vers les ports 10080 et 10443. Necessaire car le socket-LB de Cilium reecrit les connexions vers les ClusterIP Envoy (80→10080, 443→10443) avant l'evaluation des politiques d'egress — sans cette regle, la connexion serait bloquee au niveau du pod source.
+
+---
+
+## Policies "internal" (communication intra-namespace)
+
+Meme forme pour toutes : les pods selectionnes acceptent l'ingress et l'egress depuis/vers les pods du meme perimetre, sans restriction de port.
+
+| Policy | Fichier | Perimetre |
+|---|---|---|
+| `allow-observability-internal` | `policies/allow-observability-internal.yaml` | namespace `observability` |
+| `allow-authentik-internal` | `policies/allow-authentik-internal.yaml` | namespace `authentik` |
+| `allow-devtools-internal` | `policies/allow-devtools-internal.yaml` | namespace `devtools` |
+| `allow-media-server-internal` | `policies/allow-media-server-internal.yaml` | namespace `media-server` |
+| `allow-vaultwarden-internal` | `policies/allow-vaultwarden-internal.yaml` | namespace `vaultwarden` |
+| `allow-netbox-internal` | `policies/allow-netbox-internal.yaml` | namespace `default`, label `app.kubernetes.io/instance: netbox` |
+
+C'est `allow-observability-internal` qui autorise Prometheus a scraper uptime-kuma (3001) et blackbox-exporter (9115) sans que ces ports figurent dans `allow-prometheus-egress`.
+
+---
+
+## Egress vers des cibles externes
+
+| Policy | Fichier | Source | Destination | Ports |
+|---|---|---|---|---|
+| `allow-asustor-egress` | `policies/allow-asustor-egress.yaml` | Prometheus | `10.25.30.1/32` (NAS) | 9100, 9633 |
+| `allow-blackbox-egress` | `policies/allow-blackbox-egress.yaml` | blackbox-exporter | `10.25.30.1/32` (NAS) | 8001 |
+| `allow-mktxp-egress` | `policies/allow-mktxp-egress.yaml` | mktxp | `10.25.200.0/24` (VLAN mgmt) | 8728 (API Mikrotik) |
+| `allow-uptime-kuma-egress` | `policies/allow-uptime-kuma-egress.yaml` | uptime-kuma | `10.25.30.0/24` | 9100, 9633, 8006 |
+| `allow-wireguard-egress` | `policies/allow-wireguard-egress.yaml` | vpn-stack (`media-server`) | `world` | 51820 UDP |
+
+---
+
+## allow-rathole-egress / allow-headscale-from-rathole
+
+**Fichier :** `policies/allow-rathole-egress.yaml`
+
+- `allow-rathole-egress` : le client rathole (`network`, label `app: rathole-client`) sort vers le VPS `212.227.22.223/32` sur 2333, et vers les pods du namespace `headscale` sur 47239
+- `allow-headscale-from-rathole` : headscale accepte l'ingress du client rathole sur 47239
+
+---
+
+## Namespaces sans policy dediee
+
+`cert-manager`, `kube-green`, `kubernetes-replicator` et `system-upgrade` n'ont aucune policy propre. Ils fonctionnent uniquement grace aux policies a `endpointSelector: {}` qui s'appliquent a tous les pods : `default-deny` (vers l'hote et l'API), `allow-kube-api`, `allow-dns`, `allow-https-egress` et `allow-lan-ingress`.
+
+Consequence pratique : ces composants peuvent joindre l'API Kubernetes, le DNS et l'exterieur en HTTPS, mais rien d'autre. Un besoin sortant sur un port different demande une policy dediee.
+
