@@ -1,14 +1,10 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
-# Bootstrap root. This is the only directory still applied by hand
-# (`kubectl apply -k kubernetes/flux/cluster/`), and it must stay outside
-# ./kubernetes/apps: cluster-apps patches every Kustomization it builds with
-# `metadata.name: _`, so if it reconciled itself its own `spec.patches` would be
-# replaced by the child patch and the cluster-wide HelmRelease defaults would
-# silently disappear.
+# Bootstrap root, reconciled from the FluxInstance `sync` block.
+# Must stay outside ./kubernetes/apps: cluster-apps patches every Kustomization
+# it builds, so reconciling itself would wipe its own spec.patches.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - ./gitrepository.yaml
   - ./cluster-apps-ks.yaml
