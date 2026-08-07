@@ -23,6 +23,15 @@ spec:
         networkPolicy: false
         multitenant: false
         type: kubernetes
+      # Self-manage the bootstrap root; generates a GitRepository and a
+      # Kustomization, both named flux-system
+      sync:
+        kind: GitRepository
+        url: https://github.com/Derlinn/home-prov.git
+        ref: refs/heads/main
+        path: kubernetes/flux/cluster
+        pullSecret: flux-system
+        interval: 1m
       kustomize:
         patches:
         # Increase the number of workers
