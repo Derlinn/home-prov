@@ -5,4 +5,4 @@ kind: Kustomization
 namespace: devtools
 resources:
   - ./namespace.yaml
-  - gitlab/ks.yaml
+#  - gitlab/ks.yaml
