@@ -1,0 +1,22 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ldap-outpost
+  annotations:
+    # Fixed address: it is written into the NAS ADM configuration, so it must
+    # not move when the service is recreated.
+    lbipam.cilium.io/ips: 10.25.50.128
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: ldap-outpost
+  ports:
+    - name: ldap
+      port: 389
+      targetPort: ldap
+      protocol: TCP
+    - name: ldaps
+      port: 636
+      targetPort: ldaps
+      protocol: TCP
