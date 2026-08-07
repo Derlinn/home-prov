@@ -53,3 +53,12 @@ spec:
             # external-dns
             - port: "7979"
               protocol: TCP
+            # echo
+            - port: "80"
+              protocol: TCP
+            # kube-green controller-manager
+            - port: "8443"
+              protocol: TCP
+            # metrics-server
+            - port: "10250"
+              protocol: TCP
