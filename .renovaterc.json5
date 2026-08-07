@@ -1,6 +1,10 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: ["github>home-operations/renovate-presets#5.0.0", ":timezone(Europe/Paris)"],
+  // The tag only pins the root preset: `default.json` references its nested
+  // presets without a tag, so they always resolve against upstream `main`.
+  // A breaking upstream release therefore breaks this config even when pinned,
+  // and the version below has to follow upstream instead of lagging behind.
+  extends: ["github>home-operations/renovate-presets#6.0.0", ":timezone(Europe/Paris)"],
   // `docker/` is the pre-Kubernetes Compose deployment, kept as an archive.
   // Without this, Renovate keeps opening PRs against a stack nobody runs.
   ignorePaths: ["docker/**"],
