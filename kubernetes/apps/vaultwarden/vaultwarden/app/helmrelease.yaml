@@ -22,7 +22,8 @@ spec:
         accessMode: "ReadWriteOnce"
         keepPvc: true
     adminToken:
-      value: "$argon2id$v=19$m=19456,t=2,p=1$y/9ugQTyPKzAffmBPkb4iA$nCKLG6CfCiWF9VCvn6XSC1eW5+J1vPoxznwYiqEZKaM"
+      existingSecret: vaultwarden-admin-token
+      existingSecretKey: ADMIN_TOKEN
     replicas: 1
     domain: "https://vaultwarden.linderis.fr/"
     ingress:
