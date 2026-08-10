@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
-# Envoy is a reverse proxy — it needs to forward traffic to backend pods
+# Envoy is a reverse proxy - it needs to forward traffic to backend pods
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:
@@ -68,4 +68,10 @@ spec:
               protocol: TCP
             # uptime-kuma
             - port: "3001"
+              protocol: TCP
+            # home-assistant
+            - port: "8123"
+              protocol: TCP
+            # gitlab webservice (workhorse)
+            - port: "8181"
               protocol: TCP
