@@ -1,0 +1,21 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mosquitto-config
+data:
+  mosquitto.conf: |
+    listener 1883
+    # Anonymous access is refused: MQTT carries the commands that switch the
+    # rack's power outlet, so a stray client on the network is not acceptable.
+    allow_anonymous false
+    password_file /mosquitto/config/passwd
+
+    persistence true
+    persistence_location /mosquitto/data/
+    autosave_interval 60
+
+    log_dest stdout
+    log_type error
+    log_type warning
+    log_type notice

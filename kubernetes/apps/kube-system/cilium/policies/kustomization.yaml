@@ -24,6 +24,7 @@ resources:
     - ./allow-rathole-egress.yaml
     - ./allow-envoy-clusterip.yaml
     - ./allow-media-server-internal.yaml
+    - ./allow-home-automation-internal.yaml
     - ./allow-wireguard-egress.yaml
     - ./allow-mktxp-egress.yaml
     - ./allow-asustor-egress.yaml
