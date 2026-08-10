@@ -1,0 +1,32 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: reloader
+spec:
+  chart:
+    spec:
+      chart: reloader
+      version: '2.2.16'
+      interval: 5h
+      sourceRef:
+        kind: HelmRepository
+        name: stakater
+        namespace: kube-system
+  releaseName: reloader
+  interval: 1h
+  values:
+    reloader:
+      # Exclude a workload with reloader.stakater.com/auto: "false".
+      autoReloadAll: true
+      readOnlyRootFileSystem: true
+      deployment:
+        resources:
+          requests:
+            cpu: 10m
+            memory: 64Mi
+          limits:
+            memory: 128Mi
+      podMonitor:
+        enabled: true
