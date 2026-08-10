@@ -33,12 +33,15 @@ spec:
             summary: "{{ $labels.routerboard_name }} mémoire faible ({{ $value | humanizePercentage }} libre)"
 
         - alert: MikrotikLowDiskSpace
-          expr: mktxp_system_free_hdd_space < 52428800
+          # A percentage, not an absolute size: the fleet ranges from 16 MiB of
+          # flash on the CRS326 to 1 GiB on the RB5009, so any fixed threshold
+          # either never fires or never clears.
+          expr: mktxp_system_free_hdd_space / mktxp_system_total_hdd_space * 100 < 10
           for: 5m
           labels:
             severity: warning
           annotations:
-            summary: "{{ $labels.routerboard_name }} espace disque faible ({{ $value | humanize1024 }}B libres)"
+            summary: "{{ $labels.routerboard_name }} espace disque faible ({{ $value | printf \"%.1f\" }} % libre)"
 
         - alert: MikrotikHighTemperature
           expr: mktxp_system_cpu_temperature > 70 or mktxp_system_board_temperature1 > 70
