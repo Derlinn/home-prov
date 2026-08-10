@@ -1,10 +1,19 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  // The tag only pins the root preset: `default.json` references its nested
-  // presets without a tag, so they always resolve against upstream `main`.
-  // A breaking upstream release therefore breaks this config even when pinned,
-  // and the version below has to follow upstream instead of lagging behind.
-  extends: ["github>home-operations/renovate-presets#6.0.0", ":timezone(Europe/Paris)"],
+  // Since upstream 7.0.0 both presets are flat and self-contained: no file in
+  // that repo references another, so each tag below pins the preset it is
+  // written on for real. There is no relative preset syntax, hence the tag
+  // repeated on every entry, and each has to be bumped on its own.
+  //
+  // `apps/grafanaDashboards.json5` is opt-in since 7.0.0: it carries the
+  // `custom.grafana-dashboards` datasource and the managers that rewrite the
+  // revision in `grafanadashboard.yaml`. Without it the dashboards stop being
+  // tracked and the auto-merge rule below matches nothing.
+  extends: [
+    "github>home-operations/renovate-presets#7.0.0",
+    "github>home-operations/renovate-presets//apps/grafanaDashboards.json5#7.0.0",
+    ":timezone(Europe/Paris)",
+  ],
   // `docker/` is the pre-Kubernetes Compose deployment, kept as an archive.
   // Without this, Renovate keeps opening PRs against a stack nobody runs.
   ignorePaths: ["docker/**"],
