@@ -76,3 +76,6 @@ spec:
             # gitlab webservice (workhorse)
             - port: "8181"
               protocol: TCP
+            # home-assistant
+            - port: "8123"
+              protocol: TCP
