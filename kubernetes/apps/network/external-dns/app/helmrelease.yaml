@@ -22,7 +22,7 @@ spec:
     txtOwnerId: external-dns
     txtPrefix: k8s.
     domainFilters:
-      - linderis.fr
+      - ${DOMAIN}
     rbac:
       create: true
     serviceAccount:
@@ -33,7 +33,7 @@ spec:
     logLevel: debug
     interval: 30s
     extraArgs:
-      - --pdns-server=https://power-dns.linderis.fr
+      - --pdns-server=https://power-dns.${DOMAIN}
       - --pdns-server-id=localhost
       - --pdns-api-key=${PDNS_API_KEY}
       - --gateway-name=envoy-internal

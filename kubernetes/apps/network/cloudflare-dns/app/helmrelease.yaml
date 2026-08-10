@@ -39,7 +39,7 @@ spec:
     txtOwnerId: default
     txtPrefix: k8s.
     domainFilters:
-      - linderis.fr
+      - ${DOMAIN}
     serviceMonitor:
       enabled: true
     podAnnotations:

@@ -13,7 +13,7 @@ spec:
       namespace: network
       sectionName: http
   hostnames:
-    - netbox.linderis.fr
+    - netbox.${DOMAIN}
   rules:
     - backendRefs:
         - name: netbox

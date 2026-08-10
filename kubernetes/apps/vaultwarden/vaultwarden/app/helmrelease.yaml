@@ -25,10 +25,10 @@ spec:
       existingSecret: vaultwarden-admin-token
       existingSecretKey: ADMIN_TOKEN
     replicas: 1
-    domain: "https://vaultwarden.linderis.fr/"
+    domain: "https://vaultwarden.${DOMAIN}/"
     ingress:
       enabled: true
-      hostname: vaultwarden.linderis.fr
+      hostname: vaultwarden.${DOMAIN}
     metrics:
       serviceMonitor:
         enabled: true

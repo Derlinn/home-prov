@@ -5,7 +5,7 @@ metadata:
   name: hello
 spec:
   hostnames:
-    - hello.linderis.fr
+    - hello.${DOMAIN}
   parentRefs:
     - name: envoy-internal
       namespace: network

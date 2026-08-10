@@ -30,7 +30,7 @@ spec:
         main:
           enabled: true
           hostnames:
-            - prometheus.linderis.fr
+            - prometheus.${DOMAIN}
           parentRefs:
             - name: envoy-internal
               namespace: network

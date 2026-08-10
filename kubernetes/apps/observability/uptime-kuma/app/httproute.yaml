@@ -13,7 +13,7 @@ spec:
       namespace: network
       sectionName: http
   hostnames:
-    - uptime.linderis.fr
+    - uptime.${DOMAIN}
   rules:
     - backendRefs:
         - name: uptime-kuma

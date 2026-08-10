@@ -20,10 +20,10 @@ spec:
     global:
       edition: ce
       hosts:
-        domain: linderis.fr
+        domain: ${DOMAIN}
         https: true
         gitlab:
-          name: gitlab.linderis.fr
+          name: gitlab.${DOMAIN}
 
       ingress:
         enabled: false

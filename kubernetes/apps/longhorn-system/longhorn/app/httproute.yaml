@@ -13,7 +13,7 @@ spec:
       namespace: network
       sectionName: http
   hostnames:
-    - longhorn.linderis.fr
+    - longhorn.${DOMAIN}
   rules:
     - backendRefs:
         - name: longhorn-frontend

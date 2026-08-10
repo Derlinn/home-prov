@@ -6,7 +6,7 @@ metadata:
   name: parkshield
 spec:
   hostnames:
-    - parkshield.linderis.fr
+    - parkshield.${DOMAIN}
   parentRefs:
     - name: envoy-external
       namespace: network

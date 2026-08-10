@@ -5,7 +5,7 @@ metadata:
   name: headscale-config
 data:
   config.yaml: |
-    server_url: https://headscale-01.linderis.fr:443
+    server_url: https://headscale-01.${DOMAIN}:443
     listen_addr: 0.0.0.0:47239
     metrics_listen_addr: 127.0.0.1:9090
     noise:
@@ -34,18 +34,18 @@ data:
           - 1.1.1.1
           - 1.0.0.1
         split:
-          headscale-01.linderis.fr:
+          headscale-01.${DOMAIN}:
             - 1.1.1.1      # IP publique — joignable avant de rejoindre Tailscale
-          linderis.fr:
+          ${DOMAIN}:
             - 10.25.30.4   # PowerDNS interne — résout les services sur envoy-internal
             - 1.1.1.1      # fallback public
       magic_dns: true
-      base_domain: linderis.fr
+      base_domain: ${DOMAIN}
     logtail:
       enabled: false
     oidc:
       only_start_if_oidc_is_available: true
-      issuer: https://authentik.linderis.fr/application/o/headscale/
+      issuer: https://authentik.${DOMAIN}/application/o/headscale/
       client_id: 3FZp05hiVpX4j9eFhL4m2kQWmKoYPaR12Gg9j9pi
       expiry: 180d
       use_expiry_from_token: false

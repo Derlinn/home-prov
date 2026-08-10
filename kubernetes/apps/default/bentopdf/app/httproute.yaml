@@ -5,7 +5,7 @@ metadata:
   name: bentopdf
 spec:
   hostnames:
-    - bentopdf.linderis.fr
+    - bentopdf.${DOMAIN}
   parentRefs:
     - name: envoy-internal
       namespace: network

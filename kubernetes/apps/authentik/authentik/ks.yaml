@@ -7,6 +7,10 @@ metadata:
 spec:
   interval: 30m
   path: ./kubernetes/apps/authentik/authentik/app
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-settings
   prune: true
   timeout: 10m
   sourceRef:

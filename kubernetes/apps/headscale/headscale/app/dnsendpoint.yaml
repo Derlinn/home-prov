@@ -9,7 +9,7 @@ metadata:
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
 spec:
   endpoints:
-    - dnsName: headscale-01.linderis.fr
+    - dnsName: headscale-01.${DOMAIN}
       recordType: A
       targets:
         - 212.227.22.223

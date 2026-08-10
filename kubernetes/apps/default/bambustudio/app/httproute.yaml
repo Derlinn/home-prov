@@ -13,7 +13,7 @@ spec:
       namespace: network
       sectionName: http
   hostnames:
-    - bambustudio.linderis.fr
+    - bambustudio.${DOMAIN}
   rules:
     - backendRefs:
         - name: bambustudio

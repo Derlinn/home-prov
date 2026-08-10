@@ -9,6 +9,10 @@ apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: vpn-stack
+  annotations:
+    # ${PORT} in the port-forward script is expanded by the container shell,
+    # not by Flux.
+    kustomize.toolkit.fluxcd.io/substitute: disabled
 spec:
   chart:
     spec:
