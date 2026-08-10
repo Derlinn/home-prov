@@ -30,7 +30,7 @@ spec:
               TZ: "Europe/Paris"
               HTTP_PROXY: "http://vpn-stack.media-server.svc.cluster.local:8888"
               HTTPS_PROXY: "http://vpn-stack.media-server.svc.cluster.local:8888"
-              NO_PROXY: "localhost,127.0.0.1,10.0.0.0/8,192.168.0.0/16,vpn-stack.media-server.svc.cluster.local,linderis.fr,.linderis.fr"
+              NO_PROXY: "localhost,127.0.0.1,10.0.0.0/8,192.168.0.0/16,vpn-stack.media-server.svc.cluster.local,${DOMAIN},.${DOMAIN}"
             probes:
               liveness:
                 enabled: true

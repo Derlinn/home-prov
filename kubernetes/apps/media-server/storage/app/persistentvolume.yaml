@@ -20,7 +20,7 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   nfs:
-    server: lin-nas-01.linderis.fr
+    server: lin-nas-01.${DOMAIN}
     path: /volume1/Media/arr
   mountOptions:
     - nfsvers=4.1

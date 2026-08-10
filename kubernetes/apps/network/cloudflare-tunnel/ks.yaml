@@ -11,6 +11,8 @@ spec:
     substituteFrom:
       - kind: Secret
         name: cloudflare-tunnel-secret # injected by vaultwarden sync
+      - kind: ConfigMap
+        name: cluster-settings
   prune: true
   sourceRef:
     kind: GitRepository

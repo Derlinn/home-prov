@@ -6,7 +6,7 @@ metadata:
   name: grafana
 spec:
   hostnames:
-    - grafana.linderis.fr
+    - grafana.${DOMAIN}
   parentRefs:
     - name: envoy-internal
       namespace: network

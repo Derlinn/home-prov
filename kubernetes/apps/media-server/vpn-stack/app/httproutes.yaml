@@ -13,7 +13,7 @@ spec:
       namespace: network
       sectionName: http
   hostnames:
-    - qbit.linderis.fr
+    - qbit.${DOMAIN}
   rules:
     - backendRefs:
         - name: vpn-stack

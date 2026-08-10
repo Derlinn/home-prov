@@ -13,7 +13,7 @@ spec:
       namespace: network
       sectionName: http
   hostnames:
-    - radarr.linderis.fr
+    - radarr.${DOMAIN}
   rules:
     - backendRefs:
         - name: radarr

@@ -13,7 +13,7 @@ spec:
       namespace: network
       sectionName: http
   hostnames:
-    - prowlarr.linderis.fr
+    - prowlarr.${DOMAIN}
   rules:
     - backendRefs:
         - name: prowlarr

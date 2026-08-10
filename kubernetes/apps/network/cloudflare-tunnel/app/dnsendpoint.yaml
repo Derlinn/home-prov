@@ -8,7 +8,7 @@ metadata:
     external-dns.alpha.kubernetes.io/controller: cloudflare
 spec:
   endpoints:
-    - dnsName: external.linderis.fr
+    - dnsName: external.${DOMAIN}
       recordType: CNAME
       targets:
         - ${CLOUDFLARE_TUNNEL_ID}.cfargotunnel.com

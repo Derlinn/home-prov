@@ -65,7 +65,7 @@ spec:
           gatus.home-operations.com/endpoint: |-
             conditions: ["[STATUS] == 200"]
         hostnames:
-          - "{{ .Release.Name }}.linderis.fr"
+          - "{{ .Release.Name }}.${DOMAIN}"
         parentRefs:
           - name: envoy-external
             namespace: network

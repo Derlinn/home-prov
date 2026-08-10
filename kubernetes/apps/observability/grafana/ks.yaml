@@ -27,6 +27,10 @@ spec:
       namespace: longhorn-system
   interval: 1h
   path: ./kubernetes/apps/observability/grafana/instance
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-settings
   prune: true
   sourceRef:
     kind: GitRepository

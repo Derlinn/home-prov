@@ -8,7 +8,7 @@ data:
     server:
       host: "0.0.0.0"
       port: 8080
-      base_url: "https://headplane.linderis.fr"
+      base_url: "https://headplane.${DOMAIN}"
       cookie_secure: true
       cookie_secret_path: "/etc/headplane/cookie-secret"
 
@@ -22,7 +22,7 @@ data:
 
     oidc:
       enabled: true
-      issuer: "https://authentik.linderis.fr/application/o/headplane/"
+      issuer: "https://authentik.${DOMAIN}/application/o/headplane/"
       client_id: "wohme7gfdOpx2Ho4xAQxUIWU2SEBdYJchuBVcENg"
       client_secret_path: "/etc/headplane/oidc-client-secret"
       headscale_api_key_path: "/etc/headplane/api-key"

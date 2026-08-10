@@ -13,7 +13,7 @@ spec:
       namespace: network
       sectionName: http
   hostnames:
-    - bazarr.linderis.fr
+    - bazarr.${DOMAIN}
   rules:
     - backendRefs:
         - name: bazarr

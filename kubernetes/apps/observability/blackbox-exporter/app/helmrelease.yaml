@@ -23,7 +23,7 @@ spec:
             # the SNI name keeps the validation real instead of disabling it,
             # and removes any dependency on DNS resolving from the cluster.
             tls_config:
-              server_name: lin-nas-01.linderis.fr
+              server_name: lin-nas-01.${DOMAIN}
     resources:
       requests:
         cpu: 10m

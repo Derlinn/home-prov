@@ -33,7 +33,7 @@ spec:
       TZ: "Europe/Paris"
       PUID: "1000"
       PGID: "1000"
-      JELLYFIN_PublishedServerUrl: "https://jellyfin.linderis.fr"
+      JELLYFIN_PublishedServerUrl: "https://jellyfin.${DOMAIN}"
 
     persistence:
       config:

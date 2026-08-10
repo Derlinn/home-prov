@@ -13,7 +13,7 @@ spec:
       namespace: network
       sectionName: http
   hostnames:
-    - gitlab.linderis.fr
+    - gitlab.${DOMAIN}
   rules:
     - backendRefs:
         - name: gitlab-webservice-default

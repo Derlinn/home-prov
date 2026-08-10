@@ -13,7 +13,7 @@ spec:
       namespace: network
       sectionName: http
   hostnames:
-    - authentik.linderis.fr
+    - authentik.${DOMAIN}
   rules:
     - backendRefs:
         - name: authentik-server

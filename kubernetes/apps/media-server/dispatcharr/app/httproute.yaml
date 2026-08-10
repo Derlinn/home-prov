@@ -13,7 +13,7 @@ spec:
       namespace: network
       sectionName: http
   hostnames:
-    - dispatcharr.linderis.fr
+    - dispatcharr.${DOMAIN}
   rules:
     - backendRefs:
         - name: dispatcharr

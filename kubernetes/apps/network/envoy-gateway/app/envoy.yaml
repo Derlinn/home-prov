@@ -77,7 +77,7 @@ kind: Gateway
 metadata:
   name: envoy-external
   annotations:
-    external-dns.alpha.kubernetes.io/target: &hostname external.linderis.fr
+    external-dns.alpha.kubernetes.io/target: &hostname external.${DOMAIN}
 spec:
   gatewayClassName: envoy
   infrastructure:

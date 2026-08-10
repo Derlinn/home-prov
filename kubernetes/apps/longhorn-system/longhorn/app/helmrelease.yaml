@@ -21,7 +21,7 @@ spec:
       concurrentAutomaticEngineUpgradePerNodeLimit: 3 # for upgrade of volume engine
     ingress:
       enabled: true
-      host: longhorn.linderis.fr
+      host: longhorn.${DOMAIN}
     metrics:
       serviceMonitor:
         enabled: true
