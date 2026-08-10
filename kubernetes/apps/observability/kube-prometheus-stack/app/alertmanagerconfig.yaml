@@ -39,6 +39,18 @@ spec:
           - name: instance
             value: asustor-1022t
             matchType: "="
+      # The NAS steps its clock once a day instead of running an NTP daemon, so
+      # the kernel keeps STA_UNSYNC set and this alert can never clear, even
+      # though the clock measures within 50 ms of Prometheus. AsustorClockDrift
+      # watches the offset itself, which is what actually breaks TOTP.
+      - receiver: "null"
+        matchers:
+          - name: alertname
+            value: NodeClockNotSynchronising
+            matchType: "="
+          - name: instance
+            value: asustor-1022t
+            matchType: "="
   receivers:
     - name: "null"
     - name: discord

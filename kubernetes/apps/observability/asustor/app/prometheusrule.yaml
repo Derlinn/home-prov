@@ -24,6 +24,15 @@ spec:
           annotations:
             summary: "NAS Asustor a redémarré (uptime {{ $value | humanizeDuration }})"
 
+        - alert: AsustorClockDrift
+          expr: |
+            abs(node_time_seconds{instance="asustor-1022t"} - timestamp(node_time_seconds{instance="asustor-1022t"})) > 30
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Horloge du NAS décalée de {{ $value | humanizeDuration }}"
+
     - name: asustor.system
       rules:
         - alert: AsustorHighCPU
