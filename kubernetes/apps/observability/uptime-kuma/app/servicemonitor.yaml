@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/servicemonitor_v1.json
+# The chart's own serviceMonitor has no authentication options, and Uptime Kuma
+# answers /metrics with `WWW-Authenticate: Basic`, so it is disabled in favour
+# of this one.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: uptime-kuma
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: uptime-kuma
+      app.kubernetes.io/instance: uptime-kuma
+  endpoints:
+    - port: http
+      interval: 60s
+      basicAuth:
+        username:
+          name: uptime-kuma-metrics
+          key: username
+        password:
+          name: uptime-kuma-metrics
+          key: password
