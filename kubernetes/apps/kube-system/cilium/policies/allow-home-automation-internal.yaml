@@ -1,0 +1,21 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-home-automation-internal
+spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
+  endpointSelector:
+    matchLabels:
+      io.kubernetes.pod.namespace: home-automation
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: home-automation
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: home-automation
