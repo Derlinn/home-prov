@@ -9,7 +9,9 @@ data:
     # Anonymous access is refused: MQTT carries the commands that switch the
     # rack's power outlet, so a stray client on the network is not acceptable.
     allow_anonymous false
-    password_file /mosquitto/config/passwd
+    # Not the mounted Secret itself: mosquitto refuses a password file it does
+    # not own, so an init container copies it here as uid 1883.
+    password_file /mosquitto/auth/passwd
 
     persistence true
     persistence_location /mosquitto/data/

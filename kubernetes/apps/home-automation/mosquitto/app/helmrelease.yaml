@@ -21,6 +21,18 @@ spec:
   values:
     controllers:
       main:
+        initContainers:
+          # A Secret volume is always owned by root, and mosquitto already warns
+          # that a future release will refuse to load a password file it does not
+          # own. Copying it as uid 1883 makes the copy owned by mosquitto, and
+          # 0400 clears the world-readable warning too.
+          prepare-passwd:
+            image:
+              repository: docker.io/library/eclipse-mosquitto
+              tag: 2.0.22
+            command: ["/bin/sh", "-c"]
+            args:
+              - install -m 0400 /secrets/passwd /mosquitto/auth/passwd
         containers:
           app:
             image:
@@ -62,9 +74,13 @@ spec:
         type: secret
         name: mosquitto-passwd
         globalMounts:
-          - path: /mosquitto/config/passwd
+          - path: /secrets/passwd
             subPath: passwd
             readOnly: true
+      auth:
+        type: emptyDir
+        globalMounts:
+          - path: /mosquitto/auth
       data:
         type: persistentVolumeClaim
         storageClass: longhorn-production-v1
