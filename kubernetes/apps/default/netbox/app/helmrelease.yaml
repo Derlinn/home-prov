@@ -27,9 +27,28 @@ spec:
         enabled: true
     superuser:
       existingSecret: netbox-superuser
+    # Memory keeps a limit exceeding it kills the container instead of slowing
+    # it down. Postgres was sitting at 169Mi against a 192Mi cap.
+    postgresql:
+      primary:
+        resourcesPreset: "none"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 192Mi
+          limits:
+            memory: 384Mi
     valkey:
       enabled: true
       replica:
         replicaCount: 0
+      primary:
+        resourcesPreset: "none"
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            memory: 192Mi
     persistence:
       enabled: true
