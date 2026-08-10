@@ -27,6 +27,15 @@ resource "proxmox_virtual_environment_vm" "this" {
     mac_address = each.value.mac_address
   }
 
+  dynamic "usb" {
+    for_each = each.value.usb_devices
+    content {
+      host    = usb.value.host
+      mapping = usb.value.mapping
+      usb3    = usb.value.usb3
+    }
+  }
+
   disk {
     datastore_id = each.value.datastore_id
     interface    = "virtio0"

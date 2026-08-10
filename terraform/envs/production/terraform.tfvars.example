@@ -46,5 +46,6 @@ talos_nodes = {
   #  cpu           = 3
   #  ram_dedicated = 8192
   #  size_disk     = 20
+  #  usb_devices   = [{ host = "10c4:ea60" }]
   #}
 }

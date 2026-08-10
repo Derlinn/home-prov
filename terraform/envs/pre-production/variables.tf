@@ -92,6 +92,12 @@ variable "talos_nodes" {
     update        = optional(bool, false)
     igpu          = optional(bool, false)
     size_disk     = optional(number, 20)
+    # USB passthrough. Set host = "vendor:product" or mapping = datacenter mapping name.
+    usb_devices = optional(list(object({
+      host    = optional(string)
+      mapping = optional(string)
+      usb3    = optional(bool, false)
+    })), [])
   }))
   default = {}
 }
