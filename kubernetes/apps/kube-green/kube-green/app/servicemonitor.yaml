@@ -1,0 +1,31 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/servicemonitor_v1.json
+# Replaces the chart's own ServiceMonitor, which offers no way to send a bearer
+# token. kube-green serves metrics through controller-runtime's secure server,
+# which authenticates every request with a TokenReview, so the mTLS the chart
+# configures is not enough on its own and the scrape gets a 401.
+#
+# The name deliberately differs from the chart's: Helm deletes resources it used
+# to own during an upgrade, and a name clash would take this one down with it.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kube-green-metrics
+spec:
+  namespaceSelector:
+    matchNames:
+      - kube-green
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kube-green
+      control-plane: controller-manager
+  endpoints:
+    - port: https
+      scheme: https
+      interval: 30s
+      path: /metrics
+      bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+      tlsConfig:
+        # The serving certificate is issued for the in-cluster Service name and
+        # signed by an internal CA that Prometheus does not trust.
+        insecureSkipVerify: true
