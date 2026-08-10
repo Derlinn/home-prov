@@ -18,6 +18,10 @@ data:
     autosave_interval 60
 
     log_dest stdout
+    # Declaring log_type replaces the default set instead of adding to it.
+    # Without `information` the broker starts up completely silently, which
+    # makes a healthy start indistinguishable from a broken one.
     log_type error
     log_type warning
     log_type notice
+    log_type information
