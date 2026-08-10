@@ -24,6 +24,9 @@ spec:
         cpu: 25m
         memory: 256Mi
       limits:
+        # Explicitly null, not omitted: Helm deep-merges maps, so leaving this
+        # out keeps the chart's own 100m and the throttling with it.
+        cpu: null
         memory: 512Mi
     namespace:
       create: false
