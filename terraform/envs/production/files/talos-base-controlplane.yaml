@@ -42,6 +42,8 @@ machine:
   kernel:
     modules:
       - name: nbd
+      # Silicon Labs USB-serial bridge, for the Zigbee coordinator.
+      - name: cp210x
   kubelet:
     defaultRuntimeSeccompProfileEnabled: true
     disableManifestsDirectory: true
@@ -73,6 +75,10 @@ machine:
     sunrpc.tcp_slot_table_entries: "128"
     user.max_user_namespaces: "11255"
     vm.nr_hugepages: "1024"
+  udev:
+    rules:
+      # Zigbee coordinator readable by GID 20, so Zigbee2MQTT stays non-root.
+      - SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0660", GROUP="20"
 cluster:
   clusterName: talos
   controlPlane:
