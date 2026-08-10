@@ -1,0 +1,10 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Included by every namespace kustomization. The ConfigMap carries no namespace
+# of its own: each parent stamps its own via the `namespace:` transformer, which
+# is what puts a copy in every namespace. Flux resolves postBuild.substituteFrom
+# in the Kustomization's own namespace, so the copies are what make it work.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - ./configmap.yaml
