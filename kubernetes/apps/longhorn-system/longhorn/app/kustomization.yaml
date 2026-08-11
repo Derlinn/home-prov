@@ -8,5 +8,6 @@ resources:
   - ./helmrelease.yaml
   - ./longhorn-production-v1.yaml
   - ./recurringjobs.yaml
+  - ./prometheusrule.yaml
   - ./httproute.yaml
   - ./grafanadashboard.yaml

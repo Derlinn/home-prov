@@ -1,0 +1,36 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: longhorn-backup
+spec:
+  groups:
+    - name: longhorn.backup
+      rules:
+        # States: 0 New, 1 Pending, 2 InProgress, 3 Completed, above that Error or Unknown.
+        - alert: LonghornBackupFailed
+          expr: longhorn_backup_state > 3
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Longhorn backup failed for volume {{ $labels.volume }}"
+
+        - alert: LonghornBackupStale
+          expr: |
+            (time() - longhorn_volume_last_backup_at > 129600)
+            and (longhorn_volume_last_backup_at > 0)
+          for: 1h
+          labels:
+            severity: critical
+          annotations:
+            summary: "Volume {{ $labels.volume }} was last backed up {{ $value | humanizeDuration }} ago"
+
+        - alert: LonghornVolumeNeverBackedUp
+          expr: longhorn_volume_last_backup_at == 0
+          for: 24h
+          labels:
+            severity: warning
+          annotations:
+            summary: "Volume {{ $labels.volume }} has never been backed up"
