@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# allow-https-egress lets every pod reach port 443, so a client ignoring
+# HTTP_PROXY would silently leak the home IP during a scan. Deny rules take
+# precedence over allow rules, so these pods only reach the cluster CIDRs:
+# CoreDNS and the gluetun proxy. Searches fail when the VPN is down.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: deny-osint-direct-egress
+spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
+  endpointSelector:
+    matchLabels:
+      io.kubernetes.pod.namespace: default
+      app.kubernetes.io/part-of: osint
+  egressDeny:
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except:
+            - 10.42.0.0/16 # pods
+            - 10.43.0.0/16 # services

@@ -13,4 +13,5 @@ resources:
   - netbox/ks.yaml
   - inp-calendar-bot/ks.yaml
   - parkshield/ks.yaml
+  - osint/ks.yaml
 #  - bambustudio/ks.yaml
