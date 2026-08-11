@@ -32,3 +32,14 @@ lovelace:
 # .storage/http and ignores the YAML since 2026.8, dropping it entirely in
 # 2027.2. Those settings now live on the PVC, outside Git: manage them under
 # Settings > System > Network.
+
+auth_oidc:
+  client_id: "fu9wSbcb6PV8DQxH28Nh0oUSQgBah27Hv2VDC34a"
+  discovery_url: "https://authentik.${DOMAIN}/application/o/home-assistant/.well-known/openid-configuration"
+  display_name: "Authentik"
+  roles:
+    admin: "Home Assistant Admins"
+    user: "linderis_home_assistant"
+  features:
+    # Reuses the existing local account instead of creating a fresh one.
+    automatic_user_linking: true
