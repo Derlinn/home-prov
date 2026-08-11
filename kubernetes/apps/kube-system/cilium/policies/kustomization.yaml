@@ -17,6 +17,7 @@ resources:
     - ./allow-envoy-backends.yaml
     - ./allow-lan-ingress.yaml
     - ./allow-longhorn-internal.yaml
+    - ./allow-longhorn-backup-egress.yaml
     - ./allow-vaultwarden-internal.yaml
     - ./allow-authentik-internal.yaml
     - ./allow-devtools-internal.yaml
