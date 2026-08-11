@@ -45,7 +45,7 @@ spec:
         name: data
       spec:
         accessModes: ["ReadWriteOnce"]
-        storageClassName: longhorn-production-v1
+        storageClassName: longhorn-encrypted-v1
         resources:
           requests:
             storage: 1Gi
