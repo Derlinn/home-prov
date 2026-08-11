@@ -23,7 +23,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: cli
-          image: docker.io/python:3.12-slim
+          image: docker.io/python:3.14-slim
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "-c"]
           args:
