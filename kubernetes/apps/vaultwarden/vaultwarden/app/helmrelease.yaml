@@ -18,7 +18,7 @@ spec:
       data:
         name: "vaultwarden-data"
         size: "15Gi"
-        class: "longhorn-production-v1"
+        class: "longhorn-encrypted-v1"
         accessMode: "ReadWriteOnce"
         keepPvc: true
     adminToken:
