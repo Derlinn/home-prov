@@ -1,10 +1,24 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+#
+# ============================ DEPRECATED (2026-08-11) ============================
+# Uptime Kuma est remplace par Gatus : ../gatus/
+# Cette Kustomization n'est plus referencee dans ../kustomization.yaml et n'est
+# donc plus reconciliee par Flux. Les manifests sont conserves pour historique /
+# rollback eventuel. `suspend: true` evite toute reconciliation accidentelle si
+# la ressource venait a etre reactivee sans revue.
+# A supprimer une fois Gatus valide en production.
+# ================================================================================
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: uptime-kuma
+  annotations:
+    lifecycle.home-prov/status: deprecated
+    lifecycle.home-prov/deprecated-since: "2026-08-11"
+    lifecycle.home-prov/replaced-by: gatus
 spec:
+  suspend: true
   interval: 1h
   path: ./kubernetes/apps/observability/uptime-kuma/app
   postBuild:

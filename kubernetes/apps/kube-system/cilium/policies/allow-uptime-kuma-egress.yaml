@@ -1,6 +1,10 @@
 ---
 # yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
 # Allow uptime-kuma to reach LAN exporters and internal services for monitoring
+#
+# DEPRECATED (2026-08-11) : uptime-kuma est remplace par Gatus.
+# Voir ./allow-gatus-egress.yaml. Retiree de ./kustomization.yaml, conservee
+# pour historique / rollback.
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:

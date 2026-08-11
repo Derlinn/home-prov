@@ -49,9 +49,9 @@ spec:
             # external-dns
             - port: "7979"
               protocol: TCP
-            # uptime-kuma
-            - port: "3001"
-              protocol: TCP
+            # DEPRECATED 2026-08-11 : uptime-kuma remplace par Gatus (metrics sur 8080, deja autorise)
+            # - port: "3001"
+            #   protocol: TCP
             # authentik
             - port: "9300"
               protocol: TCP

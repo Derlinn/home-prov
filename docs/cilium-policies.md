@@ -78,7 +78,7 @@ Les pods du namespace `flux-system` peuvent communiquer entre eux (ingress et eg
 
 **Fichier :** `policies/allow-prometheus-ingress.yaml`
 
-Prometheus (`observability`, label `app.kubernetes.io/name: prometheus`) peut scraper tous les pods sur 19 ports de metriques : 9090, 9100, 9153, 9402, 8080, 8081, 9500 (longhorn-manager), 9962 (cilium-agent), 9963 (cilium-operator), 9964 (envoy-metrics), 9965 (hubble), 19001 (envoy-gateway), 7979 (external-dns), 3001 (uptime-kuma), 9300 (authentik), 8443 (kube-green), 10250 (metrics-server), 80 (echo), 9115 (blackbox-exporter).
+Prometheus (`observability`, label `app.kubernetes.io/name: prometheus`) peut scraper tous les pods sur 18 ports de metriques : 9090, 9100, 9153, 9402, 8080 (dont gatus), 8081, 9500 (longhorn-manager), 9962 (cilium-agent), 9963 (cilium-operator), 9964 (envoy-metrics), 9965 (hubble), 19001 (envoy-gateway), 7979 (external-dns), 9300 (authentik), 8443 (kube-green), 10250 (metrics-server), 80 (echo), 9115 (blackbox-exporter).
 
 Cette policy doit rester symetrique avec `allow-prometheus-egress` : un port present d'un seul cote laisse le scrape en timeout.
 
@@ -158,7 +158,7 @@ Meme forme pour toutes : les pods selectionnes acceptent l'ingress et l'egress d
 | `allow-vaultwarden-internal` | `policies/allow-vaultwarden-internal.yaml` | namespace `vaultwarden` |
 | `allow-netbox-internal` | `policies/allow-netbox-internal.yaml` | namespace `default`, label `app.kubernetes.io/instance: netbox` |
 
-C'est `allow-observability-internal` qui autorise Prometheus a scraper uptime-kuma (3001) et blackbox-exporter (9115) sans que ces ports figurent dans `allow-prometheus-egress`.
+C'est `allow-observability-internal` qui autorise Prometheus a scraper Gatus (8080) et blackbox-exporter (9115) sans que ces ports figurent dans `allow-prometheus-egress`.
 
 ---
 
@@ -169,8 +169,11 @@ C'est `allow-observability-internal` qui autorise Prometheus a scraper uptime-ku
 | `allow-asustor-egress` | `policies/allow-asustor-egress.yaml` | Prometheus | `10.25.30.1/32` (NAS) | 9100, 9633 |
 | `allow-blackbox-egress` | `policies/allow-blackbox-egress.yaml` | blackbox-exporter | `10.25.30.1/32` (NAS) | 8001 |
 | `allow-mktxp-egress` | `policies/allow-mktxp-egress.yaml` | mktxp | `10.25.200.0/24` (VLAN mgmt) | 8728 (API Mikrotik) |
-| `allow-uptime-kuma-egress` | `policies/allow-uptime-kuma-egress.yaml` | uptime-kuma | `10.25.30.0/24` | 9100, 9633, 8006 |
+| `allow-gatus-egress` | `policies/allow-gatus-egress.yaml` | gatus | `10.25.30.0/24` | ICMP echo (type 8) |
 | `allow-wireguard-egress` | `policies/allow-wireguard-egress.yaml` | vpn-stack (`media-server`) | `world` | 51820 UDP |
+
+> `allow-uptime-kuma-egress` est **obsolete depuis le 2026-08-11** (uptime-kuma remplace par Gatus).
+> Le fichier reste dans le repo mais n'est plus reference dans `policies/kustomization.yaml`.
 
 ---
 

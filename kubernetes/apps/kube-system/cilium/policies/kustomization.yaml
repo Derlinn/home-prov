@@ -30,5 +30,6 @@ resources:
     - ./allow-mktxp-egress.yaml
     - ./allow-asustor-egress.yaml
     - ./allow-blackbox-egress.yaml
-    - ./allow-uptime-kuma-egress.yaml
+    # DEPRECATED 2026-08-11 : ./allow-uptime-kuma-egress.yaml remplace par ./allow-gatus-egress.yaml
+    - ./allow-gatus-egress.yaml
     - ./default-deny.yaml

@@ -1,0 +1,25 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# Gatus pings LIN-NAS-01 on the LAN. HTTP endpoints already go through the
+# cluster-wide 443 / envoy-clusterip rules, but ICMP is denied by default and
+# would report the NAS as down: exactly the false positive a monitor must not
+# produce.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-gatus-egress
+spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
+  endpointSelector:
+    matchLabels:
+      io.kubernetes.pod.namespace: observability
+      app.kubernetes.io/name: gatus
+  egress:
+    - toCIDR:
+        - 10.25.30.0/24
+      icmps:
+        - fields:
+            - type: 8
+              family: IPv4
