@@ -1,0 +1,103 @@
+---
+views:
+  - title: Prise 01
+    path: prise-01
+    icon: mdi:power-socket-fr
+    cards:
+      - type: entities
+        title: Mois en cours
+        state_color: true
+        entities:
+          - entity: sensor.prise_01_energie_mensuelle
+            name: Energie consommee
+          - entity: sensor.prise_01_cout_mensuel
+            name: Cout estime
+          - type: divider
+          - entity: sensor.lin_socket_01_energie_mensuelle_hp
+            name: Heures pleines
+          - entity: sensor.lin_socket_01_energie_mensuelle_hc
+            name: Heures creuses
+          - type: divider
+          - entity: binary_sensor.heures_creuses
+            name: Tarif actuel
+          - entity: sensor.lin_socket_01_power
+            name: Puissance instantanee
+
+      - type: entities
+        title: Mois precedent
+        entities:
+          - entity: sensor.prise_01_energie_mois_precedent
+            name: Energie consommee
+          - entity: sensor.prise_01_cout_mois_precedent
+            name: Cout estime
+
+      - type: markdown
+        title: Historique mensuel
+        content: |-
+          {%- set php = states('input_number.prix_kwh_hp') | float(0) -%}
+          {%- set phc = states('input_number.prix_kwh_hc') | float(0) -%}
+          {%- set php = php if php > 0 else 0.2142 -%}
+          {%- set phc = phc if phc > 0 else 0.1589 -%}
+          {%- set detail = state_attr('sensor.prise_01_historique_mensuel', 'detail') -%}
+          {%- if detail %}
+          | Mois | HP | HC | Total | Cout |
+          |:---|---:|---:|---:|---:|
+          {% for r in detail | from_json -%}
+          | {{ r.mois }} | {{ r.hp }} kWh | {{ r.hc }} kWh | {{ (r.hp + r.hc) | round(2) }} kWh | {{ (r.hp * php + r.hc * phc) | round(2) }} EUR |
+          {% endfor -%}
+          {%- else %}
+          Historique indisponible.
+          {%- endif -%}
+
+      - type: statistics-graph
+        title: Consommation par jour
+        chart_type: bar
+        period: day
+        days_to_show: 31
+        stat_types:
+          - change
+        entities:
+          - sensor.lin_socket_01_energy
+
+      - type: statistics-graph
+        title: Consommation par mois
+        chart_type: bar
+        period: month
+        days_to_show: 365
+        stat_types:
+          - change
+        entities:
+          - sensor.lin_socket_01_energy
+
+      - type: statistics-graph
+        title: Cout par mois
+        chart_type: bar
+        period: month
+        days_to_show: 365
+        stat_types:
+          - change
+        entities:
+          - sensor.prise_01_cout_cumule
+
+      - type: entities
+        title: Reglages
+        entities:
+          - entity: input_number.prix_kwh_hp
+            name: Prix du kWh - heures pleines
+          - entity: input_number.prix_kwh_hc
+            name: Prix du kWh - heures creuses
+          - type: divider
+          - entity: input_datetime.heures_creuses_debut
+            name: Debut des heures creuses
+          - entity: input_datetime.heures_creuses_fin
+            name: Fin des heures creuses
+          - type: divider
+          - entity: automation.bascule_heures_pleines_creuses_prise_01
+            name: Bascule HP/HC
+          - entity: automation.rapport_mensuel_consommation_prise_01
+            name: Rapport mensuel
+          - type: divider
+          - entity: script.calibrer_aout_prise_01
+            name: Calibrer le compteur d'aout
+          - entity: input_boolean.calibration_aout_prise_01
+            name: Calibration deja effectuee

@@ -15,16 +15,17 @@ script: !include scripts.yaml
 scene: !include scenes.yaml
 
 # An extra dashboard alongside the default one, which stays editable in the UI.
-# This one is read-only by design: it comes from Git.
+# This one is read-only by design: it comes from Git. Named after the plugs
+# rather than energy, to avoid colliding with the built-in Energy dashboard.
 lovelace:
   mode: storage
   dashboards:
-    energie-prise:
+    conso-prises:
       mode: yaml
-      title: Energie
-      icon: mdi:lightning-bolt
+      title: Conso prises
+      icon: mdi:power-socket-fr
       show_in_sidebar: true
-      filename: dashboards/energie.yaml
+      filename: dashboards/conso-prises.yaml
 
 # The http block used to set use_x_forwarded_for and trusted_proxies, needed
 # because TLS is terminated by Envoy Gateway. Home Assistant migrated it to

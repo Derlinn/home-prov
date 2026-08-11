@@ -1,11 +1,15 @@
 ---
-# Monthly energy and cost tracking for the lin_socket_01 smart plug.
+# Monthly energy and cost tracking for the lin_socket_01 smart plug, split
+# between peak (HP) and off-peak (HC) hours.
 # Source: sensor.lin_socket_01_energy, a cumulative kWh counter fed by
 # Zigbee2MQTT.
+#
+# Prices and the off-peak window are editable from the UI. The values hardcoded
+# below are only fallbacks, used until the helpers hold something meaningful.
 
 input_number:
-  prix_kwh:
-    name: Prix du kWh
+  prix_kwh_hp:
+    name: Prix du kWh - heures pleines
     icon: mdi:currency-eur
     min: 0
     max: 2
@@ -13,13 +17,111 @@ input_number:
     mode: box
     unit_of_measurement: "EUR/kWh"
 
+  prix_kwh_hc:
+    name: Prix du kWh - heures creuses
+    icon: mdi:currency-eur
+    min: 0
+    max: 2
+    step: 0.0001
+    mode: box
+    unit_of_measurement: "EUR/kWh"
+
+input_datetime:
+  heures_creuses_debut:
+    name: Debut des heures creuses
+    icon: mdi:weather-night
+    has_date: false
+    has_time: true
+
+  heures_creuses_fin:
+    name: Fin des heures creuses
+    icon: mdi:weather-sunset-up
+    has_date: false
+    has_time: true
+
+input_boolean:
+  calibration_aout_prise_01:
+    name: Calibration aout 2026 effectuee
+    icon: mdi:check-decagram
+
 utility_meter:
+  # Resets on the first of each month. Feeds the monthly report.
   lin_socket_01_energie_mensuelle:
     source: sensor.lin_socket_01_energy
     cycle: monthly
+    tariffs:
+      - hp
+      - hc
+
+  # No cycle, so it never resets. Only exists to give the cumulative cost sensor
+  # a monotonic base, which is what the euro chart needs.
+  lin_socket_01_energie_totale:
+    source: sensor.lin_socket_01_energy
+    tariffs:
+      - hp
+      - hc
+
+sql:
+  - name: "Prise 01 historique mensuel"
+    unique_id: lin_socket_01_historique_mensuel
+    icon: mdi:table-clock
+    column: etat
+    # The state is a constant; the monthly breakdown rides in the "detail"
+    # attribute as JSON. Off-peak hours are hardcoded here because the SQL
+    # integration cannot template its query: keep in sync with the helpers.
+    query: >-
+      WITH pts AS (
+        SELECT start_ts,
+               CAST(strftime('%H', start_ts, 'unixepoch', 'localtime') AS INT) AS h,
+               strftime('%Y-%m', start_ts, 'unixepoch', 'localtime') AS mois,
+               sum AS s,
+               LAG(sum) OVER (ORDER BY start_ts) AS prev
+        FROM statistics
+        WHERE metadata_id = (SELECT id FROM statistics_meta
+                             WHERE statistic_id = 'sensor.lin_socket_01_energy')
+      ), deltas AS (
+        SELECT mois, h, s - prev AS d FROM pts WHERE prev IS NOT NULL AND s > prev
+      ), parmois AS (
+        SELECT mois,
+               ROUND(SUM(CASE WHEN h >= 22 OR h < 6 THEN 0 ELSE d END), 2) AS hp,
+               ROUND(SUM(CASE WHEN h >= 22 OR h < 6 THEN d ELSE 0 END), 2) AS hc
+        FROM deltas GROUP BY mois
+      )
+      SELECT 'ok' AS etat,
+             (SELECT json_group_array(json_object('mois', mois, 'hp', hp, 'hc', hc))
+              FROM (SELECT * FROM parmois ORDER BY mois DESC LIMIT 13)) AS detail
 
 template:
+  - binary_sensor:
+      - name: "Heures creuses"
+        unique_id: heures_creuses
+        icon: mdi:weather-night
+        # A zero-length window means the helpers were never set, so fall back to
+        # the usual 22:00-06:00 rather than billing everything at the peak rate.
+        state: >-
+          {%- set d = states('input_datetime.heures_creuses_debut') -%}
+          {%- set f = states('input_datetime.heures_creuses_fin') -%}
+          {%- if d in ['unknown', 'unavailable', 'none'] or d == f -%}
+            {%- set d, f = '22:00:00', '06:00:00' -%}
+          {%- endif -%}
+          {%- set maintenant = now().strftime('%H:%M:%S') -%}
+          {%- if d < f -%}
+            {{ d <= maintenant < f }}
+          {%- else -%}
+            {{ maintenant >= d or maintenant < f }}
+          {%- endif -%}
+
   - sensor:
+      - name: "Prise 01 energie mensuelle"
+        unique_id: lin_socket_01_energie_mensuelle_totale
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: total
+        icon: mdi:counter
+        state: >-
+          {{ (states('sensor.lin_socket_01_energie_mensuelle_hp') | float(0)
+            + states('sensor.lin_socket_01_energie_mensuelle_hc') | float(0)) | round(3) }}
+
       - name: "Prise 01 cout mensuel"
         unique_id: lin_socket_01_cout_mensuel
         unit_of_measurement: "EUR"
@@ -27,9 +129,12 @@ template:
         state_class: total
         icon: mdi:cash-clock
         state: >-
-          {% set prix = states('input_number.prix_kwh') | float(0) %}
-          {% set prix = prix if prix > 0 else 0.2016 %}
-          {{ (states('sensor.lin_socket_01_energie_mensuelle') | float(0) * prix) | round(2) }}
+          {%- set php = states('input_number.prix_kwh_hp') | float(0) -%}
+          {%- set phc = states('input_number.prix_kwh_hc') | float(0) -%}
+          {%- set php = php if php > 0 else 0.2142 -%}
+          {%- set phc = phc if phc > 0 else 0.1589 -%}
+          {{ ((states('sensor.lin_socket_01_energie_mensuelle_hp') | float(0) * php)
+            + (states('sensor.lin_socket_01_energie_mensuelle_hc') | float(0) * phc)) | round(2) }}
 
       - name: "Prise 01 energie mois precedent"
         unique_id: lin_socket_01_energie_mois_precedent
@@ -38,7 +143,8 @@ template:
         state_class: total
         icon: mdi:calendar-arrow-left
         state: >-
-          {{ state_attr('sensor.lin_socket_01_energie_mensuelle', 'last_period') | float(0) | round(3) }}
+          {{ (state_attr('sensor.lin_socket_01_energie_mensuelle_hp', 'last_period') | float(0)
+            + state_attr('sensor.lin_socket_01_energie_mensuelle_hc', 'last_period') | float(0)) | round(3) }}
 
       - name: "Prise 01 cout mois precedent"
         unique_id: lin_socket_01_cout_mois_precedent
@@ -47,11 +153,87 @@ template:
         state_class: total
         icon: mdi:cash-check
         state: >-
-          {% set prix = states('input_number.prix_kwh') | float(0) %}
-          {% set prix = prix if prix > 0 else 0.2016 %}
-          {{ (state_attr('sensor.lin_socket_01_energie_mensuelle', 'last_period') | float(0) * prix) | round(2) }}
+          {%- set php = states('input_number.prix_kwh_hp') | float(0) -%}
+          {%- set phc = states('input_number.prix_kwh_hc') | float(0) -%}
+          {%- set php = php if php > 0 else 0.2142 -%}
+          {%- set phc = phc if phc > 0 else 0.1589 -%}
+          {{ ((state_attr('sensor.lin_socket_01_energie_mensuelle_hp', 'last_period') | float(0) * php)
+            + (state_attr('sensor.lin_socket_01_energie_mensuelle_hc', 'last_period') | float(0) * phc)) | round(2) }}
+
+      # state_class total, not total_increasing: lowering a price makes this
+      # sensor drop, which total_increasing would read as a meter reset.
+      - name: "Prise 01 cout cumule"
+        unique_id: lin_socket_01_cout_cumule
+        unit_of_measurement: "EUR"
+        device_class: monetary
+        state_class: total
+        icon: mdi:cash-multiple
+        state: >-
+          {%- set php = states('input_number.prix_kwh_hp') | float(0) -%}
+          {%- set phc = states('input_number.prix_kwh_hc') | float(0) -%}
+          {%- set php = php if php > 0 else 0.2142 -%}
+          {%- set phc = phc if phc > 0 else 0.1589 -%}
+          {{ ((states('sensor.lin_socket_01_energie_totale_hp') | float(0) * php)
+            + (states('sensor.lin_socket_01_energie_totale_hc') | float(0) * phc)) | round(2) }}
+
+script:
+  calibrer_aout_prise_01:
+    alias: "Calibrer le compteur d'aout - prise 01"
+    icon: mdi:calendar-sync
+    description: >-
+      A executer une seule fois. Le compteur a ete cree le 11 aout et ignore
+      donc le debut du mois. On recalcule l'ecart depuis le releve du compteur
+      brut au 1er aout 00:00, puis on le repartit HP/HC selon la proportion
+      observee sur les statistiques horaires du mois. L'ecart est mesure au
+      moment de l'execution, donc le resultat reste juste quel que soit le
+      delai. Le garde-fou input_boolean empeche un double comptage.
+    mode: single
+    sequence:
+      - condition: state
+        entity_id: input_boolean.calibration_aout_prise_01
+        state: "off"
+      - variables:
+          # Reading of sensor.lin_socket_01_energy at 2026-08-01 00:00, taken
+          # from long-term statistics.
+          manquant: >-
+            {{ (states('sensor.lin_socket_01_energy') | float(0) - 329.05
+              - states('sensor.lin_socket_01_energie_mensuelle_hp') | float(0)
+              - states('sensor.lin_socket_01_energie_mensuelle_hc') | float(0)) | round(3) }}
+      - action: utility_meter.calibrate
+        target:
+          entity_id: sensor.lin_socket_01_energie_mensuelle_hp
+        data:
+          value: "{{ (states('sensor.lin_socket_01_energie_mensuelle_hp') | float(0) + manquant | float(0) * 0.691) | round(3) }}"
+      - action: utility_meter.calibrate
+        target:
+          entity_id: sensor.lin_socket_01_energie_mensuelle_hc
+        data:
+          value: "{{ (states('sensor.lin_socket_01_energie_mensuelle_hc') | float(0) + manquant | float(0) * 0.309) | round(3) }}"
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.calibration_aout_prise_01
 
 automation:
+  - id: bascule_tarif_lin_socket_01
+    alias: "Bascule heures pleines / creuses - prise 01"
+    description: >-
+      Aligne le tarif actif des deux compteurs sur la plage d'heures creuses.
+    mode: single
+    triggers:
+      - trigger: state
+        entity_id: binary_sensor.heures_creuses
+        to:
+          - "on"
+          - "off"
+    actions:
+      - action: select.select_option
+        target:
+          entity_id:
+            - select.lin_socket_01_energie_mensuelle
+            - select.lin_socket_01_energie_totale
+        data:
+          option: "{{ 'hc' if is_state('binary_sensor.heures_creuses', 'on') else 'hp' }}"
+
   - id: rapport_mensuel_conso_lin_socket_01
     alias: "Rapport mensuel - consommation prise 01"
     description: >-
@@ -66,37 +248,46 @@ automation:
         value_template: "{{ now().day == 1 }}"
     actions:
       - variables:
-          kwh: "{{ state_attr('sensor.lin_socket_01_energie_mensuelle', 'last_period') | float(0) }}"
-          kwh_courant: "{{ states('sensor.lin_socket_01_energie_mensuelle') | float(0) }}"
-          prix: >-
-            {% set p = states('input_number.prix_kwh') | float(0) %}{{ p if p > 0 else 0.2016 }}
+          hp: "{{ state_attr('sensor.lin_socket_01_energie_mensuelle_hp', 'last_period') | float(0) }}"
+          hc: "{{ state_attr('sensor.lin_socket_01_energie_mensuelle_hc', 'last_period') | float(0) }}"
+          hp_courant: "{{ states('sensor.lin_socket_01_energie_mensuelle_hp') | float(0) }}"
+          hc_courant: "{{ states('sensor.lin_socket_01_energie_mensuelle_hc') | float(0) }}"
+          php: >-
+            {%- set p = states('input_number.prix_kwh_hp') | float(0) -%}{{ p if p > 0 else 0.2142 }}
+          phc: >-
+            {%- set p = states('input_number.prix_kwh_hc') | float(0) -%}{{ p if p > 0 else 0.1589 }}
           # Derive the month from last_reset, the start of the current cycle,
           # rather than from today's date, so a manual run stays accurate.
           mois: >-
-            {%- set lr = state_attr('sensor.lin_socket_01_energie_mensuelle', 'last_reset') -%}
+            {%- set lr = state_attr('sensor.lin_socket_01_energie_mensuelle_hp', 'last_reset') -%}
             {%- set debut = (lr | as_datetime | as_local) if lr else now().replace(day=1) -%}
             {%- set d = debut - timedelta(days=1) -%}
             {%- set noms = ['janvier','fevrier','mars','avril','mai','juin','juillet','aout','septembre','octobre','novembre','decembre'] -%}
             {{ noms[d.month - 1] }} {{ d.year }}
+      - variables:
+          total: "{{ (hp | float(0) + hc | float(0)) | round(3) }}"
+          total_courant: "{{ (hp_courant | float(0) + hc_courant | float(0)) | round(3) }}"
+          cout: "{{ (hp | float(0) * php | float(0) + hc | float(0) * phc | float(0)) | round(2) }}"
+          cout_courant: "{{ (hp_courant | float(0) * php | float(0) + hc_courant | float(0) * phc | float(0)) | round(2) }}"
       - action: persistent_notification.create
         data:
           notification_id: rapport_conso_lin_socket_01
           title: "Conso prise 01 - {{ mois }}"
           message: |-
-            Energie consommee : {{ kwh | float(0) | round(3) }} kWh
-            Cout estime : {{ (kwh | float(0) * prix | float(0)) | round(2) }} EUR
-            Tarif applique : {{ prix | float(0) }} EUR/kWh
-            Mois en cours : {{ kwh_courant | float(0) | round(3) }} kWh soit {{ (kwh_courant | float(0) * prix | float(0)) | round(2) }} EUR
+            Energie consommee : {{ total }} kWh ({{ hp | float(0) | round(3) }} HP + {{ hc | float(0) | round(3) }} HC)
+            Cout estime : {{ cout }} EUR
+            Tarifs appliques : {{ php }} HP / {{ phc }} HC EUR/kWh
+            Mois en cours : {{ total_courant }} kWh soit {{ cout_courant }} EUR
       - action: logbook.log
         data:
           name: "Rapport conso prise 01"
-          message: "{{ mois }} : {{ kwh | float(0) | round(3) }} kWh pour {{ (kwh | float(0) * prix | float(0)) | round(2) }} EUR"
+          message: "{{ mois }} : {{ total }} kWh pour {{ cout }} EUR"
       # Last, so a webhook failure cannot swallow the two local traces above.
       - action: rest_command.discord_notify
         data:
           message: |-
             **Conso prise 01 — {{ mois }}**
-            Energie consommee : {{ kwh | float(0) | round(3) }} kWh
-            Cout estime : {{ (kwh | float(0) * prix | float(0)) | round(2) }} EUR
-            Tarif applique : {{ prix | float(0) }} EUR/kWh
-            Mois en cours : {{ kwh_courant | float(0) | round(3) }} kWh soit {{ (kwh_courant | float(0) * prix | float(0)) | round(2) }} EUR
+            Energie consommee : {{ total }} kWh ({{ hp | float(0) | round(3) }} HP + {{ hc | float(0) | round(3) }} HC)
+            Cout estime : {{ cout }} EUR
+            Tarifs appliques : {{ php }} HP / {{ phc }} HC EUR/kWh
+            Mois en cours : {{ total_courant }} kWh soit {{ cout_courant }} EUR

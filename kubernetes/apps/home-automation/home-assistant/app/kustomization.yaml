@@ -17,7 +17,7 @@ configMapGenerator:
       - ./config/packages/discord.yaml
   - name: home-assistant-dashboards
     files:
-      - ./config/dashboards/energie.yaml
+      - ./config/dashboards/conso-prises.yaml
 
 generatorOptions:
   disableNameSuffixHash: true
