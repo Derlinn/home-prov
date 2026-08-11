@@ -7,5 +7,6 @@ resources:
   - ./secret.sops.yaml
   - ./helmrelease.yaml
   - ./longhorn-production-v1.yaml
+  - ./recurringjobs.yaml
   - ./httproute.yaml
   - ./grafanadashboard.yaml
