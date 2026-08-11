@@ -14,9 +14,6 @@ spec:
       gatus:
         annotations:
           reloader.stakater.com/auto: "true"
-        # SQLite file on a RWO Longhorn volume. With RollingUpdate the new pod
-        # starts before the old one stops and both mount the same volume, which
-        # corrupts the database. Recreate guarantees a single writer.
         strategy: Recreate
         containers:
           app:
@@ -25,7 +22,7 @@ spec:
               tag: v5.36.0
             env:
               TZ: Europe/Paris
-              GATUS_CONFIG_PATH: /config/config.yaml
+              GATUS_CONFIG_PATH: /config
               DISCORD_WEBHOOK_URL:
                 valueFrom:
                   secretKeyRef:
@@ -96,4 +93,11 @@ spec:
         globalMounts:
           - path: /config/config.yaml
             subPath: config.yaml
+            readOnly: true
+      alerting:
+        type: configMap
+        name: gatus-alerting
+        globalMounts:
+          - path: /config/alerting.yaml
+            subPath: alerting.yaml
             readOnly: true

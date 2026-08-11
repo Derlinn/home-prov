@@ -12,9 +12,12 @@ configMapGenerator:
   - name: gatus-config
     files:
       - ./config/config.yaml
+  - name: gatus-alerting
+    files:
+      - ./config/alerting.yaml
+    options:
+      annotations:
+        kustomize.toolkit.fluxcd.io/substitute: disabled
 
-# Gatus reads its configuration once at startup. A stable ConfigMap name lets
-# Reloader restart the pod on change; a hashed name would make the HelmRelease
-# reference a ConfigMap that no longer exists.
 generatorOptions:
   disableNameSuffixHash: true

@@ -3,22 +3,6 @@
 # the "accepted status codes 200-299" rule expressed as two conditions.
 metrics: true
 
-# Le webhook est injecte par la variable d'environnement DISCORD_WEBHOOK_URL
-# (secret gatus-discord). Le `$$` echappe la substitution Flux : postBuild le
-# rend comme `${DISCORD_WEBHOOK_URL}`, que Gatus resout ensuite au demarrage.
-# Sans cet echappement, Flux ne trouverait pas la variable dans cluster-settings
-# et la remplacerait par une chaine vide, desactivant silencieusement l'alerting.
-alerting:
-  discord:
-    webhook-url: $${DISCORD_WEBHOOK_URL}
-    title: ":helmet_with_white_cross: Gatus | Linderis"
-    # 3 echecs consecutifs a 60s d'intervalle = ~3 min avant d'alerter, ce qui
-    # evite le bruit lors d'un redemarrage de pod ou d'un microcoupure reseau.
-    default-alert:
-      failure-threshold: 3
-      success-threshold: 2
-      send-on-resolved: true
-
 storage:
   type: sqlite
   path: /data/data.db

@@ -1,0 +1,9 @@
+---
+alerting:
+  discord:
+    webhook-url: ${DISCORD_WEBHOOK_URL}
+    title: ":helmet_with_white_cross: Gatus | Linderis"
+    default-alert:
+      failure-threshold: 3
+      success-threshold: 2
+      send-on-resolved: true
