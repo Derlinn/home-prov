@@ -33,6 +33,9 @@ spec:
             envFrom:
               - secretRef:
                   name: zigbee2mqtt-secret
+            securityContext:
+              # Required to lift the cgroup device filter blocking /dev/ttyUSB0.
+              privileged: true
             resources:
               requests:
                 cpu: 50m
