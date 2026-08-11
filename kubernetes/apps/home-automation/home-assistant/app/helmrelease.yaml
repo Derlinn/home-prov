@@ -21,6 +21,29 @@ spec:
       main:
         # RWO Longhorn volume + SQLite: never let two pods mount /config at once.
         strategy: Recreate
+        initContainers:
+          # Installs hass-oidc-auth from Git rather than HACS, so the version
+          # stays declarative. No shell variables: Flux substitutes ${...}.
+          install-oidc:
+            image:
+              repository: alpine
+              tag: "3.22"
+            command:
+              - /bin/sh
+              - -c
+              # renovate: datasource=github-releases depName=christiaangoossens/hass-oidc-auth
+              - |
+                set -eu
+                if grep -qx 1.1.1 /config/custom_components/auth_oidc/.installed_version 2>/dev/null; then
+                  echo "auth_oidc 1.1.1 already installed"
+                  exit 0
+                fi
+                rm -rf /config/custom_components/auth_oidc
+                mkdir -p /config/custom_components/auth_oidc
+                wget -qO /tmp/oidc.zip https://github.com/christiaangoossens/hass-oidc-auth/releases/download/v1.1.1/hass-oidc-auth.zip
+                unzip -q /tmp/oidc.zip -d /config/custom_components/auth_oidc
+                echo 1.1.1 > /config/custom_components/auth_oidc/.installed_version
+                echo "auth_oidc 1.1.1 installed"
         containers:
           app:
             image:
