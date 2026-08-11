@@ -15,6 +15,9 @@ configMapGenerator:
     files:
       - ./config/packages/conso_prise_lin_socket_01.yaml
       - ./config/packages/discord.yaml
+  - name: home-assistant-dashboards
+    files:
+      - ./config/dashboards/energie.yaml
 
 generatorOptions:
   disableNameSuffixHash: true

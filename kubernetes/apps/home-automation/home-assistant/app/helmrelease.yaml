@@ -72,3 +72,10 @@ spec:
           - path: /config/secrets.yaml
             subPath: secrets.yaml
             readOnly: true
+
+      dashboards:
+        type: configMap
+        name: home-assistant-dashboards
+        globalMounts:
+          - path: /config/dashboards
+            readOnly: true

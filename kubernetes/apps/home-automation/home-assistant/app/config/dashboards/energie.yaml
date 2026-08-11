@@ -1,0 +1,42 @@
+---
+views:
+  - title: Prise 01
+    path: prise-01
+    icon: mdi:power-socket-fr
+    cards:
+      - type: entities
+        title: Mois en cours
+        state_color: true
+        entities:
+          - entity: sensor.lin_socket_01_energie_mensuelle
+            name: Energie consommee
+          - entity: sensor.prise_01_cout_mensuel
+            name: Cout estime
+          - entity: sensor.lin_socket_01_power
+            name: Puissance instantanee
+
+      - type: entities
+        title: Mois precedent
+        entities:
+          - entity: sensor.prise_01_energie_mois_precedent
+            name: Energie consommee
+          - entity: sensor.prise_01_cout_mois_precedent
+            name: Cout estime
+
+      - type: statistics-graph
+        title: Consommation par jour
+        chart_type: bar
+        period: day
+        days_to_show: 31
+        stat_types:
+          - change
+        entities:
+          - sensor.lin_socket_01_energy
+
+      - type: entities
+        title: Reglages
+        entities:
+          - entity: input_number.prix_kwh
+            name: Prix du kWh
+          - entity: automation.rapport_mensuel_consommation_prise_01
+            name: Rapport mensuel

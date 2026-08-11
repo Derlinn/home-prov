@@ -67,6 +67,7 @@ automation:
     actions:
       - variables:
           kwh: "{{ state_attr('sensor.lin_socket_01_energie_mensuelle', 'last_period') | float(0) }}"
+          kwh_courant: "{{ states('sensor.lin_socket_01_energie_mensuelle') | float(0) }}"
           prix: >-
             {% set p = states('input_number.prix_kwh') | float(0) %}{{ p if p > 0 else 0.2016 }}
           # Derive the month from last_reset, the start of the current cycle,
@@ -85,10 +86,12 @@ automation:
             Energie consommee : {{ kwh | float(0) | round(3) }} kWh
             Cout estime : {{ (kwh | float(0) * prix | float(0)) | round(2) }} EUR
             Tarif applique : {{ prix | float(0) }} EUR/kWh
+            Mois en cours : {{ kwh_courant | float(0) | round(3) }} kWh soit {{ (kwh_courant | float(0) * prix | float(0)) | round(2) }} EUR
       - action: logbook.log
         data:
           name: "Rapport conso prise 01"
           message: "{{ mois }} : {{ kwh | float(0) | round(3) }} kWh pour {{ (kwh | float(0) * prix | float(0)) | round(2) }} EUR"
+      # Last, so a webhook failure cannot swallow the two local traces above.
       - action: rest_command.discord_notify
         data:
           message: |-
@@ -96,3 +99,4 @@ automation:
             Energie consommee : {{ kwh | float(0) | round(3) }} kWh
             Cout estime : {{ (kwh | float(0) * prix | float(0)) | round(2) }} EUR
             Tarif applique : {{ prix | float(0) }} EUR/kWh
+            Mois en cours : {{ kwh_courant | float(0) | round(3) }} kWh soit {{ (kwh_courant | float(0) * prix | float(0)) | round(2) }} EUR

@@ -14,10 +14,20 @@ automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 
-# TLS is terminated by Envoy Gateway; Home Assistant listens in clear text on
-# 8123 behind it. Without trusted_proxies it answers 400 to every proxied
-# request.
-http:
-  use_x_forwarded_for: true
-  trusted_proxies:
-    - 10.42.0.0/16
+# An extra dashboard alongside the default one, which stays editable in the UI.
+# This one is read-only by design: it comes from Git.
+lovelace:
+  mode: storage
+  dashboards:
+    energie-prise:
+      mode: yaml
+      title: Energie
+      icon: mdi:lightning-bolt
+      show_in_sidebar: true
+      filename: dashboards/energie.yaml
+
+# The http block used to set use_x_forwarded_for and trusted_proxies, needed
+# because TLS is terminated by Envoy Gateway. Home Assistant migrated it to
+# .storage/http and ignores the YAML since 2026.8, dropping it entirely in
+# 2027.2. Those settings now live on the PVC, outside Git: manage them under
+# Settings > System > Network.
