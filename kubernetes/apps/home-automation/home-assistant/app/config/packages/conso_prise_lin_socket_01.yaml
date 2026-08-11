@@ -40,6 +40,8 @@ input_datetime:
     has_time: true
 
 input_boolean:
+  # TODO: remove after the September report, along with the calibration script
+  # and its automation. One-shot backfill for August 2026 only.
   calibration_aout_prise_01:
     name: Calibration aout 2026 effectuee
     icon: mdi:check-decagram
@@ -177,6 +179,8 @@ template:
             + (states('sensor.lin_socket_01_energie_totale_hc') | float(0) * phc)) | round(2) }}
 
 script:
+  # TODO: remove after the September report. The 329.05 reference and the
+  # 0.691/0.309 split only mean something for August 2026.
   calibrer_aout_prise_01:
     alias: "Calibrer le compteur d'aout - prise 01"
     icon: mdi:calendar-sync
@@ -220,20 +224,30 @@ script:
           entity_id: input_boolean.calibration_aout_prise_01
 
 automation:
+  # TODO: remove after the September report. Already done its job once
+  # input_boolean.calibration_aout_prise_01 is on.
   - id: calibration_initiale_aout_lin_socket_01
     alias: "Calibration initiale du compteur d'aout - prise 01"
     description: >-
-      Declenche le rattrapage tout seul au demarrage, pour que les chiffres
-      soient justes sans intervention. Le script porte ses propres garde-fous,
-      donc rejouer cette automatisation ne double rien.
+      Declenche le rattrapage tout seul, sans intervention. Se rejoue a chaque
+      mise a jour du compteur tant qu'il n'a pas abouti, donc un redemarrage en
+      cours de route ne le perd pas. Le script porte ses propres garde-fous.
     mode: single
     triggers:
-      - trigger: homeassistant
-        event: start
+      - trigger: state
+        entity_id: sensor.lin_socket_01_energie_mensuelle_hp
+    conditions:
+      - condition: state
+        entity_id: input_boolean.calibration_aout_prise_01
+        state: "off"
+      # Every source value must be a real number, otherwise the missing amount
+      # is computed against zeroes and the meters get a bogus value.
+      - condition: template
+        value_template: >-
+          {{ states('sensor.lin_socket_01_energy') | is_number
+             and states('sensor.lin_socket_01_energie_mensuelle_hp') | is_number
+             and states('sensor.lin_socket_01_energie_mensuelle_hc') | is_number }}
     actions:
-      # Leave the utility_meter entities time to restore their state, otherwise
-      # the missing amount is computed against zeroes.
-      - delay: "00:02:00"
       - action: script.calibrer_aout_prise_01
 
   - id: bascule_tarif_lin_socket_01
