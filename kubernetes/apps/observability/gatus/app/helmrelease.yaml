@@ -26,6 +26,11 @@ spec:
             env:
               TZ: Europe/Paris
               GATUS_CONFIG_PATH: /config/config.yaml
+              DISCORD_WEBHOOK_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: gatus-discord
+                    key: DISCORD_WEBHOOK_URL
             probes:
               liveness: &probes
                 enabled: true

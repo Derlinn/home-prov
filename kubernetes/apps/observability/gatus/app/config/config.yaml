@@ -3,6 +3,22 @@
 # the "accepted status codes 200-299" rule expressed as two conditions.
 metrics: true
 
+# Le webhook est injecte par la variable d'environnement DISCORD_WEBHOOK_URL
+# (secret gatus-discord). Le `$$` echappe la substitution Flux : postBuild le
+# rend comme `${DISCORD_WEBHOOK_URL}`, que Gatus resout ensuite au demarrage.
+# Sans cet echappement, Flux ne trouverait pas la variable dans cluster-settings
+# et la remplacerait par une chaine vide, desactivant silencieusement l'alerting.
+alerting:
+  discord:
+    webhook-url: $${DISCORD_WEBHOOK_URL}
+    title: ":helmet_with_white_cross: Gatus | Linderis"
+    # 3 echecs consecutifs a 60s d'intervalle = ~3 min avant d'alerter, ce qui
+    # evite le bruit lors d'un redemarrage de pod ou d'un microcoupure reseau.
+    default-alert:
+      failure-threshold: 3
+      success-threshold: 2
+      send-on-resolved: true
+
 storage:
   type: sqlite
   path: /data/data.db
@@ -21,24 +37,29 @@ endpoints:
     conditions: &http-2xx
       - "[STATUS] >= 200"
       - "[STATUS] < 300"
+    alerts: &discord-alert
+      - type: discord
 
   - name: Prometheus
     group: infrastructure
     url: https://prometheus.${DOMAIN}
     interval: 60s
     conditions: *http-2xx
+    alerts: *discord-alert
 
   - name: Longhorn
     group: infrastructure
     url: https://longhorn.${DOMAIN}
     interval: 60s
     conditions: *http-2xx
+    alerts: *discord-alert
 
   - name: Authentik
     group: infrastructure
     url: https://authentik.${DOMAIN}
     interval: 60s
     conditions: *http-2xx
+    alerts: *discord-alert
 
   # --- Réseau -----------------------------------------------------------
   # Headscale and Headplane were disabled in Uptime Kuma and are left out.
@@ -47,12 +68,14 @@ endpoints:
     url: https://power-dns.${DOMAIN}
     interval: 60s
     conditions: *http-2xx
+    alerts: *discord-alert
 
   - name: Adguard
     group: Réseau
     url: https://adguard.${DOMAIN}
     interval: 60s
     conditions: *http-2xx
+    alerts: *discord-alert
 
   # --- Sécurité ---------------------------------------------------------
   - name: Vaultwarden
@@ -60,6 +83,7 @@ endpoints:
     url: https://vaultwarden.${DOMAIN}/alive
     interval: 60s
     conditions: *http-2xx
+    alerts: *discord-alert
 
   # --- Applications -----------------------------------------------------
   - name: Netbox
@@ -67,12 +91,14 @@ endpoints:
     url: https://netbox.${DOMAIN}
     interval: 60s
     conditions: *http-2xx
+    alerts: *discord-alert
 
   - name: BenToPDF
     group: Applications
     url: https://bentopdf.${DOMAIN}
     interval: 60s
     conditions: *http-2xx
+    alerts: *discord-alert
 
   # --- Media ------------------------------------------------------------
   - name: Jellyfin
@@ -80,42 +106,49 @@ endpoints:
     url: https://jellyfin.${DOMAIN}/health
     interval: 60s
     conditions: *http-2xx
+    alerts: *discord-alert
 
   - name: Jellyseerr
     group: Media
     url: https://jellyseerr.${DOMAIN}/api/v1/status
     interval: 60s
     conditions: *http-2xx
+    alerts: *discord-alert
 
   - name: Sonarr
     group: Media
     url: https://sonarr.${DOMAIN}/ping
     interval: 60s
     conditions: *http-2xx
+    alerts: *discord-alert
 
   - name: Radarr
     group: Media
     url: https://radarr.${DOMAIN}/ping
     interval: 60s
     conditions: *http-2xx
+    alerts: *discord-alert
 
   - name: Prowlarr
     group: Media
     url: https://prowlarr.${DOMAIN}/ping
     interval: 60s
     conditions: *http-2xx
+    alerts: *discord-alert
 
   - name: Bazarr
     group: Media
     url: https://bazarr.${DOMAIN}
     interval: 60s
     conditions: *http-2xx
+    alerts: *discord-alert
 
   - name: qBittorrent
     group: Media
     url: https://qbit.${DOMAIN}
     interval: 60s
     conditions: *http-2xx
+    alerts: *discord-alert
 
   # --- Hardware ---------------------------------------------------------
   - name: LIN-NAS-01
@@ -124,3 +157,4 @@ endpoints:
     interval: 60s
     conditions:
       - "[CONNECTED] == true"
+    alerts: *discord-alert
