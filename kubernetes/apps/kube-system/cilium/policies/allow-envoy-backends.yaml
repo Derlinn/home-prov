@@ -79,3 +79,6 @@ spec:
             # home-assistant
             - port: "8123"
               protocol: TCP
+            # maigret
+            - port: "5000"
+              protocol: TCP
