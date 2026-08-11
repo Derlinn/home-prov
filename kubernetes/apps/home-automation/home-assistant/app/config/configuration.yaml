@@ -38,7 +38,7 @@ auth_oidc:
   discovery_url: "https://authentik.${DOMAIN}/application/o/home-assistant/.well-known/openid-configuration"
   display_name: "Authentik"
   roles:
-    admin: "Home Assistant Admins"
+    admin: "linderis_home_assistant_admins"
     user: "linderis_home_assistant"
   features:
     # Reuses the existing local account instead of creating a fresh one.
