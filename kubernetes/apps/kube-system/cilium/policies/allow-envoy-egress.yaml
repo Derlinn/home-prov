@@ -75,3 +75,6 @@ spec:
             # gitlab webservice (workhorse)
             - port: "8181"
               protocol: TCP
+            # maigret
+            - port: "5000"
+              protocol: TCP
