@@ -14,7 +14,7 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: "NAS Asustor inaccessible depuis {{ $value | humanizeDuration }}"
+            summary: "Asustor NAS unreachable for {{ $value | humanizeDuration }}"
 
         - alert: AsustorReboot
           expr: node_time_seconds{instance="asustor-1022t"} - node_boot_time_seconds{instance="asustor-1022t"} < 300
@@ -22,7 +22,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "NAS Asustor a redémarré (uptime {{ $value | humanizeDuration }})"
+            summary: "Asustor NAS rebooted (uptime {{ $value | humanizeDuration }})"
 
         - alert: AsustorClockDrift
           expr: |
@@ -31,7 +31,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "Horloge du NAS décalée de {{ $value | humanizeDuration }}"
+            summary: "NAS clock drifted by {{ $value | humanizeDuration }}"
 
     - name: asustor.system
       rules:
@@ -41,7 +41,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "NAS CPU élevé ({{ $value | humanize }}%)"
+            summary: "NAS high CPU ({{ $value | humanize }}%)"
 
         - alert: AsustorHighMemory
           expr: |
@@ -50,7 +50,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "NAS mémoire élevée ({{ $value | humanize }}% utilisée)"
+            summary: "NAS high memory ({{ $value | humanize }}% used)"
 
     - name: asustor.disk
       rules:
@@ -61,7 +61,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "NAS volume {{ $labels.mountpoint }} utilisé à {{ $value | humanize }}%"
+            summary: "NAS volume {{ $labels.mountpoint }} is {{ $value | humanize }}% full"
 
         - alert: AsustorDiskUsageCritical
           expr: |
@@ -70,7 +70,7 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: "NAS volume {{ $labels.mountpoint }} critique ({{ $value | humanize }}% utilisé)"
+            summary: "NAS volume {{ $labels.mountpoint }} critical ({{ $value | humanize }}% used)"
 
         - alert: AsustorDiskIOSaturated
           expr: rate(node_disk_io_time_seconds_total{instance="asustor-1022t", device="sda"}[5m]) > 0.9
@@ -78,7 +78,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "NAS disque sda saturé ({{ $value | humanizePercentage }} IO utilization)"
+            summary: "NAS disk sda saturated ({{ $value | humanizePercentage }} IO utilization)"
 
     - name: asustor.smart
       rules:
@@ -88,7 +88,7 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: "NAS disque {{ $labels.device }} — panne SMART imminente"
+            summary: "NAS disk {{ $labels.device }} — SMART failure imminent"
 
         - alert: AsustorDiskHighTemperature
           expr: smartctl_device_temperature{instance="asustor-1022t", temperature_type="current"} > 50
@@ -96,7 +96,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "NAS disque {{ $labels.device }} température élevée ({{ $value }}°C)"
+            summary: "NAS disk {{ $labels.device }} high temperature ({{ $value }}°C)"
 
         - alert: AsustorDiskCriticalTemperature
           expr: smartctl_device_temperature{instance="asustor-1022t", temperature_type="current"} > 60
@@ -104,7 +104,7 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: "NAS disque {{ $labels.device }} température critique ({{ $value }}°C)"
+            summary: "NAS disk {{ $labels.device }} critical temperature ({{ $value }}°C)"
 
         - alert: AsustorDiskReallocatedSectors
           expr: |
@@ -113,7 +113,7 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: "NAS disque {{ $labels.device }} secteurs réalloués détectés ({{ $value }}) — disque défaillant"
+            summary: "NAS disk {{ $labels.device }} reallocated sectors detected ({{ $value }}) — failing disk"
 
         - alert: AsustorDiskPendingSectors
           expr: |
@@ -122,7 +122,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "NAS disque {{ $labels.device }} secteurs en attente ({{ $value }}) — données potentiellement perdues"
+            summary: "NAS disk {{ $labels.device }} pending sectors ({{ $value }}) — potential data loss"
 
         - alert: AsustorDiskUDMACRCErrors
           expr: |
@@ -131,7 +131,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "NAS erreurs CRC UDMA sur {{ $labels.device }} — câble SATA défectueux ?"
+            summary: "NAS UDMA CRC errors on {{ $labels.device }} — faulty SATA cable?"
 
     - name: asustor.network
       rules:
@@ -143,7 +143,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "NAS interface {{ $labels.device }} saturée ({{ $value | humanize }}bps)"
+            summary: "NAS interface {{ $labels.device }} saturated ({{ $value | humanize }}bps)"
 
         - alert: AsustorNetworkErrors
           expr: |
@@ -153,4 +153,4 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "NAS erreurs réseau sur {{ $labels.device }} ({{ $value | humanize }}/s)"
+            summary: "NAS network errors on {{ $labels.device }} ({{ $value | humanize }}/s)"

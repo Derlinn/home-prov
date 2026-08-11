@@ -14,7 +14,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "{{ $labels.routerboard_name }} a redémarré (uptime {{ $value | humanizeDuration }})"
+            summary: "{{ $labels.routerboard_name }} rebooted (uptime {{ $value | humanizeDuration }})"
 
         - alert: MikrotikHighCPU
           expr: mktxp_system_cpu_load > 80
@@ -22,7 +22,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "{{ $labels.routerboard_name }} CPU élevé ({{ $value }}%)"
+            summary: "{{ $labels.routerboard_name }} high CPU ({{ $value }}%)"
 
         - alert: MikrotikHighMemory
           expr: mktxp_system_free_memory / mktxp_system_total_memory * 100 < 10
@@ -30,7 +30,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "{{ $labels.routerboard_name }} mémoire faible ({{ $value | humanizePercentage }} libre)"
+            summary: "{{ $labels.routerboard_name }} low memory ({{ $value | humanizePercentage }} free)"
 
         - alert: MikrotikLowDiskSpace
           # A percentage, not an absolute size: the fleet ranges from 16 MiB of
@@ -41,7 +41,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "{{ $labels.routerboard_name }} espace disque faible ({{ $value | printf \"%.1f\" }} % libre)"
+            summary: "{{ $labels.routerboard_name }} low disk space ({{ $value | printf \"%.1f\" }} % free)"
 
         - alert: MikrotikHighTemperature
           expr: mktxp_system_cpu_temperature > 70 or mktxp_system_board_temperature1 > 70
@@ -49,7 +49,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "{{ $labels.routerboard_name }} température élevée ({{ $value }}°C)"
+            summary: "{{ $labels.routerboard_name }} high temperature ({{ $value }}°C)"
 
         - alert: MikrotikCriticalTemperature
           expr: mktxp_system_cpu_temperature > 80 or mktxp_system_board_temperature1 > 80
@@ -57,7 +57,7 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: "{{ $labels.routerboard_name }} température critique ({{ $value }}°C) — risque matériel"
+            summary: "{{ $labels.routerboard_name }} critical temperature ({{ $value }}°C) — hardware at risk"
 
         - alert: MikrotikVoltageAnomaly
           expr: mktxp_system_routerboard_voltage < 10 or mktxp_system_routerboard_voltage > 28
@@ -65,7 +65,7 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: "{{ $labels.routerboard_name }} tension anormale ({{ $value }}V)"
+            summary: "{{ $labels.routerboard_name }} abnormal voltage ({{ $value }}V)"
 
     - name: mikrotik.network
       rules:
@@ -78,7 +78,7 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: "{{ $labels.routerboard_name }} interface physique {{ $labels.name }} est down"
+            summary: "{{ $labels.routerboard_name }} physical interface {{ $labels.name }} is down"
 
         - alert: MikrotikLinkFlapping
           expr: increase(mktxp_link_downs_total[10m]) > 5
@@ -86,7 +86,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "{{ $labels.routerboard_name }} interface {{ $labels.name }} flapping ({{ $value }} drops en 10min)"
+            summary: "{{ $labels.routerboard_name }} interface {{ $labels.name }} flapping ({{ $value }} drops in 10min)"
 
         - alert: MikrotikWANSaturated
           expr: |
@@ -101,7 +101,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "WAN RB5009 saturé ({{ $value | humanizePercentage }} de {{ $labels.name }})"
+            summary: "RB5009 WAN saturated ({{ $value | humanizePercentage }} of {{ $labels.name }})"
 
         - alert: MikrotikTrunkSaturated
           expr: |
@@ -116,7 +116,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "{{ $labels.routerboard_name }} lien trunk {{ $labels.name }} saturé ({{ $value | humanizePercentage }})"
+            summary: "{{ $labels.routerboard_name }} trunk link {{ $labels.name }} saturated ({{ $value | humanizePercentage }})"
 
         - alert: MikrotikHighConnections
           expr: mktxp_ip_connections_total > 50000
@@ -124,7 +124,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "{{ $labels.routerboard_name }} connexions IP élevées ({{ $value }})"
+            summary: "{{ $labels.routerboard_name }} high IP connection count ({{ $value }})"
 
         - alert: MikrotikSwitchFCSErrors
           expr: rate(mktxp_switch_rx_fcs_error_total[5m]) > 1
@@ -132,7 +132,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "{{ $labels.routerboard_name }} port {{ $labels.name }} FCS errors (câble/transceiver défectueux ?)"
+            summary: "{{ $labels.routerboard_name }} port {{ $labels.name }} FCS errors (faulty cable or transceiver?)"
 
         - alert: MikrotikSwitchHighDrops
           expr: |
@@ -141,7 +141,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "{{ $labels.routerboard_name }} port {{ $labels.name }} drops élevés ({{ $value | humanize }}/s)"
+            summary: "{{ $labels.routerboard_name }} port {{ $labels.name }} high drops ({{ $value | humanize }}/s)"
 
         - alert: MikrotikSwitchBufferOverflow
           expr: rate(mktxp_switch_rx_overflow_total[5m]) > 0
@@ -149,7 +149,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "{{ $labels.routerboard_name }} port {{ $labels.name }} buffer overflow — congestion switch"
+            summary: "{{ $labels.routerboard_name }} port {{ $labels.name }} buffer overflow — switch congestion"
 
     - name: mikrotik.services
       rules:
@@ -159,7 +159,7 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: "{{ $labels.routerboard_name }} session BGP {{ $labels.name }} down"
+            summary: "{{ $labels.routerboard_name }} BGP session {{ $labels.name }} is down"
 
         - alert: MikrotikDHCPPoolNearlyFull
           expr: mktxp_ip_pool_used > 200
@@ -167,7 +167,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "{{ $labels.routerboard_name }} pool DHCP {{ $labels.pool }} proche de la saturation ({{ $value }} leases)"
+            summary: "{{ $labels.routerboard_name }} DHCP pool {{ $labels.pool }} nearly full ({{ $value }} leases)"
 
         - alert: MikrotikCAPsManAllAPsOffline
           expr: count(mktxp_capsman_remote_caps_info{routerboard_name="RB5009"}) == 0
@@ -175,7 +175,7 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: "RB5009 — aucun AP CAPsMAN enregistré"
+            summary: "RB5009 — no CAPsMAN AP registered"
 
         - alert: MikrotikCAPsManAPLost
           expr: |
@@ -185,7 +185,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "RB5009 — un AP CAPsMAN a disparu ({{ $value }} AP(s) enregistrés)"
+            summary: "RB5009 — a CAPsMAN AP disappeared ({{ $value }} AP(s) registered)"
 
         - alert: MikrotikBlacklistRapidGrowth
           expr: |
@@ -194,7 +194,7 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "{{ $labels.routerboard_name }} blacklist en croissance rapide (+{{ $value }} entrées en 1h — scan/attaque en cours ?)"
+            summary: "{{ $labels.routerboard_name }} blacklist growing rapidly (+{{ $value }} entries in 1h — scan or attack in progress?)"
 
         - alert: MikrotikRoutingProcessHighMemory
           expr: mktxp_routing_stats_private_mem > 104857600
@@ -202,4 +202,4 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "{{ $labels.routerboard_name }} processus de routage mémoire élevée ({{ $value | humanize1024 }}B)"
+            summary: "{{ $labels.routerboard_name }} routing process high memory ({{ $value | humanize1024 }}B)"
