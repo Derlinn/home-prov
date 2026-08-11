@@ -19,7 +19,7 @@ spec:
   values:
     controllers:
       main:
-        replicas: 0
+        replicas: 1
         containers:
           app:
             image:
@@ -29,6 +29,7 @@ spec:
               TZ: "Europe/Paris"
               ZIGBEE2MQTT_DATA: /app/data
               ZIGBEE2MQTT_CONFIG_MQTT_SERVER: mqtt://mosquitto:1883
+              ZIGBEE2MQTT_CONFIG_FRONTEND_PORT: "8080"
             envFrom:
               - secretRef:
                   name: zigbee2mqtt-secret
