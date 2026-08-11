@@ -199,6 +199,12 @@ script:
             {{ (states('sensor.lin_socket_01_energy') | float(0) - 329.05
               - states('sensor.lin_socket_01_energie_mensuelle_hp') | float(0)
               - states('sensor.lin_socket_01_energie_mensuelle_hc') | float(0)) | round(3) }}
+      # Refuse to run outside the month this backfill was computed for, and
+      # refuse to lower the meters, whatever the guard says.
+      - condition: template
+        value_template: "{{ now().year == 2026 and now().month == 8 }}"
+      - condition: template
+        value_template: "{{ manquant | float(0) > 0 }}"
       - action: utility_meter.calibrate
         target:
           entity_id: sensor.lin_socket_01_energie_mensuelle_hp
@@ -214,6 +220,22 @@ script:
           entity_id: input_boolean.calibration_aout_prise_01
 
 automation:
+  - id: calibration_initiale_aout_lin_socket_01
+    alias: "Calibration initiale du compteur d'aout - prise 01"
+    description: >-
+      Declenche le rattrapage tout seul au demarrage, pour que les chiffres
+      soient justes sans intervention. Le script porte ses propres garde-fous,
+      donc rejouer cette automatisation ne double rien.
+    mode: single
+    triggers:
+      - trigger: homeassistant
+        event: start
+    actions:
+      # Leave the utility_meter entities time to restore their state, otherwise
+      # the missing amount is computed against zeroes.
+      - delay: "00:02:00"
+      - action: script.calibrer_aout_prise_01
+
   - id: bascule_tarif_lin_socket_01
     alias: "Bascule heures pleines / creuses - prise 01"
     description: >-
