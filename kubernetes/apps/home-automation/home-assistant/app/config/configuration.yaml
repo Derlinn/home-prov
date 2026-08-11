@@ -5,6 +5,10 @@ default_config:
 # read-only on /config/packages. Edit them in Git, not through the UI.
 homeassistant:
   packages: !include_dir_named packages
+  # Absolute URLs built by integrations (OIDC redirect_uri, notifications).
+  # Must match the HTTPRoute hostname, not the retired HAOS VM.
+  external_url: "https://ha.${DOMAIN}"
+  internal_url: "https://ha.${DOMAIN}"
 
 # Load frontend themes from the themes folder
 frontend:
