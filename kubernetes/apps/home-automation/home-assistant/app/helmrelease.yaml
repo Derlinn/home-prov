@@ -19,6 +19,8 @@ spec:
   values:
     controllers:
       main:
+        # RWO Longhorn volume + SQLite: never let two pods mount /config at once.
+        strategy: Recreate
         containers:
           app:
             image:
