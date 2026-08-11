@@ -50,3 +50,17 @@ spec:
         size: 5Gi
         globalMounts:
           - path: /config
+      configuration:
+        type: configMap
+        name: home-assistant-configuration
+        globalMounts:
+          - path: /config/configuration.yaml
+            subPath: configuration.yaml
+            readOnly: true
+
+      packages:
+        type: configMap
+        name: home-assistant-packages
+        globalMounts:
+          - path: /config/packages
+            readOnly: true

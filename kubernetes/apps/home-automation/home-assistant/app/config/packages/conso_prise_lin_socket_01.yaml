@@ -1,0 +1,85 @@
+---
+# Suivi mensuel de la consommation et du coût de la prise connectée
+# lin_socket_01.
+# Source : sensor.lin_socket_01_energy (kWh cumulés, remontés par Zigbee2MQTT).
+
+input_number:
+  prix_kwh:
+    name: Prix du kWh
+    icon: mdi:currency-eur
+    min: 0
+    max: 2
+    step: 0.0001
+    mode: box
+    unit_of_measurement: "EUR/kWh"
+
+utility_meter:
+  lin_socket_01_energie_mensuelle:
+    source: sensor.lin_socket_01_energy
+    cycle: monthly
+
+template:
+  - sensor:
+      - name: "Prise 01 cout mensuel"
+        unique_id: lin_socket_01_cout_mensuel
+        unit_of_measurement: "EUR"
+        device_class: monetary
+        state_class: total
+        icon: mdi:cash-clock
+        state: >-
+          {% set prix = states('input_number.prix_kwh') | float(0) %}
+          {% set prix = prix if prix > 0 else 0.2016 %}
+          {{ (states('sensor.lin_socket_01_energie_mensuelle') | float(0) * prix) | round(2) }}
+
+      - name: "Prise 01 energie mois precedent"
+        unique_id: lin_socket_01_energie_mois_precedent
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: total
+        icon: mdi:calendar-arrow-left
+        state: >-
+          {{ state_attr('sensor.lin_socket_01_energie_mensuelle', 'last_period') | float(0) | round(3) }}
+
+      - name: "Prise 01 cout mois precedent"
+        unique_id: lin_socket_01_cout_mois_precedent
+        unit_of_measurement: "EUR"
+        device_class: monetary
+        state_class: total
+        icon: mdi:cash-check
+        state: >-
+          {% set prix = states('input_number.prix_kwh') | float(0) %}
+          {% set prix = prix if prix > 0 else 0.2016 %}
+          {{ (state_attr('sensor.lin_socket_01_energie_mensuelle', 'last_period') | float(0) * prix) | round(2) }}
+
+automation:
+  - id: rapport_mensuel_conso_lin_socket_01
+    alias: "Rapport mensuel - consommation prise 01"
+    description: >-
+      Publie le 1er de chaque mois le bilan du mois écoulé
+      (énergie consommée + coût) pour la prise lin_socket_01.
+    mode: single
+    triggers:
+      - trigger: time
+        at: "00:10:00"
+    conditions:
+      - condition: template
+        value_template: "{{ now().day == 1 }}"
+    actions:
+      - variables:
+          kwh: "{{ state_attr('sensor.lin_socket_01_energie_mensuelle', 'last_period') | float(0) }}"
+          prix: >-
+            {% set p = states('input_number.prix_kwh') | float(0) %}{{ p if p > 0 else 0.2016 }}
+          mois: >-
+            {% set d = now().replace(day=1) - timedelta(days=1) %}{% set noms = ['janvier','fevrier','mars','avril','mai','juin','juillet','aout','septembre','octobre','novembre','decembre'] %}{{ noms[d.month - 1] }} {{ d.year }}
+      - action: persistent_notification.create
+        data:
+          notification_id: rapport_conso_lin_socket_01
+          title: "Conso prise 01 - {{ mois }}"
+          message: |-
+            Energie consommee : {{ kwh | float(0) | round(3) }} kWh
+            Cout estime : {{ (kwh | float(0) * prix | float(0)) | round(2) }} EUR
+            Tarif applique : {{ prix | float(0) }} EUR/kWh
+      - action: logbook.log
+        data:
+          name: "Rapport conso prise 01"
+          message: "{{ mois }} : {{ kwh | float(0) | round(3) }} kWh pour {{ (kwh | float(0) * prix | float(0)) | round(2) }} EUR"

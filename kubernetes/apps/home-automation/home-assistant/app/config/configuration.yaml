@@ -1,0 +1,23 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Packages are provided by the home-assistant-packages ConfigMap, mounted
+# read-only on /config/packages. Edit them in Git, not through the UI.
+homeassistant:
+  packages: !include_dir_named packages
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+# TLS is terminated by Envoy Gateway; Home Assistant listens in clear text on
+# 8123 behind it. Without trusted_proxies it answers 400 to every proxied
+# request.
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 10.42.0.0/16

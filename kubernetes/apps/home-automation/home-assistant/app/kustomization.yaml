@@ -5,3 +5,14 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
   - ./httproute.yaml
+
+configMapGenerator:
+  - name: home-assistant-configuration
+    files:
+      - ./config/configuration.yaml
+  - name: home-assistant-packages
+    files:
+      - ./config/packages/conso_prise_lin_socket_01.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
