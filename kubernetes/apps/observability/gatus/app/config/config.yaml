@@ -1,6 +1,4 @@
 ---
-# Ported from Uptime Kuma: same endpoints, same groups, same 60s interval and
-# the "accepted status codes 200-299" rule expressed as two conditions.
 metrics: true
 
 storage:
@@ -141,4 +139,60 @@ endpoints:
     interval: 60s
     conditions:
       - "[CONNECTED] == true"
+    alerts: *discord-alert
+
+  - name: LIN-PVE-01
+    group: Hardware
+    url: tcp://10.25.30.20:8006
+    interval: 60s
+    conditions:
+      - "[CONNECTED] == true"
+    alerts: *discord-alert
+
+  # --- Domotique --------------------------------------------------------
+  - name: Home Assistant
+    group: Domotique
+    url: https://ha.${DOMAIN}
+    interval: 60s
+    conditions: *http-2xx
+    alerts: *discord-alert
+
+  - name: Zigbee2MQTT
+    group: Domotique
+    url: https://z2m.${DOMAIN}
+    interval: 60s
+    conditions: *http-2xx
+    alerts: *discord-alert
+
+  # --- DNS --------------------------------------------------------------
+  - name: DNS interne
+    group: Réseau
+    url: 10.25.30.4
+    dns:
+      query-name: grafana.${DOMAIN}
+      query-type: A
+    interval: 60s
+    conditions:
+      - "[DNS_RCODE] == NOERROR"
+      - "[BODY] == 10.25.50.126"
+    alerts: *discord-alert
+
+  - name: DNS récursif
+    group: Réseau
+    url: 10.25.30.4
+    dns:
+      query-name: cloudflare.com
+      query-type: A
+    interval: 60s
+    conditions:
+      - "[DNS_RCODE] == NOERROR"
+    alerts: *discord-alert
+
+  # --- Certificats ------------------------------------------------------
+  - name: Certificat TLS
+    group: Sécurité
+    url: https://grafana.${DOMAIN}
+    interval: 1h
+    conditions:
+      - "[CERTIFICATE_EXPIRATION] > 240h"
     alerts: *discord-alert
