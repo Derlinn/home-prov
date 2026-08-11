@@ -27,7 +27,7 @@ spec:
           install-oidc:
             image:
               repository: alpine
-              tag: "3.22"
+              tag: "3.24"
             command:
               - /bin/sh
               - -c
