@@ -56,7 +56,7 @@ spec:
         name: pgdata
       spec:
         accessModes: ["ReadWriteOnce"]
-        storageClassName: longhorn-production-v1
+        storageClassName: longhorn-encrypted-v1
         resources:
           requests:
             storage: 2Gi
