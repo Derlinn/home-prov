@@ -11,3 +11,4 @@ resources:
   - ./namespace.yaml
   - ./mosquitto/ks.yaml
   - ./home-assistant/ks.yaml
+  - ./zigbee2mqtt/ks.yaml
