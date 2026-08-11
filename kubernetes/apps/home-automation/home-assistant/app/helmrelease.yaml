@@ -64,3 +64,11 @@ spec:
         globalMounts:
           - path: /config/packages
             readOnly: true
+
+      secrets:
+        type: secret
+        name: home-assistant-secrets
+        globalMounts:
+          - path: /config/secrets.yaml
+            subPath: secrets.yaml
+            readOnly: true

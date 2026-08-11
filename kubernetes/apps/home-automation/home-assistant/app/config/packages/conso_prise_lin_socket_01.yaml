@@ -89,3 +89,10 @@ automation:
         data:
           name: "Rapport conso prise 01"
           message: "{{ mois }} : {{ kwh | float(0) | round(3) }} kWh pour {{ (kwh | float(0) * prix | float(0)) | round(2) }} EUR"
+      - action: rest_command.discord_notify
+        data:
+          message: |-
+            **Conso prise 01 — {{ mois }}**
+            Energie consommee : {{ kwh | float(0) | round(3) }} kWh
+            Cout estime : {{ (kwh | float(0) * prix | float(0)) | round(2) }} EUR
+            Tarif applique : {{ prix | float(0) }} EUR/kWh
