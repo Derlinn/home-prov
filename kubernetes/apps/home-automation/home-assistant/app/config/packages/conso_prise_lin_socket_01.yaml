@@ -1,7 +1,7 @@
 ---
-# Suivi mensuel de la consommation et du coût de la prise connectée
-# lin_socket_01.
-# Source : sensor.lin_socket_01_energy (kWh cumulés, remontés par Zigbee2MQTT).
+# Monthly energy and cost tracking for the lin_socket_01 smart plug.
+# Source: sensor.lin_socket_01_energy, a cumulative kWh counter fed by
+# Zigbee2MQTT.
 
 input_number:
   prix_kwh:
@@ -69,8 +69,14 @@ automation:
           kwh: "{{ state_attr('sensor.lin_socket_01_energie_mensuelle', 'last_period') | float(0) }}"
           prix: >-
             {% set p = states('input_number.prix_kwh') | float(0) %}{{ p if p > 0 else 0.2016 }}
+          # Derive the month from last_reset, the start of the current cycle,
+          # rather than from today's date, so a manual run stays accurate.
           mois: >-
-            {% set d = now().replace(day=1) - timedelta(days=1) %}{% set noms = ['janvier','fevrier','mars','avril','mai','juin','juillet','aout','septembre','octobre','novembre','decembre'] %}{{ noms[d.month - 1] }} {{ d.year }}
+            {%- set lr = state_attr('sensor.lin_socket_01_energie_mensuelle', 'last_reset') -%}
+            {%- set debut = (lr | as_datetime | as_local) if lr else now().replace(day=1) -%}
+            {%- set d = debut - timedelta(days=1) -%}
+            {%- set noms = ['janvier','fevrier','mars','avril','mai','juin','juillet','aout','septembre','octobre','novembre','decembre'] -%}
+            {{ noms[d.month - 1] }} {{ d.year }}
       - action: persistent_notification.create
         data:
           notification_id: rapport_conso_lin_socket_01
