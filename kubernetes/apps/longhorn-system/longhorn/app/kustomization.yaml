@@ -7,6 +7,8 @@ resources:
   - ./secret.sops.yaml
   - ./helmrelease.yaml
   - ./longhorn-production-v1.yaml
+  - ./longhorn-encrypted-v1.yaml
+  - ./secret-crypto.sops.yaml
   - ./recurringjobs.yaml
   - ./prometheusrule.yaml
   - ./httproute.yaml
