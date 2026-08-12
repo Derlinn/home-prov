@@ -15,10 +15,22 @@ spec:
       labels:
         app.kubernetes.io/name: inp-calendar-rs
     spec:
+      securityContext:
+        fsGroup: 65532
+        fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: inp-calendar-rs
-          image: ghcr.io/akt0o/inp-calendar-rs:v0.0.1
+          image: ghcr.io/akt0o/inp-calendar-rs:v0.0.2
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsGroup: 65532
+            runAsNonRoot: true
+            runAsUser: 65532
           env:
             - name: TZ
               value: Europe/Paris
