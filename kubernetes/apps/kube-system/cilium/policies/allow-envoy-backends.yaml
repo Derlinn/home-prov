@@ -82,3 +82,6 @@ spec:
             # maigret
             - port: "5000"
               protocol: TCP
+            # social-analyzer
+            - port: "9005"
+              protocol: TCP
