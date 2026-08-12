@@ -100,6 +100,19 @@
       ignoreTests: false,
     },
     {
+      // Still on 0.0.x, where a feature release is a minor bump, so patch
+      // alone would leave most releases waiting on a manual merge. Confined to
+      // its own namespace under a scoped ServiceAccount, and a plain Deployment
+      // that reverts in one commit, so the blast radius stays local.
+      description: "Auto-merge the INP calendar bot",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/inp-calendar-bot/"],
+      matchUpdateTypes: ["minor", "patch"],
+      automerge: true,
+      automergeType: "pr",
+      ignoreTests: false,
+    },
+    {
       description: "Auto-merge GitHub Actions",
       matchManagers: ["github-actions"],
       matchUpdateTypes: ["minor", "patch", "digest"],

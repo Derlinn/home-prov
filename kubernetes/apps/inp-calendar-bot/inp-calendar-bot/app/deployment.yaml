@@ -17,8 +17,8 @@ spec:
     spec:
       containers:
         - name: inp-calendar-bot
-          image: ghcr.io/akt0o/inp-calendar-bot:latest
-          imagePullPolicy: Always
+          image: ghcr.io/akt0o/inp-calendar-bot:0.0.1
+          imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "-c"]
           args:
             - |

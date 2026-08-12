@@ -7,5 +7,3 @@ resources:
   - pvc.yaml
   - secret.sops.yaml
   - pull-secret.sops.yaml
-  - rbac.yaml
-  - cronjob.yaml

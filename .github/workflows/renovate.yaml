@@ -65,6 +65,11 @@ jobs:
           RENOVATE_AUTODISCOVER: true
           RENOVATE_AUTODISCOVER_FILTER: ${{ github.repository }}
           RENOVATE_DRY_RUN: ${{ inputs.dryRun }}
+          # ghcr.io/akt0o/inp-calendar-bot is private, so tag lookups are
+          # anonymous-denied without this. The App token cannot read the
+          # container registry: a PAT with read:packages is required.
+          RENOVATE_HOST_RULES: >-
+            [{"hostType":"docker","matchHost":"ghcr.io","username":"Derlinn","password":"${{ secrets.GHCR_READ_TOKEN }}"}]
           RENOVATE_INTERNAL_CHECKS_FILTER: strict
           RENOVATE_PLATFORM: github
           RENOVATE_PLATFORM_COMMIT: true

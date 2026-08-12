@@ -19,26 +19,19 @@ rules:
       - configmaps
       - persistentvolumeclaims
       - secrets
-      - serviceaccounts
       - services
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
   - apiGroups: ["apps"]
     resources: ["deployments"]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
-  - apiGroups: ["batch"]
-    resources: ["cronjobs", "jobs"]
-    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # Read-only, for the `wait: true` health check: kstatus walks a Deployment
+  # down to its ReplicaSets and Pods to decide whether the rollout is done.
   - apiGroups: ["apps"]
     resources: ["replicasets"]
     verbs: ["get", "list", "watch"]
   - apiGroups: [""]
     resources: ["pods"]
     verbs: ["get", "list", "watch"]
-  # For app/rbac.yaml. RBAC escalation prevention caps what can be granted
-  # to what this Role already holds.
-  - apiGroups: ["rbac.authorization.k8s.io"]
-    resources: ["roles", "rolebindings"]
-    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
