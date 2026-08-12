@@ -29,8 +29,14 @@ spec:
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "-c"]
           args:
-            - pip install --no-cache-dir --user user-scanner ignorant
-              && exec sleep infinity
+            # Retry rather than crash-loop: the install needs vpn-proxy, which may
+            # not be up yet when this pod starts.
+            - |
+              until pip install --no-cache-dir --user user-scanner ignorant; do
+                echo "install failed, retrying in 30s" >&2
+                sleep 30
+              done
+              exec sleep infinity
           env:
             - name: HOME
               value: /home/osint
