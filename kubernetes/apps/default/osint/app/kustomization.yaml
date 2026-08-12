@@ -7,5 +7,9 @@ resources:
   - maigret-deployment.yaml
   - maigret-service.yaml
   - maigret-httproute.yaml
+  - social-analyzer-pvc.yaml
+  - social-analyzer-deployment.yaml
+  - social-analyzer-service.yaml
+  - social-analyzer-httproute.yaml
   - cli-pvc.yaml
   - cli-deployment.yaml

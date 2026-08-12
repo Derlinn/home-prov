@@ -1,0 +1,114 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: social-analyzer
+  namespace: default
+  labels:
+    app.kubernetes.io/name: social-analyzer
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: social-analyzer
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: social-analyzer
+        app.kubernetes.io/part-of: osint
+        vpn-proxy-client: "true"
+        egress: vpn-only
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: social-analyzer
+          # Upstream ships no image (its compose file builds from source), so the
+          # app is built at startup on the PVC and kept there across restarts.
+          image: docker.io/node:22
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "-c"]
+          args:
+            # Retry rather than crash-loop: fetching sources needs vpn-proxy,
+            # which may not be up yet when this pod starts. A failed attempt
+            # wipes the tree so a half-built checkout cannot wedge the pod.
+            - |
+              set -e
+              until { [ -d /app/src/.git ] || git clone --depth 1 https://github.com/qeeqbox/social-analyzer.git /app/src; } \
+                    && cd /app/src && npm ci --omit=dev --ignore-scripts; do
+                echo "setup failed, retrying in 30s" >&2
+                rm -rf /app/src
+                sleep 30
+              done
+              cd /app/src
+              # NodeJS ignores HTTPS_PROXY, and the app only wires a proxy agent
+              # when one is saved from the web UI. Patch the shared request
+              # options instead, otherwise every scan is dropped by the
+              # deny-direct-egress policy.
+              grep -q HttpsProxyAgent modules/helper.js || sed -i \
+                -e "s#^const proxy = ''#const proxy = process.env.HTTPS_PROXY || ''#" \
+                -e "s#^export default {#import HttpsProxyAgent from 'https-proxy-agent'\nif (proxy !== '') { header_options.agent = HttpsProxyAgent(proxy) }\nexport default {#" \
+                modules/helper.js
+              # Fail loudly if upstream moved the anchors: no proxy means no scan.
+              grep -q "header_options.agent" modules/helper.js
+              exec npm start -- --docker
+          env:
+            - name: HOME
+              value: /app
+            - name: HTTP_PROXY
+              value: http://vpn-proxy.vpn.svc.cluster.local:8888
+            - name: HTTPS_PROXY
+              value: http://vpn-proxy.vpn.svc.cluster.local:8888
+            # Lowercase duplicates required: git shells out to libcurl, which
+            # ignores the uppercase HTTP_PROXY (httpoxy mitigation).
+            - name: http_proxy
+              value: http://vpn-proxy.vpn.svc.cluster.local:8888
+            - name: https_proxy
+              value: http://vpn-proxy.vpn.svc.cluster.local:8888
+            - name: NO_PROXY
+              value: 10.0.0.0/8,192.168.0.0/16,localhost,127.0.0.1,.svc.cluster.local
+            - name: no_proxy
+              value: 10.0.0.0/8,192.168.0.0/16,localhost,127.0.0.1,.svc.cluster.local
+          ports:
+            - name: http
+              containerPort: 9005
+          startupProbe:
+            httpGet:
+              path: /app.html
+              port: http
+            periodSeconds: 10
+            failureThreshold: 90
+          readinessProbe:
+            httpGet:
+              path: /app.html
+              port: http
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /app.html
+              port: http
+            periodSeconds: 30
+            failureThreshold: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: data
+              mountPath: /app
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: social-analyzer-data

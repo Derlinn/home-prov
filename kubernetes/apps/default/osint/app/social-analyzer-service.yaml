@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: social-analyzer
+  namespace: default
+  labels:
+    app.kubernetes.io/name: social-analyzer
+spec:
+  selector:
+    app.kubernetes.io/name: social-analyzer
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
