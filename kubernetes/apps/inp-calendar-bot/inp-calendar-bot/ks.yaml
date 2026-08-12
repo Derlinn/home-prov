@@ -6,12 +6,12 @@ metadata:
   name: inp-calendar-bot
 spec:
   interval: 1h
-  path: ./kubernetes/apps/default/inp-calendar-bot/app
+  path: ./kubernetes/apps/inp-calendar-bot/inp-calendar-bot/app
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: default
+  targetNamespace: inp-calendar-bot
   wait: true
   timeout: 5m

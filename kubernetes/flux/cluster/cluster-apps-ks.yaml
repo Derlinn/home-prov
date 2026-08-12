@@ -69,3 +69,23 @@ spec:
       target:
         group: kustomize.toolkit.fluxcd.io
         kind: Kustomization
+    # Tenant isolation for directories co-owned by an outside contributor.
+    #
+    # Lives here rather than in the app's own ks.yaml, which sits in the
+    # directory the contributor may edit.
+    #
+    # - serviceAccountName: apply as a namespace-scoped SA instead of
+    #   kustomize-controller's cluster-admin.
+    # - secretRef removed: keeps the age private key out of the tenant
+    #   namespace, where any pod could mount it. kustomize-controller falls
+    #   back to its --sops-age-secret key in flux-system.
+    - patch: |-
+        - op: remove
+          path: /spec/decryption/secretRef
+        - op: add
+          path: /spec/serviceAccountName
+          value: flux-inp-calendar-bot
+      target:
+        group: kustomize.toolkit.fluxcd.io
+        kind: Kustomization
+        name: inp-calendar-bot

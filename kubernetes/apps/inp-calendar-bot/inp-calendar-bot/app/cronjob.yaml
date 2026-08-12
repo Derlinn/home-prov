@@ -3,7 +3,6 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: inp-calendar-bot-updater
-  namespace: default
 spec:
   schedule: "*/5 * * * *"
   concurrencyPolicy: Forbid
@@ -40,7 +39,7 @@ spec:
               args:
                 - |
                   set -eu
-                  NAMESPACE=default
+                  NAMESPACE=inp-calendar-bot
                   DEPLOYMENT=inp-calendar-bot
                   CONFIGMAP=inp-calendar-bot-image-digest
 

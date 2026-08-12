@@ -1,0 +1,47 @@
+---
+# Identity Flux impersonates when applying ./inp-calendar-bot/app, which is
+# co-owned by an external contributor (see .github/CODEOWNERS). Without it
+# Flux applies as cluster-admin and a ClusterRoleBinding dropped in that
+# directory would own the cluster.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: flux-inp-calendar-bot
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: flux-inp-calendar-bot
+rules:
+  # Only the kinds the app actually ships. Anything else fails at apply.
+  - apiGroups: [""]
+    resources:
+      - configmaps
+      - persistentvolumeclaims
+      - secrets
+      - serviceaccounts
+      - services
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["batch"]
+    resources: ["cronjobs", "jobs"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # For app/rbac.yaml. RBAC escalation prevention caps what can be granted
+  # to what this Role already holds.
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["roles", "rolebindings"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: flux-inp-calendar-bot
+subjects:
+  - kind: ServiceAccount
+    name: flux-inp-calendar-bot
+roleRef:
+  kind: Role
+  name: flux-inp-calendar-bot
+  apiGroup: rbac.authorization.k8s.io
