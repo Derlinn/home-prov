@@ -1,0 +1,9 @@
+# CODEOWNERS grants no write access. It only forces a review, and only if
+# `Require review from Code Owners` is enabled on main. Last match wins.
+
+* @Derlinn
+
+# Bot app manifests. Applied by Flux under a namespace-scoped ServiceAccount
+# (kubernetes/apps/inp-calendar-bot/tenant-rbac.yaml), which is not editable
+# from here.
+/kubernetes/apps/inp-calendar-bot/inp-calendar-bot/app/ @Derlinn @Akt0o

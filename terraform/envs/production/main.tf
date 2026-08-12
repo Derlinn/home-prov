@@ -143,7 +143,10 @@ resource "kubernetes_secret" "sops_age_key" {
     name      = "sops-age"
     namespace = "flux-system"
     annotations = {
-      "replicator.v1.mittwald.de/replicate-to" = "*"
+      # Explicit allow-list, not "*". Any pod can mount any Secret in its own
+      # namespace, so a wildcard hands the age private key to every workload,
+      # including tenant namespaces owned by outside contributors.
+      "replicator.v1.mittwald.de/replicate-to" = "kube-system,cert-manager,authentik,observability,network,kubernetes-replicator,default,longhorn-system,vaultwarden,system-upgrade,kube-green,media-server,devtools,home-automation"
     }
   }
 
