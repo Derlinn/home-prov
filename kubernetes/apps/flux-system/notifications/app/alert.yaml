@@ -24,7 +24,7 @@ spec:
     - { kind: Kustomization, name: "*", namespace: flux-system }
     - { kind: Kustomization, name: "*", namespace: kube-green }
     - { kind: Kustomization, name: "*", namespace: kube-system }
-    - { kind: Kustomization, name: "*", namespace: kubernetes-replicator }
+    - { kind: Kustomization, name: "*", namespace: inp-calendar-bot }
     - { kind: Kustomization, name: "*", namespace: longhorn-system }
     - { kind: Kustomization, name: "*", namespace: media-server }
     - { kind: Kustomization, name: "*", namespace: network }
@@ -38,7 +38,7 @@ spec:
     - { kind: HelmRelease, name: "*", namespace: flux-system }
     - { kind: HelmRelease, name: "*", namespace: kube-green }
     - { kind: HelmRelease, name: "*", namespace: kube-system }
-    - { kind: HelmRelease, name: "*", namespace: kubernetes-replicator }
+    - { kind: HelmRelease, name: "*", namespace: inp-calendar-bot }
     - { kind: HelmRelease, name: "*", namespace: longhorn-system }
     - { kind: HelmRelease, name: "*", namespace: media-server }
     - { kind: HelmRelease, name: "*", namespace: network }
