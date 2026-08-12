@@ -30,8 +30,8 @@ resources:
     - ./allow-mktxp-egress.yaml
     - ./allow-asustor-egress.yaml
     - ./allow-blackbox-egress.yaml
-    - ./allow-osint-vpn-egress.yaml
-    - ./deny-osint-direct-egress.yaml
+    - ./allow-vpn-proxy.yaml
+    - ./deny-direct-egress.yaml
     # DEPRECATED 2026-08-11 : ./allow-uptime-kuma-egress.yaml remplace par ./allow-gatus-egress.yaml
     - ./allow-gatus-egress.yaml
     - ./default-deny.yaml

@@ -1,0 +1,87 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpn-proxy
+  namespace: network
+  labels:
+    app.kubernetes.io/name: vpn-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vpn-proxy
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: vpn-proxy
+    spec:
+      containers:
+        - name: gluetun
+          image: ghcr.io/qdm12/gluetun:latest
+          securityContext:
+            capabilities:
+              add: ["NET_ADMIN"]
+          env:
+            - name: VPN_SERVICE_PROVIDER
+              value: protonvpn
+            - name: VPN_TYPE
+              value: wireguard
+            # Western Europe keeps latency bounded and results reproducible.
+            # Netherlands is left out on purpose: vpn-stack uses it for
+            # qBittorrent, and the same server would mean the same exit IP.
+            - name: SERVER_COUNTRIES
+              value: France,Belgium,Germany,Switzerland,Spain,Italy
+            - name: WIREGUARD_ALLOWED_IPS
+              value: 0.0.0.0/0
+            - name: WIREGUARD_MTU
+              value: "1200"
+            - name: HTTPPROXY
+              value: "on"
+            - name: HTTPPROXY_LISTENING_ADDRESS
+              value: ":8888"
+            - name: FIREWALL_INPUT_PORTS
+              value: "8888"
+            - name: FIREWALL_OUTBOUND_SUBNETS
+              value: 10.25.0.0/16,10.42.0.0/16,10.43.0.0/16,192.168.0.0/16
+            - name: BLOCK_IPV6
+              value: "on"
+            - name: DOT
+              value: "off"
+            - name: DNS_ADDRESS
+              value: 1.1.1.1
+            - name: HEALTH_TARGET_ADDRESS
+              value: 1.1.1.1:443
+            - name: UPDATER_PERIOD
+              value: 24h
+          envFrom:
+            - secretRef:
+                name: gluetun-credentials
+          ports:
+            - name: http-proxy
+              containerPort: 8888
+          readinessProbe:
+            tcpSocket:
+              port: http-proxy
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: http-proxy
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 5
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: "1"
+              memory: 256Mi
+          volumeMounts:
+            - name: tun
+              mountPath: /dev/net/tun
+      volumes:
+        - name: tun
+          hostPath:
+            path: /dev/net/tun

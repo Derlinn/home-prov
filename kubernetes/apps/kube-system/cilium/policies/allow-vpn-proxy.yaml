@@ -1,0 +1,68 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# Shared VPN egress proxy. Any pod labelled vpn-proxy-client can reach it,
+# whatever its namespace, so applications depend on network rather than on
+# another application namespace.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-vpn-proxy-clients
+spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
+  endpointSelector:
+    matchLabels:
+      vpn-proxy-client: "true"
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: network
+            app.kubernetes.io/name: vpn-proxy
+      toPorts:
+        - ports:
+            - port: "8888"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-vpn-proxy-ingress
+spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
+  endpointSelector:
+    matchLabels:
+      io.kubernetes.pod.namespace: network
+      app.kubernetes.io/name: vpn-proxy
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            vpn-proxy-client: "true"
+      toPorts:
+        - ports:
+            - port: "8888"
+              protocol: TCP
+---
+# The proxy is the one pod that must reach the internet directly, to bring the
+# WireGuard tunnel up.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-vpn-proxy-wireguard
+spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
+  endpointSelector:
+    matchLabels:
+      io.kubernetes.pod.namespace: network
+      app.kubernetes.io/name: vpn-proxy
+  egress:
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "51820"
+              protocol: UDP

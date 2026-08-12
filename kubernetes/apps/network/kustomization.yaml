@@ -16,3 +16,4 @@ resources:
   - ./external-dns/ks.yaml
   - ./rathole/ks.yaml
   - ./echo/ks.yaml
+  - ./vpn-proxy/ks.yaml

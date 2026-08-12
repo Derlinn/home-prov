@@ -18,6 +18,8 @@ spec:
       labels:
         app.kubernetes.io/name: maigret
         app.kubernetes.io/part-of: osint
+        vpn-proxy-client: "true"
+        egress: vpn-only
     spec:
       securityContext:
         fsGroup: 1000
@@ -29,9 +31,9 @@ spec:
             # Egress through the gluetun HTTP proxy; aiohttp sessions are built
             # with trust_env=True, so these are honoured.
             - name: HTTP_PROXY
-              value: http://vpn-stack.media-server.svc.cluster.local:8888
+              value: http://vpn-proxy.network.svc.cluster.local:8888
             - name: HTTPS_PROXY
-              value: http://vpn-stack.media-server.svc.cluster.local:8888
+              value: http://vpn-proxy.network.svc.cluster.local:8888
             - name: NO_PROXY
               value: 10.0.0.0/8,192.168.0.0/16,localhost,127.0.0.1,.svc.cluster.local
           ports:
