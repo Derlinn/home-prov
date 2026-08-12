@@ -145,27 +145,3 @@ spec:
           target:
             kind: Deployment
             name: kustomize-controller
-        - patch: |
-            apiVersion: apps/v1
-            kind: Deployment
-            metadata:
-              name: kustomize-controller
-            spec:
-              template:
-                spec:
-                  containers:
-                    - name: manager
-                      env:
-                        - name: GNUPGHOME
-                          value: /tmp/.gnupg
-                      volumeMounts:
-                        - name: sops-age
-                          mountPath: /age
-                          readOnly: true
-                  volumes:
-                    - name: sops-age
-                      secret:
-                        secretName: sops-age
-          target:
-            kind: Deployment
-            name: kustomize-controller
