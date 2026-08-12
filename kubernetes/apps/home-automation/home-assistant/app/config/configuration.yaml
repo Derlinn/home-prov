@@ -47,3 +47,4 @@ auth_oidc:
   features:
     # Reuses the existing local account instead of creating a fresh one.
     automatic_user_linking: true
+    force_https: true
