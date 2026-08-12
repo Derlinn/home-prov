@@ -11,6 +11,19 @@ spec:
       namespace: network
       sectionName: https
   rules:
+    - matches:
+        - path:
+            type: Exact
+            value: /
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /app.html
+      backendRefs:
+        - name: social-analyzer
+          port: 80
     - backendRefs:
         - name: social-analyzer
           port: 80
