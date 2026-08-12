@@ -93,23 +93,12 @@
       matchDatasources: ["docker", "helm"],
       matchFileNames: ["kubernetes/**"],
       matchUpdateTypes: ["patch"],
-      matchPackageNames: ["!/longhorn/", "!/siderolabs/"],
+      // inp-calendar-bot is excluded so the soak below does not apply to it;
+      // it has its own rule after zer0ver.
+      matchPackageNames: ["!/longhorn/", "!/siderolabs/", "!/inp-calendar-bot/"],
       automerge: true,
       automergeType: "pr",
       minimumReleaseAge: "3 days",
-      ignoreTests: false,
-    },
-    {
-      // Still on 0.0.x, where a feature release is a minor bump, so patch
-      // alone would leave most releases waiting on a manual merge. Confined to
-      // its own namespace under a scoped ServiceAccount, and a plain Deployment
-      // that reverts in one commit, so the blast radius stays local.
-      description: "Auto-merge the INP calendar bot",
-      matchDatasources: ["docker"],
-      matchPackageNames: ["/inp-calendar-bot/"],
-      matchUpdateTypes: ["minor", "patch"],
-      automerge: true,
-      automergeType: "pr",
       ignoreTests: false,
     },
     {
@@ -175,6 +164,15 @@
       matchUpdateTypes: ["minor"],
       matchCurrentVersion: "/^v?0\\./",
       automerge: false,
+    },
+    {
+      description: "Auto-merge the INP calendar bot",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/inp-calendar-bot/"],
+      matchUpdateTypes: ["minor", "patch"],
+      automerge: true,
+      automergeType: "pr",
+      ignoreTests: false,
     },
     // Grouping rules
     {
@@ -342,6 +340,7 @@
       matchDatasources: ["docker", "helm"],
       matchUpdateTypes: ["minor"],
       matchCurrentVersion: "/^v?0\\./",
+      matchPackageNames: ["!/inp-calendar-bot/"],
       minimumReleaseAge: "7 days",
     },
     // Labeling rules
