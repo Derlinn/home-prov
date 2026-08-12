@@ -10,8 +10,10 @@ resources:
   - observability
   - cert-manager
   - network
+  - vpn
   - kubernetes-replicator
   - default
+  - inp-calendar-bot
   - longhorn-system
   - vaultwarden
   - system-upgrade

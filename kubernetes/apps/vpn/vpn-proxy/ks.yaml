@@ -6,10 +6,10 @@ metadata:
   name: vpn-proxy
 spec:
   interval: 1h
-  path: ./kubernetes/apps/network/vpn-proxy/app
+  path: ./kubernetes/apps/vpn/vpn-proxy/app
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: network
+  targetNamespace: vpn

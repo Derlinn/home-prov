@@ -29,8 +29,8 @@ spec:
               PUID: "1001"
               PGID: "1001"
               TZ: "Europe/Paris"
-              HTTP_PROXY: "http://vpn-proxy.network.svc.cluster.local:8888"
-              HTTPS_PROXY: "http://vpn-proxy.network.svc.cluster.local:8888"
+              HTTP_PROXY: "http://vpn-proxy.vpn.svc.cluster.local:8888"
+              HTTPS_PROXY: "http://vpn-proxy.vpn.svc.cluster.local:8888"
               NO_PROXY: "10.0.0.0/8,192.168.0.0/16,media-server.svc.cluster.local,addic7ed.com,www.addic7ed.com,gestdown.info,www.gestdown.info"
             probes:
               liveness:

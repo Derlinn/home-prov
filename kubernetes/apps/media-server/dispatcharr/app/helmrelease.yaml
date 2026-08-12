@@ -33,8 +33,8 @@ spec:
               REDIS_HOST: "localhost"
               CELERY_BROKER_URL: "redis://localhost:6379/0"
               DISPATCHARR_LOG_LEVEL: "info"
-              HTTP_PROXY: "http://vpn-proxy.network.svc.cluster.local:8888"
-              HTTPS_PROXY: "http://vpn-proxy.network.svc.cluster.local:8888"
+              HTTP_PROXY: "http://vpn-proxy.vpn.svc.cluster.local:8888"
+              HTTPS_PROXY: "http://vpn-proxy.vpn.svc.cluster.local:8888"
               NO_PROXY: "10.0.0.0/8,192.168.0.0/16,media-server.svc.cluster.local"
             probes:
               liveness:

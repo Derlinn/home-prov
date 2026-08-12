@@ -28,9 +28,9 @@ spec:
               PUID: "1001"
               PGID: "1001"
               TZ: "Europe/Paris"
-              HTTP_PROXY: "http://vpn-proxy.network.svc.cluster.local:8888"
-              HTTPS_PROXY: "http://vpn-proxy.network.svc.cluster.local:8888"
-              NO_PROXY: "localhost,127.0.0.1,10.0.0.0/8,192.168.0.0/16,vpn-proxy.network.svc.cluster.local,${DOMAIN},.${DOMAIN}"
+              HTTP_PROXY: "http://vpn-proxy.vpn.svc.cluster.local:8888"
+              HTTPS_PROXY: "http://vpn-proxy.vpn.svc.cluster.local:8888"
+              NO_PROXY: "localhost,127.0.0.1,10.0.0.0/8,192.168.0.0/16,vpn-proxy.vpn.svc.cluster.local,${DOMAIN},.${DOMAIN}"
             probes:
               liveness:
                 enabled: true

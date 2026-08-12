@@ -17,7 +17,7 @@ spec:
   egress:
     - toEndpoints:
         - matchLabels:
-            io.kubernetes.pod.namespace: network
+            io.kubernetes.pod.namespace: vpn
             app.kubernetes.io/name: vpn-proxy
       toPorts:
         - ports:
@@ -34,7 +34,7 @@ spec:
     ingress: false
   endpointSelector:
     matchLabels:
-      io.kubernetes.pod.namespace: network
+      io.kubernetes.pod.namespace: vpn
       app.kubernetes.io/name: vpn-proxy
   ingress:
     - fromEndpoints:
@@ -57,7 +57,7 @@ spec:
     ingress: false
   endpointSelector:
     matchLabels:
-      io.kubernetes.pod.namespace: network
+      io.kubernetes.pod.namespace: vpn
       app.kubernetes.io/name: vpn-proxy
   egress:
     - toEntities:

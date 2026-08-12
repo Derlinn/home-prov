@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vpn
+  labels:
+    # Gluetun needs NET_ADMIN and a hostPath on /dev/net/tun. Keeping it in its
+    # own namespace confines the PodSecurity exception to this single pod,
+    # instead of relaxing admission for the gateways living in network.
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/warn: privileged
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled

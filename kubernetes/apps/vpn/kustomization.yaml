@@ -2,17 +2,11 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: network
+namespace: vpn
 
 components:
   - ../../components/cluster-settings
 
 resources:
   - ./namespace.yaml
-  - ./certificates/ks.yaml
-  - ./cloudflare-dns/ks.yaml
-  - ./cloudflare-tunnel/ks.yaml
-  - ./envoy-gateway/ks.yaml
-  - ./external-dns/ks.yaml
-  - ./rathole/ks.yaml
-  - ./echo/ks.yaml
+  - ./vpn-proxy/ks.yaml
