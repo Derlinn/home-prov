@@ -28,6 +28,12 @@ rules:
   - apiGroups: ["batch"]
     resources: ["cronjobs", "jobs"]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["replicasets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
   # For app/rbac.yaml. RBAC escalation prevention caps what can be granted
   # to what this Role already holds.
   - apiGroups: ["rbac.authorization.k8s.io"]
