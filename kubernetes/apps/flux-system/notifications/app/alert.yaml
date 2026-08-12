@@ -8,6 +8,10 @@ spec:
   providerRef:
     name: discord
   eventSeverity: error
+  # A rollout of kustomize-controller/helm-controller (Flux self-upgrade, node
+  # drain, eviction) cancels the context of every in-flight reconciliation
+  exclusionList:
+    - "context canceled"
   # The Alert CRD documents `*` on `name` only ("If multiple resources are
   # targeted `*` may be set"); `namespace` is an exact match, and an event whose
   # namespace does not match is silently discarded by the event server. Since
