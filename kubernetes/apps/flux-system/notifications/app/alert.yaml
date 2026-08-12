@@ -22,27 +22,31 @@ spec:
     - { kind: Kustomization, name: "*", namespace: default }
     - { kind: Kustomization, name: "*", namespace: devtools }
     - { kind: Kustomization, name: "*", namespace: flux-system }
+    - { kind: Kustomization, name: "*", namespace: home-automation }
+    - { kind: Kustomization, name: "*", namespace: inp-calendar-bot }
     - { kind: Kustomization, name: "*", namespace: kube-green }
     - { kind: Kustomization, name: "*", namespace: kube-system }
-    - { kind: Kustomization, name: "*", namespace: inp-calendar-bot }
     - { kind: Kustomization, name: "*", namespace: longhorn-system }
     - { kind: Kustomization, name: "*", namespace: media-server }
     - { kind: Kustomization, name: "*", namespace: network }
     - { kind: Kustomization, name: "*", namespace: observability }
     - { kind: Kustomization, name: "*", namespace: system-upgrade }
     - { kind: Kustomization, name: "*", namespace: vaultwarden }
+    - { kind: Kustomization, name: "*", namespace: vpn }
     - { kind: HelmRelease, name: "*", namespace: authentik }
     - { kind: HelmRelease, name: "*", namespace: cert-manager }
     - { kind: HelmRelease, name: "*", namespace: default }
     - { kind: HelmRelease, name: "*", namespace: devtools }
     - { kind: HelmRelease, name: "*", namespace: flux-system }
+    - { kind: HelmRelease, name: "*", namespace: home-automation }
+    - { kind: HelmRelease, name: "*", namespace: inp-calendar-bot }
     - { kind: HelmRelease, name: "*", namespace: kube-green }
     - { kind: HelmRelease, name: "*", namespace: kube-system }
-    - { kind: HelmRelease, name: "*", namespace: inp-calendar-bot }
     - { kind: HelmRelease, name: "*", namespace: longhorn-system }
     - { kind: HelmRelease, name: "*", namespace: media-server }
     - { kind: HelmRelease, name: "*", namespace: network }
     - { kind: HelmRelease, name: "*", namespace: observability }
     - { kind: HelmRelease, name: "*", namespace: system-upgrade }
     - { kind: HelmRelease, name: "*", namespace: vaultwarden }
+    - { kind: HelmRelease, name: "*", namespace: vpn }
   suspend: false
