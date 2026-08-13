@@ -31,31 +31,14 @@ spec:
             runAsGroup: 65532
             runAsNonRoot: true
             runAsUser: 65532
+          envFrom:
+            - secretRef:
+                name: inp-calendar-rs-secret
           env:
             - name: TZ
               value: Europe/Paris
             - name: DATA_DIR
               value: /app/data
-            - name: CALENDAR_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: inp-calendar-rs-secret
-                  key: GRENOBLE_USERNAME
-            - name: CALENDAR_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: inp-calendar-rs-secret
-                  key: GRENOBLE_PASSWORD
-            - name: CALENDAR_URL
-              valueFrom:
-                secretKeyRef:
-                  name: inp-calendar-rs-secret
-                  key: CALENDAR_URL
-            - name: TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: inp-calendar-rs-secret
-                  key: TOKEN
           volumeMounts:
             - name: data
               mountPath: /app/data

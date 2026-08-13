@@ -7,4 +7,3 @@
 # (kubernetes/apps/inp-calendar-bot/tenant-rbac.yaml), which is not editable
 # from here.
 /kubernetes/apps/inp-calendar-bot/inp-calendar-bot/app/ @Derlinn @Akt0o
-/kubernetes/apps/inp-calendar-bot/inp-calendar-rs/app/ @Derlinn @Akt0o
