@@ -17,7 +17,7 @@ spec:
         - name: ldap
           # Must track the authentik server version exactly: the core rejects
           # outposts whose version diverges from its own.
-          image: ghcr.io/goauthentik/ldap:2026.5.6
+          image: ghcr.io/goauthentik/ldap:2026.8.0
           env:
             - name: AUTHENTIK_HOST
               value: http://authentik-server.authentik.svc.cluster.local
