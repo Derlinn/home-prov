@@ -17,20 +17,35 @@ spec:
           annotations:
             summary: "Longhorn backup failed for volume {{ $labels.volume }}"
 
+        # Orphaned volumes (PVC deleted, PV Retained) can never be backed up because
+        # allow-recurring-job-while-volume-detached=false, so their timestamp freezes and
+        # the alert would fire forever. Join against kube-state-metrics to only consider
+        # volumes whose PVC still exists.
         - alert: LonghornBackupStale
           expr: |
             (time() - longhorn_volume_last_backup_at > 129600)
             and (longhorn_volume_last_backup_at > 0)
+            and on (pvc, pvc_namespace) (
+              label_replace(
+                label_replace(kube_persistentvolumeclaim_info, "pvc", "$1", "persistentvolumeclaim", "(.*)"),
+                "pvc_namespace", "$1", "namespace", "(.*)")
+            )
           for: 1h
           labels:
             severity: critical
           annotations:
-            summary: "Volume {{ $labels.volume }} was last backed up {{ $value | humanizeDuration }} ago"
+            summary: "Volume {{ $labels.pvc_namespace }}/{{ $labels.pvc }} was last backed up {{ $value | humanizeDuration }} ago"
 
         - alert: LonghornVolumeNeverBackedUp
-          expr: longhorn_volume_last_backup_at == 0
+          expr: |
+            (longhorn_volume_last_backup_at == 0)
+            and on (pvc, pvc_namespace) (
+              label_replace(
+                label_replace(kube_persistentvolumeclaim_info, "pvc", "$1", "persistentvolumeclaim", "(.*)"),
+                "pvc_namespace", "$1", "namespace", "(.*)")
+            )
           for: 24h
           labels:
             severity: warning
           annotations:
-            summary: "Volume {{ $labels.volume }} has never been backed up"
+            summary: "Volume {{ $labels.pvc_namespace }}/{{ $labels.pvc }} has never been backed up"
