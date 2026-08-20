@@ -5,3 +5,6 @@ metadata:
   name: cluster-settings
 data:
   DOMAIN: linderis.fr
+  VPN_PROXY: http://vpn-proxy.vpn.svc.cluster.local:8888
+  # Flux substitutes in a single pass, so ${DOMAIN} cannot be nested here and is appended by each caller.
+  NO_PROXY_CLUSTER: localhost,127.0.0.1,.svc.cluster.local,.svc,.cluster.local

@@ -29,9 +29,10 @@ spec:
               PUID: "1001"
               PGID: "1001"
               TZ: "Europe/Paris"
-              HTTP_PROXY: "http://vpn-proxy.vpn.svc.cluster.local:8888"
-              HTTPS_PROXY: "http://vpn-proxy.vpn.svc.cluster.local:8888"
-              NO_PROXY: "10.0.0.0/8,192.168.0.0/16,media-server.svc.cluster.local,addic7ed.com,www.addic7ed.com,gestdown.info,www.gestdown.info"
+              HTTP_PROXY: "${VPN_PROXY}"
+              HTTPS_PROXY: "${VPN_PROXY}"
+              # addic7ed and gestdown are reached from the home IP, not the VPN exit (4fb2b6c).
+              NO_PROXY: "${NO_PROXY_CLUSTER},${DOMAIN},.${DOMAIN},addic7ed.com,.addic7ed.com,gestdown.info,.gestdown.info"
             probes:
               liveness:
                 enabled: true
