@@ -43,9 +43,9 @@ spec:
               TZ: "Europe/Paris"
               LANG: "en_GB"
               DRIVER: "nodriver"
-              HTTP_PROXY: "http://vpn-proxy.vpn.svc.cluster.local:8888"
-              HTTPS_PROXY: "http://vpn-proxy.vpn.svc.cluster.local:8888"
-              NO_PROXY: "localhost,127.0.0.1,10.0.0.0/8,192.168.0.0/16"
+              HTTP_PROXY: "${VPN_PROXY}"
+              HTTPS_PROXY: "${VPN_PROXY}"
+              NO_PROXY: "${NO_PROXY_CLUSTER},${DOMAIN},.${DOMAIN}"
 
     service:
       main:
