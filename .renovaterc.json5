@@ -273,6 +273,21 @@
       ],
       separateMultipleMinor: true,
     },
+    // A Longhorn chart bump starts a live engine upgrade, and a Talos bump has
+    // tuppr power-cycle the node. Merged together on 2026-08-20 they faulted
+    // three volumes, so the two PR windows are kept apart.
+    {
+      description: "Longhorn PRs open Monday, away from the Talos window",
+      matchDatasources: ["docker", "helm"],
+      matchPackageNames: ["/longhorn/"],
+      schedule: ["before 6am on Monday"],
+    },
+    {
+      // Matches the "Talos Group" members, so the whole group moves together.
+      description: "Talos PRs open Thursday, away from the Longhorn window",
+      matchPackageNames: ["siderolabs/talos", "/siderolabs\\/installer/"],
+      schedule: ["before 6am on Thursday"],
+    },
     {
       // The bootstrap CRDs must never get ahead of the version envoy-gateway
       // ships, otherwise a fresh bootstrap validates resources against a

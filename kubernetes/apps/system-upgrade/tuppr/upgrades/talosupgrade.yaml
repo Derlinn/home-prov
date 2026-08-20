@@ -10,3 +10,4 @@ spec:
     version: v1.13.9
   policy:
     rebootMode: powercycle
+    waitForVolumeDetach: true

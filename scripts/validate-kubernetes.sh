@@ -103,6 +103,9 @@ echo "Validating against Kubernetes ${KUBERNETES_VERSION}"
 # -strict rejects unknown fields, which is what catches a typo in a manifest.
 # Secrets are skipped because SOPS adds a top-level `sops:` key that is not in
 # the Secret schema; scripts/check-sops-encrypted.sh covers those instead.
+# TalosUpgrade is skipped while the published schema lags the CRD tuppr installs:
+# it lacks `waitForVolumeDetach` yet sets `additionalProperties: false`, so
+# -strict rejects manifests a server-side dry-run accepts.
 # -ignore-missing-schemas keeps a brand new CRD from breaking CI before its
 # schema is published upstream; those resources are reported as skipped.
 kubeconform \
@@ -110,7 +113,7 @@ kubeconform \
   -schema-location default \
   -schema-location 'https://kubernetes-schemas.pages.dev/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
   -strict \
-  -skip Secret \
+  -skip Secret,tuppr.home-operations.com/v1alpha1/TalosUpgrade \
   -ignore-missing-schemas \
   -summary \
   -n 4 \
