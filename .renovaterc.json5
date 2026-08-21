@@ -206,13 +206,8 @@
       minimumGroupSize: 2,
     },
     {
-      // The LDAP outpost image tag has to equal the authentik server version:
-      // the core refuses outposts that diverge from it. Chart and images share
-      // one version stream, so grouping keeps them in step.
-      //
-      // No `minimumGroupSize` here on purpose, unlike the groups above: this is
-      // a correctness constraint, not a convenience. Splitting the PR would let
-      // one half be merged alone and break the outpost.
+      // Chart and server image share one version stream, so grouping keeps
+      // them in step.
       description: "Authentik Group",
       groupName: "authentik",
       matchDatasources: ["docker", "helm"],
