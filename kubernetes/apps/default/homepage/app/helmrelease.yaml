@@ -45,7 +45,14 @@ spec:
                 enabled: true
                 custom: true
                 spec:
-                  httpGet: {path: /api/healthcheck, port: &port 3000}
+                  httpGet:
+                    path: /api/healthcheck
+                    port: &port 3000
+                    # The kubelet probes by pod IP, which HOMEPAGE_ALLOWED_HOSTS
+                    # rejects with a 400.
+                    httpHeaders:
+                      - name: Host
+                        value: home.${DOMAIN}
                   initialDelaySeconds: 10
                   periodSeconds: 20
                   failureThreshold: 5
