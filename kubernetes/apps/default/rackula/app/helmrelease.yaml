@@ -83,7 +83,8 @@ spec:
               RACKULA_API_PORT: "3001"
               CORS_ORIGIN: https://rackula.${DOMAIN}
               ALLOW_INSECURE_CORS: "false"
-              RACKULA_TRUST_PROXY: "1"
+              # The API parses this as a boolean, the nginx frontend as 0/1.
+              RACKULA_TRUST_PROXY: "true"
               RACKULA_BASE_URL: https://rackula.${DOMAIN}
               RACKULA_AUTH_MODE: oidc
               RACKULA_OIDC_ISSUER: https://authentik.${DOMAIN}/application/o/rackula/
