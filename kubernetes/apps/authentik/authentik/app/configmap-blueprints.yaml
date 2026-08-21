@@ -4,18 +4,14 @@ kind: ConfigMap
 metadata:
   name: authentik-blueprints
 data:
-  # Authentik's own config lives in PostgreSQL and is otherwise unreproducible
-  # from Git. References use !Find rather than the UUIDs `ak export_blueprint`
-  # emits, which differ on every install.
-  # Groups and bindings sit in their application's own blueprint: ordering across
-  # blueprints is not guaranteed, and an unbound application is open to everyone.
+  # Authentik's config lives in PostgreSQL and is unreproducible from Git.
+  # Empty grant_types rejects every request; an unbound application is public.
   admin.yaml: |
     version: 1
     metadata:
       name: admin
     entries:
-      # Redeclared only so !KeyOf resolves here; `created` never touches an
-      # existing object, so the application blueprints stay the owners.
+      # Redeclared only so !KeyOf resolves here; `created` never touches them.
       - model: authentik_core.group
         id: g-rackula
         state: created
@@ -86,8 +82,7 @@ data:
         state: created
         identifiers:
           name: linderis_social_analyzer
-      # A child is a member of every parent, so this group reaches every
-      # application. `users` is authoritative: UI additions are dropped.
+      # A child is a member of every parent. `users` drops UI additions.
       - model: authentik_core.group
         state: present
         identifiers:
@@ -132,6 +127,9 @@ data:
           client_id: rackula-web
           client_secret: !Env AUTHENTIK_RACKULA_CLIENT_SECRET
           client_type: confidential
+          grant_types:
+            - authorization_code
+            - refresh_token
           sub_mode: hashed_user_id
           include_claims_in_id_token: true
           issuer_mode: per_provider
@@ -211,6 +209,9 @@ data:
           client_id: SFBLbR91wSTxSv4FVfucopcnQ1eIDCTdurohbpQ9
           client_secret: !Env AUTHENTIK_GRAFANA_CLIENT_SECRET
           client_type: confidential
+          grant_types:
+            - authorization_code
+            - refresh_token
           sub_mode: hashed_user_id
           include_claims_in_id_token: true
           issuer_mode: per_provider
@@ -269,6 +270,9 @@ data:
           client_id: FR72dWDUgirT6EypaHw8mt5fgLCbMDw9JzYEh5Kx
           client_secret: !Env AUTHENTIK_JELLYFIN_CLIENT_SECRET
           client_type: confidential
+          grant_types:
+            - authorization_code
+            - refresh_token
           sub_mode: hashed_user_id
           include_claims_in_id_token: true
           issuer_mode: per_provider
@@ -334,6 +338,9 @@ data:
         attrs:
           client_id: fu9wSbcb6PV8DQxH28Nh0oUSQgBah27Hv2VDC34a
           client_type: public
+          grant_types:
+            - authorization_code
+            - refresh_token
           sub_mode: hashed_user_id
           include_claims_in_id_token: true
           issuer_mode: per_provider
@@ -385,8 +392,7 @@ data:
     metadata:
       name: gatus
     entries:
-      # Unused: Gatus panics when the issuer is unreachable at startup. Kept
-      # because dropping the file orphans the objects instead of deleting them.
+      # Unused: Gatus panics if the issuer is down. Dropping this orphans it.
       - model: authentik_core.group
         id: gatus-group
         state: present
@@ -403,6 +409,9 @@ data:
           client_id: gatus
           client_secret: !Env AUTHENTIK_GATUS_CLIENT_SECRET
           client_type: confidential
+          grant_types:
+            - authorization_code
+            - refresh_token
           sub_mode: hashed_user_id
           include_claims_in_id_token: true
           issuer_mode: per_provider
@@ -461,6 +470,9 @@ data:
           client_id: netbox
           client_secret: !Env AUTHENTIK_NETBOX_CLIENT_SECRET
           client_type: confidential
+          grant_types:
+            - authorization_code
+            - refresh_token
           sub_mode: hashed_user_id
           include_claims_in_id_token: true
           issuer_mode: per_provider
@@ -519,6 +531,9 @@ data:
           client_id: jellyseerr
           client_secret: !Env AUTHENTIK_JELLYSEERR_CLIENT_SECRET
           client_type: confidential
+          grant_types:
+            - authorization_code
+            - refresh_token
           sub_mode: hashed_user_id
           include_claims_in_id_token: true
           issuer_mode: per_provider
@@ -594,6 +609,9 @@ data:
           client_id: vaultwarden
           client_secret: !Env AUTHENTIK_VAULTWARDEN_CLIENT_SECRET
           client_type: confidential
+          grant_types:
+            - authorization_code
+            - refresh_token
           sub_mode: hashed_user_id
           include_claims_in_id_token: true
           issuer_mode: per_provider
@@ -655,6 +673,9 @@ data:
           client_id: longhorn
           client_secret: !Env AUTHENTIK_LONGHORN_CLIENT_SECRET
           client_type: confidential
+          grant_types:
+            - authorization_code
+            - refresh_token
           sub_mode: hashed_user_id
           include_claims_in_id_token: true
           issuer_mode: per_provider
@@ -713,6 +734,9 @@ data:
           client_id: prometheus
           client_secret: !Env AUTHENTIK_PROMETHEUS_CLIENT_SECRET
           client_type: confidential
+          grant_types:
+            - authorization_code
+            - refresh_token
           sub_mode: hashed_user_id
           include_claims_in_id_token: true
           issuer_mode: per_provider
@@ -771,6 +795,9 @@ data:
           client_id: maigret
           client_secret: !Env AUTHENTIK_MAIGRET_CLIENT_SECRET
           client_type: confidential
+          grant_types:
+            - authorization_code
+            - refresh_token
           sub_mode: hashed_user_id
           include_claims_in_id_token: true
           issuer_mode: per_provider
@@ -829,6 +856,9 @@ data:
           client_id: social-analyzer
           client_secret: !Env AUTHENTIK_SOCIAL_ANALYZER_CLIENT_SECRET
           client_type: confidential
+          grant_types:
+            - authorization_code
+            - refresh_token
           sub_mode: hashed_user_id
           include_claims_in_id_token: true
           issuer_mode: per_provider

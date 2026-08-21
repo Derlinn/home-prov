@@ -26,8 +26,7 @@ spec:
       existingSecretKey: ADMIN_TOKEN
     sso:
       enabled: true
-      # Must match the discovered issuer exactly; the chart's comment says to
-      # strip the trailing slash, which breaks it.
+      # Must match the discovered issuer, trailing slash included.
       authority: https://authentik.${DOMAIN}/application/o/vaultwarden/
       # Without offline_access Authentik issues no refresh token.
       scopes: "email profile offline_access"
