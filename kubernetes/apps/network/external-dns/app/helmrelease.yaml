@@ -32,10 +32,18 @@ spec:
       runAsNonRoot: true
     logLevel: debug
     interval: 30s
+    env:
+      # kingpin exposes every flag as EXTERNAL_DNS_*; keeps the key out of args.
+      - name: EXTERNAL_DNS_PDNS_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: &secret external-dns-secret
+            key: PDNS_API_KEY
     extraArgs:
       - --pdns-server=https://power-dns.${DOMAIN}
       - --pdns-server-id=localhost
-      - --pdns-api-key=${PDNS_API_KEY}
       - --gateway-name=envoy-internal
     serviceMonitor:
       enabled: true
+    podAnnotations:
+      secret.reloader.stakater.com/reload: *secret

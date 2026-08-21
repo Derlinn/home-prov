@@ -32,7 +32,5 @@ spec:
     - name: external-dns-secrets
   postBuild:
     substituteFrom:
-      - kind: Secret
-        name: external-dns-secret
       - kind: ConfigMap
         name: cluster-settings
