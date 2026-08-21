@@ -17,7 +17,6 @@ resources:
   - vaultwarden
   - system-upgrade
   - kube-green
-#  - headscale
   - media-server
   - devtools
   - home-automation

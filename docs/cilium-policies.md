@@ -176,15 +176,6 @@ C'est `allow-observability-internal` qui autorise Prometheus a scraper Gatus (80
 
 ---
 
-## allow-rathole-egress / allow-headscale-from-rathole
-
-**Fichier :** `policies/allow-rathole-egress.yaml`
-
-- `allow-rathole-egress` : le client rathole (`network`, label `app: rathole-client`) sort vers le VPS `212.227.22.223/32` sur 2333, et vers les pods du namespace `headscale` sur 47239
-- `allow-headscale-from-rathole` : headscale accepte l'ingress du client rathole sur 47239
-
----
-
 ## Namespaces sans policy dediee
 
 `cert-manager`, `kube-green`, `kubernetes-replicator` et `system-upgrade` n'ont aucune policy propre. Ils fonctionnent uniquement grace aux policies a `endpointSelector: {}` qui s'appliquent a tous les pods : `default-deny` (vers l'hote et l'API), `allow-kube-api`, `allow-dns`, `allow-https-egress` et `allow-lan-ingress`.

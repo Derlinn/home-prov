@@ -312,7 +312,6 @@
         "/flux-instance/",
         "/authentik/",
         "/vaultwarden/",
-        "/headscale/",
         "/kube-prometheus-stack/",
       ],
       dependencyDashboardApproval: true,
@@ -320,8 +319,8 @@
     {
       // Same list as above, for the 0.x packages: `zer0ver` flags their minors
       // as breaking but leaves the updateType at `minor`, so the rule above
-      // never sees them. Covers flux-operator/flux-instance, headscale,
-      // vaultwarden and tuppr, which are all still pre-1.0.
+      // never sees them. Covers flux-operator/flux-instance, vaultwarden
+      // and tuppr, which are all still pre-1.0.
       description: "Critical infrastructure 0.x minors are breaking too: manual approval",
       matchDatasources: ["docker", "helm"],
       matchUpdateTypes: ["minor"],
@@ -338,7 +337,6 @@
         "/flux-instance/",
         "/authentik/",
         "/vaultwarden/",
-        "/headscale/",
         "/kube-prometheus-stack/",
         "/tuppr/",
       ],

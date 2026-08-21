@@ -25,9 +25,6 @@ spec:
               protocol: TCP
             - port: "8443"
               protocol: TCP
-            # headscale
-            - port: "47239"
-              protocol: TCP
             # longhorn
             - port: "8000"
               protocol: TCP

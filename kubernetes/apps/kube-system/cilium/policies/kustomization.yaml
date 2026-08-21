@@ -23,7 +23,6 @@ resources:
     - ./allow-devtools-internal.yaml
     - ./allow-netbox-internal.yaml
     - ./allow-rackula-internal.yaml
-    - ./allow-rathole-egress.yaml
     - ./allow-envoy-clusterip.yaml
     - ./allow-media-server-internal.yaml
     - ./allow-home-automation-internal.yaml

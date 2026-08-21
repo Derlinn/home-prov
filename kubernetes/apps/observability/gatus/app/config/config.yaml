@@ -44,7 +44,6 @@ endpoints:
     alerts: *discord-alert
 
   # --- Network ----------------------------------------------------------
-  # Headscale and Headplane were disabled in Uptime Kuma and are left out.
   - name: PowerDNS
     group: Réseau
     url: https://power-dns.${DOMAIN}
