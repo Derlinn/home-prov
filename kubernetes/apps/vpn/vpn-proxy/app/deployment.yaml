@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: gluetun
-          image: ghcr.io/qdm12/gluetun:latest
+          image: ghcr.io/qdm12/gluetun:v3.41.3
           securityContext:
             capabilities:
               add: ["NET_ADMIN"]

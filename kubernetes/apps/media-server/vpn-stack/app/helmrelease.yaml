@@ -30,7 +30,7 @@ spec:
           gluetun:
             image:
               repository: ghcr.io/qdm12/gluetun
-              tag: latest
+              tag: v3.41.3
             securityContext:
               capabilities:
                 add: ["NET_ADMIN"]
@@ -61,7 +61,7 @@ spec:
           port-sync:
             image:
               repository: alpine
-              tag: latest
+              tag: "3.24"
             command:
               - /bin/sh
               - -c
