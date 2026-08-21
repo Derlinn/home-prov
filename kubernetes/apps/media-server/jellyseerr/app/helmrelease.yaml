@@ -21,9 +21,12 @@ spec:
       main:
         containers:
           app:
+            # OIDC is unreleased upstream (seerr-team/seerr#2715, milestone
+            # v3.5.0). This preview tag is the only build that carries it, and
+            # is still far newer than the abandoned fallenbagel/jellyseerr.
             image:
-              repository: fallenbagel/jellyseerr
-              tag: preview-OIDC
+              repository: ghcr.io/seerr-team/seerr
+              tag: preview-new-oidc
             env:
               TZ: "Europe/Paris"
             probes:

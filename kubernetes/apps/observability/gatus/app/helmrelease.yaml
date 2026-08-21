@@ -28,6 +28,16 @@ spec:
                   secretKeyRef:
                     name: gatus-discord
                     key: DISCORD_WEBHOOK_URL
+              GATUS_OIDC_CLIENT_ID:
+                valueFrom:
+                  secretKeyRef:
+                    name: gatus-oidc
+                    key: GATUS_OIDC_CLIENT_ID
+              GATUS_OIDC_CLIENT_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: gatus-oidc
+                    key: GATUS_OIDC_CLIENT_SECRET
             probes:
               liveness: &probes
                 enabled: true

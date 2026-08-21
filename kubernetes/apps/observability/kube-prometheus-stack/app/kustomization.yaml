@@ -5,9 +5,11 @@ kind: Kustomization
 resources:
   - ./secret.sops.yaml
   - ./secret-heartbeat.sops.yaml
+  - ./secret-oidc.sops.yaml
   - ./alertmanagerconfig.yaml
   - ./helmrelease.yaml
   - ./ocirepository.yaml
+  - ./securitypolicy.yaml
   # - ./scrapeconfig.yaml  # disabled: expanse.internal is down
   - ./grafanadashboard.yaml
   - ./configmap-kubernetes-pods.yaml

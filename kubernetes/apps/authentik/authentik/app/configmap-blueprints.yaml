@@ -7,11 +7,134 @@ data:
   # Authentik's own config lives in PostgreSQL and is otherwise unreproducible
   # from Git. References use !Find rather than the UUIDs `ak export_blueprint`
   # emits, which differ on every install.
+  #
+  # Each application declares its own linderis_* group and binds it in the same
+  # blueprint. Authentik walks the blueprint directory unsorted and applies one
+  # async task per file, so a cross-file reference may resolve before its target
+  # exists — and an application left with no binding is open to every account.
+  # Group membership itself stays managed in the UI, except linderis_admin whose
+  # members are pinned in admin.yaml.
+  admin.yaml: |
+    version: 1
+    metadata:
+      name: admin
+    entries:
+      # Redeclared here only so !KeyOf resolves within this file. `created`
+      # never touches an object that already exists, so the per-application
+      # blueprints remain the sole owners of these groups.
+      - model: authentik_core.group
+        id: g-rackula
+        state: created
+        identifiers:
+          name: linderis_rackula
+      - model: authentik_core.group
+        id: g-grafana
+        state: created
+        identifiers:
+          name: linderis_grafana
+      - model: authentik_core.group
+        id: g-grafana-admins
+        state: created
+        identifiers:
+          name: Grafana Admins
+      - model: authentik_core.group
+        id: g-jellyfin
+        state: created
+        identifiers:
+          name: linderis_jellyfin
+      - model: authentik_core.group
+        id: g-home-assistant
+        state: created
+        identifiers:
+          name: linderis_home_assistant
+      - model: authentik_core.group
+        id: g-home-assistant-admins
+        state: created
+        identifiers:
+          name: linderis_home_assistant_admins
+      - model: authentik_core.group
+        id: g-gatus
+        state: created
+        identifiers:
+          name: linderis_gatus
+      - model: authentik_core.group
+        id: g-netbox
+        state: created
+        identifiers:
+          name: linderis_netbox
+      - model: authentik_core.group
+        id: g-jellyseerr
+        state: created
+        identifiers:
+          name: linderis_jellyseerr
+      - model: authentik_core.group
+        id: g-vaultwarden
+        state: created
+        identifiers:
+          name: linderis_vaultwarden
+      - model: authentik_core.group
+        id: g-longhorn
+        state: created
+        identifiers:
+          name: linderis_longhorn
+      - model: authentik_core.group
+        id: g-prometheus
+        state: created
+        identifiers:
+          name: linderis_prometheus
+      - model: authentik_core.group
+        id: g-maigret
+        state: created
+        identifiers:
+          name: linderis_maigret
+      - model: authentik_core.group
+        id: g-social-analyzer
+        state: created
+        identifiers:
+          name: linderis_social_analyzer
+      # Membership in a child counts as membership in every parent, so this one
+      # group satisfies every application binding without adding a binding of
+      # its own. The role groups are parents too: authentik emits inherited
+      # names in the `groups` claim, which is what Grafana and Home Assistant
+      # read to pick a role.
+      #
+      # `users` is authoritative — anyone added to this group through the UI is
+      # dropped on the next reconcile.
+      - model: authentik_core.group
+        state: present
+        identifiers:
+          name: linderis_admin
+        attrs:
+          is_superuser: false
+          users:
+            - !Find [authentik_core.user, [username, theo]]
+          parents:
+            - !KeyOf g-rackula
+            - !KeyOf g-grafana
+            - !KeyOf g-grafana-admins
+            - !KeyOf g-jellyfin
+            - !KeyOf g-home-assistant
+            - !KeyOf g-home-assistant-admins
+            - !KeyOf g-gatus
+            - !KeyOf g-netbox
+            - !KeyOf g-jellyseerr
+            - !KeyOf g-vaultwarden
+            - !KeyOf g-longhorn
+            - !KeyOf g-prometheus
+            - !KeyOf g-maigret
+            - !KeyOf g-social-analyzer
   rackula.yaml: |
     version: 1
     metadata:
       name: rackula
     entries:
+      - model: authentik_core.group
+        id: rackula-group
+        state: present
+        identifiers:
+          name: linderis_rackula
+        attrs:
+          is_superuser: false
       - model: authentik_providers_oauth2.oauth2provider
         id: rackula-provider
         state: present
@@ -50,6 +173,7 @@ data:
               redirect_uri_type: authorization
               url: https://rackula.${DOMAIN}/auth/callback
       - model: authentik_core.application
+        id: rackula-app
         state: present
         identifiers:
           slug: rackula
@@ -57,11 +181,41 @@ data:
           name: Rackula
           provider: !KeyOf rackula-provider
           policy_engine_mode: any
+      - model: authentik_policies.policybinding
+        state: present
+        identifiers:
+          target: !KeyOf rackula-app
+          group: !KeyOf rackula-group
+        attrs:
+          order: 0
+          enabled: true
   grafana.yaml: |
     version: 1
     metadata:
       name: grafana
     entries:
+      # Only linderis_grafana is bound. The other two are read by Grafana's
+      # role_attribute_path to pick a role, not to grant access, so a member of
+      # either must also be in linderis_grafana to get through.
+      - model: authentik_core.group
+        id: grafana-group
+        state: present
+        identifiers:
+          name: linderis_grafana
+        attrs:
+          is_superuser: false
+      - model: authentik_core.group
+        state: present
+        identifiers:
+          name: Grafana Admins
+        attrs:
+          is_superuser: false
+      - model: authentik_core.group
+        state: present
+        identifiers:
+          name: Grafana Editors
+        attrs:
+          is_superuser: false
       - model: authentik_providers_oauth2.oauth2provider
         id: grafana-provider
         state: present
@@ -92,6 +246,7 @@ data:
               redirect_uri_type: authorization
               url: https://grafana.${DOMAIN}/login/generic_oauth
       - model: authentik_core.application
+        id: grafana-app
         state: present
         identifiers:
           slug: grafana
@@ -99,11 +254,26 @@ data:
           name: Grafana
           provider: !KeyOf grafana-provider
           policy_engine_mode: any
+      - model: authentik_policies.policybinding
+        state: present
+        identifiers:
+          target: !KeyOf grafana-app
+          group: !KeyOf grafana-group
+        attrs:
+          order: 0
+          enabled: true
   jellyfin.yaml: |
     version: 1
     metadata:
       name: jellyfin
     entries:
+      - model: authentik_core.group
+        id: jellyfin-group
+        state: present
+        identifiers:
+          name: linderis_jellyfin
+        attrs:
+          is_superuser: false
       - model: authentik_providers_oauth2.oauth2provider
         id: jellyfin-provider
         state: present
@@ -134,6 +304,7 @@ data:
               redirect_uri_type: authorization
               url: https://jellyfin.${DOMAIN}/sso/OID/redirect/authentik
       - model: authentik_core.application
+        id: jellyfin-app
         state: present
         identifiers:
           slug: jellyfin
@@ -142,11 +313,33 @@ data:
           provider: !KeyOf jellyfin-provider
           policy_engine_mode: any
           meta_launch_url: https://jellyfin.${DOMAIN}/sso/OID/start/authentik
+      - model: authentik_policies.policybinding
+        state: present
+        identifiers:
+          target: !KeyOf jellyfin-app
+          group: !KeyOf jellyfin-group
+        attrs:
+          order: 0
+          enabled: true
   home-assistant.yaml: |
     version: 1
     metadata:
       name: home-assistant
     entries:
+      - model: authentik_core.group
+        id: home-assistant-group
+        state: present
+        identifiers:
+          name: linderis_home_assistant
+        attrs:
+          is_superuser: false
+      - model: authentik_core.group
+        id: home-assistant-admins-group
+        state: present
+        identifiers:
+          name: linderis_home_assistant_admins
+        attrs:
+          is_superuser: false
       - model: authentik_providers_oauth2.oauth2provider
         id: home-assistant-provider
         state: present
@@ -176,6 +369,7 @@ data:
               redirect_uri_type: authorization
               url: https://ha.${DOMAIN}/auth/oidc/callback
       - model: authentik_core.application
+        id: home-assistant-app
         state: present
         identifiers:
           slug: home-assistant
@@ -183,46 +377,509 @@ data:
           name: home-assistant
           provider: !KeyOf home-assistant-provider
           policy_engine_mode: any
-  groups.yaml: |
+      # Two bindings under policy_engine_mode any: admins are not members of the
+      # user group, so requiring both would lock them out.
+      - model: authentik_policies.policybinding
+        state: present
+        identifiers:
+          target: !KeyOf home-assistant-app
+          group: !KeyOf home-assistant-group
+        attrs:
+          order: 0
+          enabled: true
+      - model: authentik_policies.policybinding
+        state: present
+        identifiers:
+          target: !KeyOf home-assistant-app
+          group: !KeyOf home-assistant-admins-group
+        attrs:
+          order: 1
+          enabled: true
+  gatus.yaml: |
     version: 1
     metadata:
-      name: groups
+      name: gatus
     entries:
-      # `users` is deliberately omitted: membership stays managed in the UI, and
-      # the local pks it would pin are meaningless on a rebuilt instance.
       - model: authentik_core.group
+        id: gatus-group
         state: present
         identifiers:
-          name: Grafana Admins
+          name: linderis_gatus
         attrs:
           is_superuser: false
-      - model: authentik_core.group
+      - model: authentik_providers_oauth2.oauth2provider
+        id: gatus-provider
         state: present
         identifiers:
-          name: Grafana Editors
+          name: Provider for Gatus
         attrs:
-          is_superuser: false
-      - model: authentik_core.group
+          client_id: gatus
+          client_secret: !Env AUTHENTIK_GATUS_CLIENT_SECRET
+          client_type: confidential
+          sub_mode: hashed_user_id
+          include_claims_in_id_token: true
+          issuer_mode: per_provider
+          authorization_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-authorization-explicit-consent]
+          invalidation_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-invalidation-flow]
+          signing_key: !Find
+            - authentik_crypto.certificatekeypair
+            - [name, authentik Self-signed Certificate]
+          property_mappings:
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+          redirect_uris:
+            - matching_mode: strict
+              redirect_uri_type: authorization
+              url: https://status.${DOMAIN}/authorization-code/callback
+      - model: authentik_core.application
+        id: gatus-app
         state: present
         identifiers:
-          name: linderis_grafana
+          slug: gatus
         attrs:
-          is_superuser: false
-      - model: authentik_core.group
+          name: Gatus
+          provider: !KeyOf gatus-provider
+          policy_engine_mode: any
+      - model: authentik_policies.policybinding
         state: present
         identifiers:
-          name: linderis_home_assistant
+          target: !KeyOf gatus-app
+          group: !KeyOf gatus-group
         attrs:
-          is_superuser: false
+          order: 0
+          enabled: true
+  netbox.yaml: |
+    version: 1
+    metadata:
+      name: netbox
+    entries:
       - model: authentik_core.group
+        id: netbox-group
         state: present
         identifiers:
-          name: linderis_home_assistant_admins
+          name: linderis_netbox
         attrs:
           is_superuser: false
-      - model: authentik_core.group
+      - model: authentik_providers_oauth2.oauth2provider
+        id: netbox-provider
         state: present
         identifiers:
-          name: linderis_jellyfin
+          name: Provider for NetBox
+        attrs:
+          client_id: netbox
+          client_secret: !Env AUTHENTIK_NETBOX_CLIENT_SECRET
+          client_type: confidential
+          sub_mode: hashed_user_id
+          include_claims_in_id_token: true
+          issuer_mode: per_provider
+          authorization_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-authorization-explicit-consent]
+          invalidation_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-invalidation-flow]
+          signing_key: !Find
+            - authentik_crypto.certificatekeypair
+            - [name, authentik Self-signed Certificate]
+          property_mappings:
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+          redirect_uris:
+            - matching_mode: strict
+              redirect_uri_type: authorization
+              url: https://netbox.${DOMAIN}/oauth/complete/oidc/
+      - model: authentik_core.application
+        id: netbox-app
+        state: present
+        identifiers:
+          slug: netbox
+        attrs:
+          name: NetBox
+          provider: !KeyOf netbox-provider
+          policy_engine_mode: any
+      - model: authentik_policies.policybinding
+        state: present
+        identifiers:
+          target: !KeyOf netbox-app
+          group: !KeyOf netbox-group
+        attrs:
+          order: 0
+          enabled: true
+  jellyseerr.yaml: |
+    version: 1
+    metadata:
+      name: jellyseerr
+    entries:
+      - model: authentik_core.group
+        id: jellyseerr-group
+        state: present
+        identifiers:
+          name: linderis_jellyseerr
         attrs:
           is_superuser: false
+      - model: authentik_providers_oauth2.oauth2provider
+        id: jellyseerr-provider
+        state: present
+        identifiers:
+          name: Provider for Jellyseerr
+        attrs:
+          client_id: jellyseerr
+          client_secret: !Env AUTHENTIK_JELLYSEERR_CLIENT_SECRET
+          client_type: confidential
+          sub_mode: hashed_user_id
+          include_claims_in_id_token: true
+          issuer_mode: per_provider
+          authorization_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-authorization-explicit-consent]
+          invalidation_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-invalidation-flow]
+          signing_key: !Find
+            - authentik_crypto.certificatekeypair
+            - [name, authentik Self-signed Certificate]
+          property_mappings:
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+          redirect_uris:
+            - matching_mode: strict
+              redirect_uri_type: authorization
+              url: https://jellyseerr.${DOMAIN}/login
+            - matching_mode: strict
+              redirect_uri_type: authorization
+              url: https://jellyseerr.${DOMAIN}/profile/settings/linked-accounts
+      - model: authentik_core.application
+        id: jellyseerr-app
+        state: present
+        identifiers:
+          slug: jellyseerr
+        attrs:
+          name: Jellyseerr
+          provider: !KeyOf jellyseerr-provider
+          policy_engine_mode: any
+      - model: authentik_policies.policybinding
+        state: present
+        identifiers:
+          target: !KeyOf jellyseerr-app
+          group: !KeyOf jellyseerr-group
+        attrs:
+          order: 0
+          enabled: true
+  vaultwarden.yaml: |
+    version: 1
+    metadata:
+      name: vaultwarden
+    entries:
+      - model: authentik_core.group
+        id: vaultwarden-group
+        state: present
+        identifiers:
+          name: linderis_vaultwarden
+        attrs:
+          is_superuser: false
+      # Authentik's stock email scope returns email_verified false, which
+      # Vaultwarden refuses to sign up. Overriding the claim is safer than
+      # SSO_ALLOW_UNKNOWN_EMAIL_VERIFICATION, which allows account takeover
+      # while SSO_SIGNUPS_MATCH_EMAIL is on.
+      - model: authentik_providers_oauth2.scopemapping
+        id: vaultwarden-email-scope
+        state: present
+        identifiers:
+          name: Vaultwarden email (verified)
+        attrs:
+          scope_name: email
+          description: Email claim with email_verified forced to true
+          expression: |
+            return {
+                "email": request.user.email,
+                "email_verified": True,
+            }
+      - model: authentik_providers_oauth2.oauth2provider
+        id: vaultwarden-provider
+        state: present
+        identifiers:
+          name: Provider for Vaultwarden
+        attrs:
+          client_id: vaultwarden
+          client_secret: !Env AUTHENTIK_VAULTWARDEN_CLIENT_SECRET
+          client_type: confidential
+          sub_mode: hashed_user_id
+          include_claims_in_id_token: true
+          issuer_mode: per_provider
+          # The Bitwarden frontend treats its own 5 minute mark as expiry, which
+          # collides with the provider default of the same length.
+          access_token_validity: minutes=30
+          authorization_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-authorization-explicit-consent]
+          invalidation_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-invalidation-flow]
+          signing_key: !Find
+            - authentik_crypto.certificatekeypair
+            - [name, authentik Self-signed Certificate]
+          property_mappings:
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, offline_access]]
+            - !KeyOf vaultwarden-email-scope
+          redirect_uris:
+            - matching_mode: strict
+              redirect_uri_type: authorization
+              url: https://vaultwarden.${DOMAIN}/identity/connect/oidc-signin
+      - model: authentik_core.application
+        id: vaultwarden-app
+        state: present
+        identifiers:
+          slug: vaultwarden
+        attrs:
+          name: Vaultwarden
+          provider: !KeyOf vaultwarden-provider
+          policy_engine_mode: any
+      - model: authentik_policies.policybinding
+        state: present
+        identifiers:
+          target: !KeyOf vaultwarden-app
+          group: !KeyOf vaultwarden-group
+        attrs:
+          order: 0
+          enabled: true
+  longhorn.yaml: |
+    version: 1
+    metadata:
+      name: longhorn
+    entries:
+      - model: authentik_core.group
+        id: longhorn-group
+        state: present
+        identifiers:
+          name: linderis_longhorn
+        attrs:
+          is_superuser: false
+      - model: authentik_providers_oauth2.oauth2provider
+        id: longhorn-provider
+        state: present
+        identifiers:
+          name: Provider for Longhorn
+        attrs:
+          client_id: longhorn
+          client_secret: !Env AUTHENTIK_LONGHORN_CLIENT_SECRET
+          client_type: confidential
+          sub_mode: hashed_user_id
+          include_claims_in_id_token: true
+          issuer_mode: per_provider
+          authorization_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-authorization-explicit-consent]
+          invalidation_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-invalidation-flow]
+          signing_key: !Find
+            - authentik_crypto.certificatekeypair
+            - [name, authentik Self-signed Certificate]
+          property_mappings:
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+          redirect_uris:
+            - matching_mode: strict
+              redirect_uri_type: authorization
+              url: https://longhorn.${DOMAIN}/oauth2/callback
+      - model: authentik_core.application
+        id: longhorn-app
+        state: present
+        identifiers:
+          slug: longhorn
+        attrs:
+          name: Longhorn
+          provider: !KeyOf longhorn-provider
+          policy_engine_mode: any
+      - model: authentik_policies.policybinding
+        state: present
+        identifiers:
+          target: !KeyOf longhorn-app
+          group: !KeyOf longhorn-group
+        attrs:
+          order: 0
+          enabled: true
+  prometheus.yaml: |
+    version: 1
+    metadata:
+      name: prometheus
+    entries:
+      - model: authentik_core.group
+        id: prometheus-group
+        state: present
+        identifiers:
+          name: linderis_prometheus
+        attrs:
+          is_superuser: false
+      - model: authentik_providers_oauth2.oauth2provider
+        id: prometheus-provider
+        state: present
+        identifiers:
+          name: Provider for Prometheus
+        attrs:
+          client_id: prometheus
+          client_secret: !Env AUTHENTIK_PROMETHEUS_CLIENT_SECRET
+          client_type: confidential
+          sub_mode: hashed_user_id
+          include_claims_in_id_token: true
+          issuer_mode: per_provider
+          authorization_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-authorization-explicit-consent]
+          invalidation_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-invalidation-flow]
+          signing_key: !Find
+            - authentik_crypto.certificatekeypair
+            - [name, authentik Self-signed Certificate]
+          property_mappings:
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+          redirect_uris:
+            - matching_mode: strict
+              redirect_uri_type: authorization
+              url: https://prometheus.${DOMAIN}/oauth2/callback
+      - model: authentik_core.application
+        id: prometheus-app
+        state: present
+        identifiers:
+          slug: prometheus
+        attrs:
+          name: Prometheus
+          provider: !KeyOf prometheus-provider
+          policy_engine_mode: any
+      - model: authentik_policies.policybinding
+        state: present
+        identifiers:
+          target: !KeyOf prometheus-app
+          group: !KeyOf prometheus-group
+        attrs:
+          order: 0
+          enabled: true
+  maigret.yaml: |
+    version: 1
+    metadata:
+      name: maigret
+    entries:
+      - model: authentik_core.group
+        id: maigret-group
+        state: present
+        identifiers:
+          name: linderis_maigret
+        attrs:
+          is_superuser: false
+      - model: authentik_providers_oauth2.oauth2provider
+        id: maigret-provider
+        state: present
+        identifiers:
+          name: Provider for Maigret
+        attrs:
+          client_id: maigret
+          client_secret: !Env AUTHENTIK_MAIGRET_CLIENT_SECRET
+          client_type: confidential
+          sub_mode: hashed_user_id
+          include_claims_in_id_token: true
+          issuer_mode: per_provider
+          authorization_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-authorization-explicit-consent]
+          invalidation_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-invalidation-flow]
+          signing_key: !Find
+            - authentik_crypto.certificatekeypair
+            - [name, authentik Self-signed Certificate]
+          property_mappings:
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+          redirect_uris:
+            - matching_mode: strict
+              redirect_uri_type: authorization
+              url: https://maigret.${DOMAIN}/oauth2/callback
+      - model: authentik_core.application
+        id: maigret-app
+        state: present
+        identifiers:
+          slug: maigret
+        attrs:
+          name: Maigret
+          provider: !KeyOf maigret-provider
+          policy_engine_mode: any
+      - model: authentik_policies.policybinding
+        state: present
+        identifiers:
+          target: !KeyOf maigret-app
+          group: !KeyOf maigret-group
+        attrs:
+          order: 0
+          enabled: true
+  social-analyzer.yaml: |
+    version: 1
+    metadata:
+      name: social-analyzer
+    entries:
+      - model: authentik_core.group
+        id: social-analyzer-group
+        state: present
+        identifiers:
+          name: linderis_social_analyzer
+        attrs:
+          is_superuser: false
+      - model: authentik_providers_oauth2.oauth2provider
+        id: social-analyzer-provider
+        state: present
+        identifiers:
+          name: Provider for Social Analyzer
+        attrs:
+          client_id: social-analyzer
+          client_secret: !Env AUTHENTIK_SOCIAL_ANALYZER_CLIENT_SECRET
+          client_type: confidential
+          sub_mode: hashed_user_id
+          include_claims_in_id_token: true
+          issuer_mode: per_provider
+          authorization_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-authorization-explicit-consent]
+          invalidation_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-invalidation-flow]
+          signing_key: !Find
+            - authentik_crypto.certificatekeypair
+            - [name, authentik Self-signed Certificate]
+          property_mappings:
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+          redirect_uris:
+            - matching_mode: strict
+              redirect_uri_type: authorization
+              url: https://social-analyzer.${DOMAIN}/oauth2/callback
+      - model: authentik_core.application
+        id: social-analyzer-app
+        state: present
+        identifiers:
+          slug: social-analyzer
+        attrs:
+          name: Social Analyzer
+          provider: !KeyOf social-analyzer-provider
+          policy_engine_mode: any
+      - model: authentik_policies.policybinding
+        state: present
+        identifiers:
+          target: !KeyOf social-analyzer-app
+          group: !KeyOf social-analyzer-group
+        attrs:
+          order: 0
+          enabled: true

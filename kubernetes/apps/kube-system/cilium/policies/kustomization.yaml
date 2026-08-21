@@ -34,4 +34,5 @@ resources:
     - ./allow-vpn-proxy.yaml
     - ./deny-direct-egress.yaml
     - ./allow-gatus-egress.yaml
+    - ./allow-gatus-longhorn-ingress.yaml
     - ./default-deny.yaml

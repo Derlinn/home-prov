@@ -32,6 +32,21 @@ spec:
         enabled: true
     superuser:
       existingSecret: netbox-superuser
+    remoteAuth:
+      enabled: true
+      backends:
+        - social_core.backends.open_id_connect.OpenIdConnectAuth
+      autoCreateUser: true
+    # SOCIAL_AUTH_* has no chart value; extraConfig drops raw settings into
+    # /run/config/extra. The client secret comes from the Secret entry so it
+    # never lands in plaintext values.
+    extraConfig:
+      - values:
+          SOCIAL_AUTH_OIDC_OIDC_ENDPOINT: https://authentik.${DOMAIN}/application/o/netbox/
+          SOCIAL_AUTH_OIDC_KEY: netbox
+          LOGOUT_REDIRECT_URL: https://authentik.${DOMAIN}/application/o/netbox/end-session/
+      - secret:
+          secretName: netbox-oidc
     # Memory keeps a limit exceeding it kills the container instead of slowing
     # it down. Postgres was sitting at 169Mi against a 192Mi cap.
     postgresql:

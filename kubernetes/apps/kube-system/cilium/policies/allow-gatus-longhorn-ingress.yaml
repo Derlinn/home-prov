@@ -1,0 +1,25 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# Counterpart to the egress rule in allow-gatus-egress: Cilium denies both
+# directions, so the Longhorn UI has to accept Gatus explicitly.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-gatus-longhorn-ingress
+spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
+  endpointSelector:
+    matchLabels:
+      io.kubernetes.pod.namespace: longhorn-system
+      app: longhorn-ui
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: observability
+            app.kubernetes.io/name: gatus
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP

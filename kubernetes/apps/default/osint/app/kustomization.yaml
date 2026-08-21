@@ -13,3 +13,5 @@ resources:
   - social-analyzer-httproute.yaml
   - cli-pvc.yaml
   - cli-deployment.yaml
+  - secret-oidc.sops.yaml
+  - securitypolicy.yaml

@@ -12,4 +12,6 @@ resources:
   - ./recurringjobs.yaml
   - ./prometheusrule.yaml
   - ./httproute.yaml
+  - ./secret-oidc.sops.yaml
+  - ./securitypolicy.yaml
   - ./grafanadashboard.yaml

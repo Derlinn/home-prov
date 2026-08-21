@@ -10,6 +10,16 @@ ui:
   header: Linderis
   description: État des services de l'infrastructure Linderis
 
+# `$$` survives Flux substitution as a literal `$`, leaving Gatus to expand the
+# variable from its own environment.
+security:
+  oidc:
+    issuer-url: https://authentik.${DOMAIN}/application/o/gatus/
+    redirect-url: https://status.${DOMAIN}/authorization-code/callback
+    client-id: $${GATUS_OIDC_CLIENT_ID}
+    client-secret: $${GATUS_OIDC_CLIENT_SECRET}
+    scopes: ["openid"]
+
 endpoints:
   # --- infrastructure ---------------------------------------------------
   - name: Grafana
@@ -22,16 +32,19 @@ endpoints:
     alerts: &discord-alert
       - type: discord
 
+  # Both sit behind the gateway's OIDC, where an unauthenticated probe only ever
+  # reaches Authentik's login page. Checking the ClusterIP keeps proving that
+  # the application itself is alive.
   - name: Prometheus
     group: infrastructure
-    url: https://prometheus.${DOMAIN}
+    url: http://prometheus-operated.observability.svc.cluster.local:9090/-/healthy
     interval: 60s
     conditions: *http-2xx
     alerts: *discord-alert
 
   - name: Longhorn
     group: infrastructure
-    url: https://longhorn.${DOMAIN}
+    url: http://longhorn-frontend.longhorn-system.svc.cluster.local/
     interval: 60s
     conditions: *http-2xx
     alerts: *discord-alert

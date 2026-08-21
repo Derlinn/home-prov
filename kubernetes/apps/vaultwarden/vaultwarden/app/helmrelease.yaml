@@ -24,6 +24,22 @@ spec:
     adminToken:
       existingSecret: vaultwarden-admin-token
       existingSecretKey: ADMIN_TOKEN
+    sso:
+      enabled: true
+      # SSO_AUTHORITY must equal the issuer returned by discovery, and
+      # Authentik's carries a trailing slash. The chart's own values comment
+      # says to strip it, which breaks the flow.
+      authority: https://authentik.${DOMAIN}/application/o/vaultwarden/
+      # offline_access has been required since Authentik 2024.2: without it no
+      # refresh token is issued and sessions expire after the access token.
+      scopes: "email profile offline_access"
+      existingSecret: vaultwarden-sso
+      clientId:
+        existingSecretKey: SSO_CLIENT_ID
+      # The chart guards SSO_CLIENT_SECRET on `sso.clientId.value`, so this key
+      # has to be named explicitly or the variable is never emitted.
+      clientSecret:
+        existingSecretKey: SSO_CLIENT_SECRET
     replicas: 1
     domain: "https://vaultwarden.${DOMAIN}/"
     ingress:

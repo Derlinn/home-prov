@@ -163,6 +163,16 @@ C'est `allow-observability-internal` qui autorise Prometheus a scraper Gatus (80
 
 ---
 
+## allow-gatus-longhorn-ingress
+
+**Fichier :** `policies/allow-gatus-longhorn-ingress.yaml`
+
+Gatus (`observability`) peut joindre l'UI Longhorn (`longhorn-system`, label `app: longhorn-ui`) sur 8000. La route `longhorn.${DOMAIN}` est protegee par OIDC au niveau de la gateway : une sonde non authentifiee n'atteindrait que la page de login Authentik, donc le check vise le ClusterIP.
+
+Cilium refusant les deux sens, cette policy est le pendant obligatoire de la regle d'egress correspondante dans `allow-gatus-egress`. Prometheus n'en a pas besoin : Gatus et lui partagent le namespace `observability`.
+
+---
+
 ## Egress vers des cibles externes
 
 | Policy | Fichier | Source | Destination | Ports |
@@ -172,7 +182,7 @@ C'est `allow-observability-internal` qui autorise Prometheus a scraper Gatus (80
 | `allow-pve-exporter-egress` | `policies/allow-proxmox-egress.yaml` | pve-exporter | `10.25.30.20/32` (API Proxmox) | 8006 |
 | `allow-blackbox-egress` | `policies/allow-blackbox-egress.yaml` | blackbox-exporter | `10.25.30.1/32` (NAS) | 8001 |
 | `allow-mktxp-egress` | `policies/allow-mktxp-egress.yaml` | mktxp | `10.25.200.0/24` (VLAN mgmt) | 8728 (API Mikrotik) |
-| `allow-gatus-egress` | `policies/allow-gatus-egress.yaml` | gatus | `10.25.30.0/24` | ICMP echo (type 8) |
+| `allow-gatus-egress` | `policies/allow-gatus-egress.yaml` | gatus | `10.25.30.0/24`, plus `longhorn-ui` en interne | ICMP echo (type 8), 53, 8006, 8000 |
 | `allow-wireguard-egress` | `policies/allow-wireguard-egress.yaml` | vpn-stack (`media-server`) | `world` | 51820 UDP |
 
 

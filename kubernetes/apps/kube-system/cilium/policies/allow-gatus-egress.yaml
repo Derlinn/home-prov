@@ -31,3 +31,12 @@ spec:
             # API Proxmox (10.25.30.20)
             - port: "8006"
               protocol: TCP
+    # The dashboard route is gated by OIDC, so the probe targets the UI pod.
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: longhorn-system
+            app: longhorn-ui
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP

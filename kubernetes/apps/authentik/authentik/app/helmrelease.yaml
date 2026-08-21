@@ -45,6 +45,46 @@ spec:
             secretKeyRef:
               name: authentik-credentials
               key: jellyfin-client-secret
+        - name: AUTHENTIK_GATUS_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-credentials
+              key: gatus-client-secret
+        - name: AUTHENTIK_NETBOX_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-credentials
+              key: netbox-client-secret
+        - name: AUTHENTIK_JELLYSEERR_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-credentials
+              key: jellyseerr-client-secret
+        - name: AUTHENTIK_VAULTWARDEN_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-credentials
+              key: vaultwarden-client-secret
+        - name: AUTHENTIK_LONGHORN_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-credentials
+              key: longhorn-client-secret
+        - name: AUTHENTIK_PROMETHEUS_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-credentials
+              key: prometheus-client-secret
+        - name: AUTHENTIK_MAIGRET_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-credentials
+              key: maigret-client-secret
+        - name: AUTHENTIK_SOCIAL_ANALYZER_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-credentials
+              key: social-analyzer-client-secret
 
     blueprints:
       configMaps:

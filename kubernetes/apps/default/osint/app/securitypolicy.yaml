@@ -1,0 +1,49 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
+# Neither OSINT tool has any authentication of its own.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: maigret-oidc
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: maigret
+  oidc:
+    provider:
+      issuer: https://authentik.${DOMAIN}/application/o/maigret/
+      # Endpoints are pinned rather than discovered: the issuer's trailing slash
+      # would produce a double slash in the well-known URL.
+      authorizationEndpoint: https://authentik.${DOMAIN}/application/o/authorize/
+      tokenEndpoint: https://authentik.${DOMAIN}/application/o/token/
+      endSessionEndpoint: https://authentik.${DOMAIN}/application/o/maigret/end-session/
+    clientID: maigret
+    clientSecret:
+      name: maigret-oidc
+    redirectURL: https://maigret.${DOMAIN}/oauth2/callback
+    logoutPath: /logout
+    scopes: ["openid", "email", "profile"]
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: social-analyzer-oidc
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: social-analyzer
+  oidc:
+    provider:
+      issuer: https://authentik.${DOMAIN}/application/o/social-analyzer/
+      authorizationEndpoint: https://authentik.${DOMAIN}/application/o/authorize/
+      tokenEndpoint: https://authentik.${DOMAIN}/application/o/token/
+      endSessionEndpoint: https://authentik.${DOMAIN}/application/o/social-analyzer/end-session/
+    clientID: social-analyzer
+    clientSecret:
+      name: social-analyzer-oidc
+    redirectURL: https://social-analyzer.${DOMAIN}/oauth2/callback
+    logoutPath: /logout
+    scopes: ["openid", "email", "profile"]
