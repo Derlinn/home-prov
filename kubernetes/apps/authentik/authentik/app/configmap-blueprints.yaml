@@ -7,21 +7,15 @@ data:
   # Authentik's own config lives in PostgreSQL and is otherwise unreproducible
   # from Git. References use !Find rather than the UUIDs `ak export_blueprint`
   # emits, which differ on every install.
-  #
-  # Each application declares its own linderis_* group and binds it in the same
-  # blueprint. Authentik walks the blueprint directory unsorted and applies one
-  # async task per file, so a cross-file reference may resolve before its target
-  # exists — and an application left with no binding is open to every account.
-  # Group membership itself stays managed in the UI, except linderis_admin whose
-  # members are pinned in admin.yaml.
+  # Groups and bindings sit in their application's own blueprint: ordering across
+  # blueprints is not guaranteed, and an unbound application is open to everyone.
   admin.yaml: |
     version: 1
     metadata:
       name: admin
     entries:
-      # Redeclared here only so !KeyOf resolves within this file. `created`
-      # never touches an object that already exists, so the per-application
-      # blueprints remain the sole owners of these groups.
+      # Redeclared only so !KeyOf resolves here; `created` never touches an
+      # existing object, so the application blueprints stay the owners.
       - model: authentik_core.group
         id: g-rackula
         state: created
@@ -92,14 +86,8 @@ data:
         state: created
         identifiers:
           name: linderis_social_analyzer
-      # Membership in a child counts as membership in every parent, so this one
-      # group satisfies every application binding without adding a binding of
-      # its own. The role groups are parents too: authentik emits inherited
-      # names in the `groups` claim, which is what Grafana and Home Assistant
-      # read to pick a role.
-      #
-      # `users` is authoritative — anyone added to this group through the UI is
-      # dropped on the next reconcile.
+      # A child is a member of every parent, so this group reaches every
+      # application. `users` is authoritative: UI additions are dropped.
       - model: authentik_core.group
         state: present
         identifiers:
@@ -194,9 +182,7 @@ data:
     metadata:
       name: grafana
     entries:
-      # Only linderis_grafana is bound. The other two are read by Grafana's
-      # role_attribute_path to pick a role, not to grant access, so a member of
-      # either must also be in linderis_grafana to get through.
+      # Only linderis_grafana grants access; the other two just pick a role.
       - model: authentik_core.group
         id: grafana-group
         state: present
@@ -377,8 +363,7 @@ data:
           name: home-assistant
           provider: !KeyOf home-assistant-provider
           policy_engine_mode: any
-      # Two bindings under policy_engine_mode any: admins are not members of the
-      # user group, so requiring both would lock them out.
+      # Two bindings, mode any: admins are not in the user group.
       - model: authentik_policies.policybinding
         state: present
         identifiers:
@@ -400,6 +385,8 @@ data:
     metadata:
       name: gatus
     entries:
+      # Unused: Gatus panics when the issuer is unreachable at startup. Kept
+      # because dropping the file orphans the objects instead of deleting them.
       - model: authentik_core.group
         id: gatus-group
         state: present
@@ -584,10 +571,7 @@ data:
           name: linderis_vaultwarden
         attrs:
           is_superuser: false
-      # Authentik's stock email scope returns email_verified false, which
-      # Vaultwarden refuses to sign up. Overriding the claim is safer than
-      # SSO_ALLOW_UNKNOWN_EMAIL_VERIFICATION, which allows account takeover
-      # while SSO_SIGNUPS_MATCH_EMAIL is on.
+      # Vaultwarden refuses signup on the stock scope's email_verified false.
       - model: authentik_providers_oauth2.scopemapping
         id: vaultwarden-email-scope
         state: present
@@ -613,8 +597,7 @@ data:
           sub_mode: hashed_user_id
           include_claims_in_id_token: true
           issuer_mode: per_provider
-          # The Bitwarden frontend treats its own 5 minute mark as expiry, which
-          # collides with the provider default of the same length.
+          # The Bitwarden frontend expires at 5 minutes, as does the default.
           access_token_validity: minutes=30
           authorization_flow: !Find
             - authentik_flows.flow

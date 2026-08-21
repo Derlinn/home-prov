@@ -1,7 +1,6 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
-# Prometheus has no authentication of its own. Grafana and the operator reach it
-# through its ClusterIP, so gating the route affects browsers only.
+# Prometheus has no authentication; Grafana reaches it by ClusterIP.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:
@@ -14,8 +13,7 @@ spec:
   oidc:
     provider:
       issuer: https://authentik.${DOMAIN}/application/o/prometheus/
-      # Endpoints are pinned rather than discovered: the issuer's trailing slash
-      # would produce a double slash in the well-known URL.
+      # Pinned, not discovered: the issuer's trailing slash doubles in the URL.
       authorizationEndpoint: https://authentik.${DOMAIN}/application/o/authorize/
       tokenEndpoint: https://authentik.${DOMAIN}/application/o/token/
       endSessionEndpoint: https://authentik.${DOMAIN}/application/o/prometheus/end-session/

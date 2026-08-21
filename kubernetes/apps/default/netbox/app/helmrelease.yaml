@@ -37,9 +37,7 @@ spec:
       backends:
         - social_core.backends.open_id_connect.OpenIdConnectAuth
       autoCreateUser: true
-    # SOCIAL_AUTH_* has no chart value; extraConfig drops raw settings into
-    # /run/config/extra. The client secret comes from the Secret entry so it
-    # never lands in plaintext values.
+    # SOCIAL_AUTH_* has no chart value; the Secret entry keeps it out of values.
     extraConfig:
       - values:
           SOCIAL_AUTH_OIDC_OIDC_ENDPOINT: https://authentik.${DOMAIN}/application/o/netbox/

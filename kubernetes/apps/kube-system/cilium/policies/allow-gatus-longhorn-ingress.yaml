@@ -1,7 +1,6 @@
 ---
 # yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
-# Counterpart to the egress rule in allow-gatus-egress: Cilium denies both
-# directions, so the Longhorn UI has to accept Gatus explicitly.
+# Counterpart to the egress rule in allow-gatus-egress; Cilium denies both ways.
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:
