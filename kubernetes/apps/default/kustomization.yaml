@@ -10,6 +10,7 @@ components:
 resources:
   - hello/ks.yaml
   - bentopdf/ks.yaml
+  - homepage/ks.yaml
   - netbox/ks.yaml
   - parkshield/ks.yaml
   - osint/ks.yaml

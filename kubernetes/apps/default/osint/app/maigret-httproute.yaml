@@ -2,6 +2,12 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Maigret"
+    gethomepage.dev/group: "OSINT"
+    gethomepage.dev/icon: "fa://fa-user-secret"
+    gethomepage.dev/href: "https://maigret.${DOMAIN}"
   name: maigret
 spec:
   hostnames:

@@ -2,6 +2,12 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "BentoPDF"
+    gethomepage.dev/group: "Applications"
+    gethomepage.dev/icon: "fa://fa-file-pdf"
+    gethomepage.dev/href: "https://bentopdf.${DOMAIN}"
   name: bentopdf
 spec:
   hostnames:

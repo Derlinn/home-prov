@@ -85,6 +85,11 @@ spec:
             secretKeyRef:
               name: authentik-credentials
               key: social-analyzer-client-secret
+        - name: AUTHENTIK_HOMEPAGE_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-credentials
+              key: homepage-client-secret
 
     blueprints:
       configMaps:

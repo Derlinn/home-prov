@@ -3,6 +3,12 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Vaultwarden"
+    gethomepage.dev/group: "Sécurité"
+    gethomepage.dev/icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/vaultwarden.svg"
+    gethomepage.dev/href: "https://vaultwarden.${DOMAIN}"
   name: vaultwarden
 spec:
   parentRefs:

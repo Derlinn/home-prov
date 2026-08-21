@@ -29,6 +29,14 @@ spec:
       route:
         main:
           enabled: true
+          annotations:
+            gethomepage.dev/enabled: "true"
+            gethomepage.dev/name: "Prometheus"
+            gethomepage.dev/group: "Infrastructure"
+            gethomepage.dev/icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/prometheus.svg"
+            gethomepage.dev/href: "https://prometheus.${DOMAIN}"
+            gethomepage.dev/widget.type: "prometheus"
+            gethomepage.dev/widget.url: "http://prometheus-operated.observability.svc.cluster.local:9090"
           hostnames:
             - prometheus.${DOMAIN}
           parentRefs:

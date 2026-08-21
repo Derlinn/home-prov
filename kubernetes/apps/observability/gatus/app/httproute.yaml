@@ -3,6 +3,12 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Gatus"
+    gethomepage.dev/group: "Infrastructure"
+    gethomepage.dev/icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/gatus.svg"
+    gethomepage.dev/href: "https://status.${DOMAIN}"
   name: gatus
 spec:
   parentRefs:

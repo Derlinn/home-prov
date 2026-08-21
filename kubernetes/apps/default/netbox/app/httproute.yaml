@@ -3,6 +3,12 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "NetBox"
+    gethomepage.dev/group: "Applications"
+    gethomepage.dev/icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/netbox.svg"
+    gethomepage.dev/href: "https://netbox.${DOMAIN}"
   name: netbox
 spec:
   parentRefs:

@@ -13,6 +13,11 @@ data:
     entries:
       # Redeclared only so !KeyOf resolves here; `created` never touches them.
       - model: authentik_core.group
+        id: g-homepage
+        state: created
+        identifiers:
+          name: linderis_homepage
+      - model: authentik_core.group
         id: g-rackula
         state: created
         identifiers:
@@ -92,6 +97,7 @@ data:
           users:
             - !Find [authentik_core.user, [username, theo]]
           parents:
+            - !KeyOf g-homepage
             - !KeyOf g-rackula
             - !KeyOf g-grafana
             - !KeyOf g-grafana-admins
@@ -106,6 +112,71 @@ data:
             - !KeyOf g-prometheus
             - !KeyOf g-maigret
             - !KeyOf g-social-analyzer
+  homepage.yaml: |
+    version: 1
+    metadata:
+      name: homepage
+    entries:
+      - model: authentik_core.group
+        id: homepage-group
+        state: present
+        identifiers:
+          name: linderis_homepage
+        attrs:
+          is_superuser: false
+      - model: authentik_providers_oauth2.oauth2provider
+        id: homepage-provider
+        state: present
+        identifiers:
+          name: Provider for Homepage
+        attrs:
+          client_id: homepage
+          client_secret: !Env AUTHENTIK_HOMEPAGE_CLIENT_SECRET
+          client_type: confidential
+          grant_types:
+            - authorization_code
+            - refresh_token
+          sub_mode: hashed_user_id
+          include_claims_in_id_token: true
+          issuer_mode: per_provider
+          authorization_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-authorization-explicit-consent]
+          invalidation_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-invalidation-flow]
+          signing_key: !Find
+            - authentik_crypto.certificatekeypair
+            - [name, authentik Self-signed Certificate]
+          property_mappings:
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+          redirect_uris:
+            - matching_mode: strict
+              redirect_uri_type: authorization
+              url: https://home.${DOMAIN}/api/auth/callback/homepage-oidc
+      - model: authentik_core.application
+        id: homepage-app
+        state: present
+        identifiers:
+          slug: homepage
+        attrs:
+          name: Homepage
+          provider: !KeyOf homepage-provider
+          policy_engine_mode: any
+          icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/homepage.svg
+          group: Infrastructure
+      # Homepage does no claim-based authorization of its own, so this binding
+      # is the only thing restricting access.
+      - model: authentik_policies.policybinding
+        state: present
+        identifiers:
+          target: !KeyOf homepage-app
+          group: !KeyOf homepage-group
+        attrs:
+          order: 0
+          enabled: true
   rackula.yaml: |
     version: 1
     metadata:

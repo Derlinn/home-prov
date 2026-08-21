@@ -1,0 +1,21 @@
+---
+- resources:
+    label: Cluster
+    cpu: true
+    memory: true
+    cputemp: false
+    uptime: true
+
+- kubernetes:
+    cluster:
+      show: true
+      cpu: true
+      memory: true
+      showLabel: true
+      label: lin-master-01
+    nodes:
+      show: false
+
+- search:
+    provider: duckduckgo
+    target: _blank

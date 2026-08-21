@@ -3,6 +3,12 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Zigbee2MQTT"
+    gethomepage.dev/group: "Domotique"
+    gethomepage.dev/icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/zigbee2mqtt.svg"
+    gethomepage.dev/href: "https://z2m.${DOMAIN}"
   name: zigbee2mqtt
 spec:
   parentRefs:

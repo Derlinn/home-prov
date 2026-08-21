@@ -3,6 +3,16 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Grafana"
+    gethomepage.dev/group: "Infrastructure"
+    gethomepage.dev/icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/grafana.svg"
+    gethomepage.dev/href: "https://grafana.${DOMAIN}"
+    gethomepage.dev/widget.type: "grafana"
+    gethomepage.dev/widget.url: "http://grafana-service.observability.svc.cluster.local:3000"
+    gethomepage.dev/widget.username: "{{HOMEPAGE_VAR_GRAFANA_USER}}"
+    gethomepage.dev/widget.password: "{{HOMEPAGE_VAR_GRAFANA_PASS}}"
   name: grafana
 spec:
   hostnames:

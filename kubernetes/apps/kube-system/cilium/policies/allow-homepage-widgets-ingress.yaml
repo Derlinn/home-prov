@@ -1,0 +1,41 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# Counterpart to allow-homepage-egress; Cilium denies both directions.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-homepage-widgets-ingress
+spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
+  endpointSelector:
+    matchExpressions:
+      - key: io.kubernetes.pod.namespace
+        operator: In
+        values: [media-server, observability, longhorn-system]
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: default
+            app.kubernetes.io/name: homepage
+      toPorts:
+        - ports:
+            - port: "7878"
+              protocol: TCP
+            - port: "8989"
+              protocol: TCP
+            - port: "9696"
+              protocol: TCP
+            - port: "6767"
+              protocol: TCP
+            - port: "8096"
+              protocol: TCP
+            - port: "8080"
+              protocol: TCP
+            - port: "3000"
+              protocol: TCP
+            - port: "9090"
+              protocol: TCP
+            - port: "8000"
+              protocol: TCP

@@ -3,6 +3,15 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Prowlarr"
+    gethomepage.dev/group: "Média"
+    gethomepage.dev/icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/prowlarr.svg"
+    gethomepage.dev/href: "https://prowlarr.${DOMAIN}"
+    gethomepage.dev/widget.type: "prowlarr"
+    gethomepage.dev/widget.url: "http://prowlarr.media-server.svc.cluster.local:9696"
+    gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_PROWLARR_KEY}}"
   name: prowlarr
 spec:
   parentRefs:

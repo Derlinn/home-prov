@@ -35,4 +35,6 @@ resources:
     - ./deny-direct-egress.yaml
     - ./allow-gatus-egress.yaml
     - ./allow-gatus-longhorn-ingress.yaml
+    - ./allow-homepage-egress.yaml
+    - ./allow-homepage-widgets-ingress.yaml
     - ./default-deny.yaml

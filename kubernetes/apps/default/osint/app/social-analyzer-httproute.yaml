@@ -2,6 +2,12 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Social Analyzer"
+    gethomepage.dev/group: "OSINT"
+    gethomepage.dev/icon: "fa://fa-search"
+    gethomepage.dev/href: "https://social-analyzer.${DOMAIN}"
   name: social-analyzer
 spec:
   hostnames:

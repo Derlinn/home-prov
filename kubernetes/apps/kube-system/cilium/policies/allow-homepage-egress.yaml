@@ -1,0 +1,55 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# Homepage queries each service's API to render its widgets.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-homepage-egress
+spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
+  endpointSelector:
+    matchLabels:
+      io.kubernetes.pod.namespace: default
+      app.kubernetes.io/name: homepage
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: media-server
+      toPorts:
+        - ports:
+            - port: "7878" # radarr
+              protocol: TCP
+            - port: "8989" # sonarr
+              protocol: TCP
+            - port: "9696" # prowlarr
+              protocol: TCP
+            - port: "6767" # bazarr
+              protocol: TCP
+            - port: "8096" # jellyfin
+              protocol: TCP
+            - port: "8080" # qbittorrent
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: observability
+      toPorts:
+        - ports:
+            - port: "9090" # prometheus
+              protocol: TCP
+            - port: "3000" # grafana
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: longhorn-system
+      toPorts:
+        - ports:
+            - port: "8000" # longhorn-ui
+              protocol: TCP
+    - toCIDR:
+        - 10.25.30.20/32
+      toPorts:
+        - ports:
+            - port: "8006" # API Proxmox
+              protocol: TCP

@@ -1,0 +1,30 @@
+---
+title: Linderis
+headerStyle: clean
+theme: dark
+color: slate
+disableCollapse: false
+statusStyle: dot
+
+layout:
+  Infrastructure:
+    style: row
+    columns: 4
+  Réseau:
+    style: row
+    columns: 4
+  Média:
+    style: row
+    columns: 4
+  Applications:
+    style: row
+    columns: 4
+  Sécurité:
+    style: row
+    columns: 3
+  Domotique:
+    style: row
+    columns: 3
+  OSINT:
+    style: row
+    columns: 3

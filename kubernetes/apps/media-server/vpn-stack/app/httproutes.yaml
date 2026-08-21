@@ -3,6 +3,16 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "qBittorrent"
+    gethomepage.dev/group: "Média"
+    gethomepage.dev/icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/qbittorrent.svg"
+    gethomepage.dev/href: "https://qbit.${DOMAIN}"
+    gethomepage.dev/widget.type: "qbittorrent"
+    gethomepage.dev/widget.url: "http://vpn-stack.media-server.svc.cluster.local:8080"
+    gethomepage.dev/widget.username: "{{HOMEPAGE_VAR_QBIT_USER}}"
+    gethomepage.dev/widget.password: "{{HOMEPAGE_VAR_QBIT_PASS}}"
   name: qbittorrent
 spec:
   parentRefs:

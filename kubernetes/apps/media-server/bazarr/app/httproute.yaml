@@ -3,6 +3,15 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Bazarr"
+    gethomepage.dev/group: "Média"
+    gethomepage.dev/icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/bazarr.svg"
+    gethomepage.dev/href: "https://bazarr.${DOMAIN}"
+    gethomepage.dev/widget.type: "bazarr"
+    gethomepage.dev/widget.url: "http://bazarr.media-server.svc.cluster.local:6767"
+    gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_BAZARR_KEY}}"
   name: bazarr
 spec:
   parentRefs:

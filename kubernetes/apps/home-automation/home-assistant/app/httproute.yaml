@@ -5,6 +5,12 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Home Assistant"
+    gethomepage.dev/group: "Domotique"
+    gethomepage.dev/icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/home-assistant.svg"
+    gethomepage.dev/href: "https://ha.${DOMAIN}"
   name: home-assistant
 spec:
   # HTTPS only: the `https-redirect` catch-all route on the gateway's `http`

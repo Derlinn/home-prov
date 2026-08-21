@@ -3,6 +3,12 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Dispatcharr"
+    gethomepage.dev/group: "Média"
+    gethomepage.dev/icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/dispatcharr.svg"
+    gethomepage.dev/href: "https://dispatcharr.${DOMAIN}"
   name: dispatcharr
 spec:
   parentRefs:

@@ -1,0 +1,105 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: homepage
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: homepage
+  interval: 1h
+  values:
+    controllers:
+      homepage:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        strategy: Recreate
+        containers:
+          app:
+            # Pinned hard: v2.0.0 was breaking and three releases shipped in a
+            # single day, one of them with a YAML parsing regression.
+            image:
+              repository: ghcr.io/gethomepage/homepage
+              tag: v2.1.2
+            env:
+              TZ: Europe/Paris
+              HOMEPAGE_ALLOWED_HOSTS: home.${DOMAIN}
+              HOMEPAGE_AUTH_ENABLED: "true"
+              HOMEPAGE_EXTERNAL_URL: https://home.${DOMAIN}
+              HOMEPAGE_OIDC_ISSUER: https://authentik.${DOMAIN}/application/o/homepage/
+              HOMEPAGE_AUTH_SECRET:
+                valueFrom:
+                  secretKeyRef: {name: homepage-secret, key: HOMEPAGE_AUTH_SECRET}
+              HOMEPAGE_OIDC_CLIENT_ID:
+                valueFrom:
+                  secretKeyRef: {name: homepage-secret, key: HOMEPAGE_OIDC_CLIENT_ID}
+              HOMEPAGE_OIDC_CLIENT_SECRET:
+                valueFrom:
+                  secretKeyRef: {name: homepage-secret, key: HOMEPAGE_OIDC_CLIENT_SECRET}
+            envFrom:
+              - secretRef:
+                  name: homepage-vars
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet: {path: /api/healthcheck, port: &port 3000}
+                  initialDelaySeconds: 10
+                  periodSeconds: 20
+                  failureThreshold: 5
+              readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities: {drop: ["ALL"]}
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 384Mi
+
+    defaultPodOptions:
+      serviceAccountName: homepage
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+
+    service:
+      app:
+        controller: homepage
+        ports:
+          http:
+            port: *port
+
+    persistence:
+      config:
+        type: configMap
+        name: homepage-config
+        globalMounts:
+          - path: /app/config/settings.yaml
+            subPath: settings.yaml
+            readOnly: true
+          - path: /app/config/kubernetes.yaml
+            subPath: kubernetes.yaml
+            readOnly: true
+          - path: /app/config/services.yaml
+            subPath: services.yaml
+            readOnly: true
+          - path: /app/config/widgets.yaml
+            subPath: widgets.yaml
+            readOnly: true
+          - path: /app/config/bookmarks.yaml
+            subPath: bookmarks.yaml
+            readOnly: true
+          - path: /app/config/docker.yaml
+            subPath: docker.yaml
+            readOnly: true
+      logs:
+        type: emptyDir
+        globalMounts:
+          - path: /app/config/logs

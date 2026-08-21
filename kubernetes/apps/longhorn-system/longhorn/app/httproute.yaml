@@ -3,6 +3,14 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Longhorn"
+    gethomepage.dev/group: "Infrastructure"
+    gethomepage.dev/icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/longhorn.svg"
+    gethomepage.dev/href: "https://longhorn.${DOMAIN}"
+    gethomepage.dev/widget.type: "longhorn"
+    gethomepage.dev/widget.url: "http://longhorn-frontend.longhorn-system.svc.cluster.local"
   name: longhorn-dashboard
 spec:
   parentRefs:

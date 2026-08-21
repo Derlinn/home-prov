@@ -173,6 +173,16 @@ Cilium refusant les deux sens, cette policy est le pendant obligatoire de la reg
 
 ---
 
+## allow-homepage-widgets-ingress
+
+**Fichier :** `policies/allow-homepage-widgets-ingress.yaml`
+
+Pendant de `allow-homepage-egress`. Le selecteur porte sur trois namespaces a la fois (`matchExpressions` avec `operator: In` sur `media-server`, `observability`, `longhorn-system`), ce qui evite une policy par namespace cible.
+
+Homepage interroge l'API de chaque service pour alimenter ses widgets : 7878 (radarr), 8989 (sonarr), 9696 (prowlarr), 6767 (bazarr), 8096 (jellyfin), 8080 (qbittorrent), 9090 (prometheus), 3000 (grafana), 8000 (longhorn-ui). Ajouter un widget demande d'ouvrir le port dans **les deux** policies.
+
+---
+
 ## Egress vers des cibles externes
 
 | Policy | Fichier | Source | Destination | Ports |
@@ -183,6 +193,7 @@ Cilium refusant les deux sens, cette policy est le pendant obligatoire de la reg
 | `allow-blackbox-egress` | `policies/allow-blackbox-egress.yaml` | blackbox-exporter | `10.25.30.1/32` (NAS) | 8001 |
 | `allow-mktxp-egress` | `policies/allow-mktxp-egress.yaml` | mktxp | `10.25.200.0/24` (VLAN mgmt) | 8728 (API Mikrotik) |
 | `allow-gatus-egress` | `policies/allow-gatus-egress.yaml` | gatus | `10.25.30.0/24`, plus `longhorn-ui` en interne | ICMP echo (type 8), 53, 8006, 8000 |
+| `allow-homepage-egress` | `policies/allow-homepage-egress.yaml` | homepage (`default`) | `media-server`, `observability`, `longhorn-system`, `10.25.30.20/32` | 7878, 8989, 9696, 6767, 8096, 8080, 9090, 3000, 8000, 8006 |
 | `allow-wireguard-egress` | `policies/allow-wireguard-egress.yaml` | vpn-stack (`media-server`) | `world` | 51820 UDP |
 
 

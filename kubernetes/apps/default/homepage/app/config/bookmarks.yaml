@@ -1,0 +1,13 @@
+---
+- Infrastructure:
+    - Authentik:
+        - abbr: AK
+          href: https://authentik.${DOMAIN}
+    - Flux:
+        - abbr: FL
+          href: https://fluxcd.io/flux/components/
+
+- Externe:
+    - GitHub:
+        - abbr: GH
+          href: https://github.com

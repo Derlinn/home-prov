@@ -1,0 +1,6 @@
+---
+# Discovery reads HTTPRoute, not Ingress: the cluster is on Gateway API.
+mode: cluster
+gateway: true
+ingress: false
+traefik: false
