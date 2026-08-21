@@ -26,7 +26,7 @@
         siteMonitor: https://power-dns.${DOMAIN}
 
     - NAS:
-        href: http://10.25.30.1:8000
+        href: https://10.25.30.1:8001
         description: asustor-1022t
         icon: asustor.svg
-        siteMonitor: http://10.25.30.1:8000
+        siteMonitor: https://10.25.30.1:8001
