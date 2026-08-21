@@ -183,3 +183,46 @@ data:
           name: home-assistant
           provider: !KeyOf home-assistant-provider
           policy_engine_mode: any
+  groups.yaml: |
+    version: 1
+    metadata:
+      name: groups
+    entries:
+      # `users` is deliberately omitted: membership stays managed in the UI, and
+      # the local pks it would pin are meaningless on a rebuilt instance.
+      - model: authentik_core.group
+        state: present
+        identifiers:
+          name: Grafana Admins
+        attrs:
+          is_superuser: false
+      - model: authentik_core.group
+        state: present
+        identifiers:
+          name: Grafana Editors
+        attrs:
+          is_superuser: false
+      - model: authentik_core.group
+        state: present
+        identifiers:
+          name: linderis_grafana
+        attrs:
+          is_superuser: false
+      - model: authentik_core.group
+        state: present
+        identifiers:
+          name: linderis_home_assistant
+        attrs:
+          is_superuser: false
+      - model: authentik_core.group
+        state: present
+        identifiers:
+          name: linderis_home_assistant_admins
+        attrs:
+          is_superuser: false
+      - model: authentik_core.group
+        state: present
+        identifiers:
+          name: linderis_jellyfin
+        attrs:
+          is_superuser: false
