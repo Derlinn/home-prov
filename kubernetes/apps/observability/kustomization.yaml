@@ -13,6 +13,7 @@ resources:
   - ./grafana/ks.yaml
   - ./gatus/ks.yaml
   - ./mikrotik/ks.yaml
+  - ./proxmox/ks.yaml
   - ./asustor/ks.yaml
   - ./blackbox-exporter/ks.yaml
   - ./loki/ks.yaml

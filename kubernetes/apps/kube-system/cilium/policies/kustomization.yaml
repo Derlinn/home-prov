@@ -29,6 +29,7 @@ resources:
     - ./allow-wireguard-egress.yaml
     - ./allow-mktxp-egress.yaml
     - ./allow-asustor-egress.yaml
+    - ./allow-proxmox-egress.yaml
     - ./allow-blackbox-egress.yaml
     - ./allow-vpn-proxy.yaml
     - ./deny-direct-egress.yaml

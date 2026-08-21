@@ -168,6 +168,8 @@ C'est `allow-observability-internal` qui autorise Prometheus a scraper Gatus (80
 | Policy | Fichier | Source | Destination | Ports |
 |---|---|---|---|---|
 | `allow-asustor-egress` | `policies/allow-asustor-egress.yaml` | Prometheus | `10.25.30.1/32` (NAS) | 9100, 9633 |
+| `allow-proxmox-egress` | `policies/allow-proxmox-egress.yaml` | Prometheus | `10.25.30.20/32` (hyperviseur) | 9100 |
+| `allow-pve-exporter-egress` | `policies/allow-proxmox-egress.yaml` | pve-exporter | `10.25.30.20/32` (API Proxmox) | 8006 |
 | `allow-blackbox-egress` | `policies/allow-blackbox-egress.yaml` | blackbox-exporter | `10.25.30.1/32` (NAS) | 8001 |
 | `allow-mktxp-egress` | `policies/allow-mktxp-egress.yaml` | mktxp | `10.25.200.0/24` (VLAN mgmt) | 8728 (API Mikrotik) |
 | `allow-gatus-egress` | `policies/allow-gatus-egress.yaml` | gatus | `10.25.30.0/24` | ICMP echo (type 8) |

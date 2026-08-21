@@ -1,0 +1,44 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# Prometheus scrapes node_exporter on the Proxmox host directly; pve-exporter
+# runs in-cluster and queries the Proxmox API instead.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-proxmox-egress
+spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
+  endpointSelector:
+    matchLabels:
+      io.kubernetes.pod.namespace: observability
+      app.kubernetes.io/name: prometheus
+  egress:
+    - toCIDR:
+        - 10.25.30.20/32
+      toPorts:
+        - ports:
+            - port: "9100"
+              protocol: TCP
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-pve-exporter-egress
+spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
+  endpointSelector:
+    matchLabels:
+      io.kubernetes.pod.namespace: observability
+      app.kubernetes.io/name: pve-exporter
+  egress:
+    - toCIDR:
+        - 10.25.30.20/32
+      toPorts:
+        - ports:
+            - port: "8006"
+              protocol: TCP
