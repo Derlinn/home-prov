@@ -9,6 +9,8 @@ metadata:
     gethomepage.dev/group: "Média"
     gethomepage.dev/icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/qbittorrent.svg"
     gethomepage.dev/href: "https://qbit.${DOMAIN}"
+    gethomepage.dev/siteMonitor: "http://vpn-stack.media-server.svc.cluster.local:8080"
+    gethomepage.dev/app: "vpn-stack"
     gethomepage.dev/widget.type: "qbittorrent"
     gethomepage.dev/widget.url: "http://vpn-stack.media-server.svc.cluster.local:8080"
     gethomepage.dev/widget.username: "{{HOMEPAGE_VAR_QBIT_USER}}"

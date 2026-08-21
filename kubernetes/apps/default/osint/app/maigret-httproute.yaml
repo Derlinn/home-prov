@@ -6,7 +6,7 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/name: "Maigret"
     gethomepage.dev/group: "OSINT"
-    gethomepage.dev/icon: "fa://fa-user-secret"
+    gethomepage.dev/icon: "mdi-account-search"
     gethomepage.dev/href: "https://maigret.${DOMAIN}"
   name: maigret
 spec:

@@ -16,6 +16,15 @@
     nodes:
       show: false
 
+# longhorn is an info widget, not a service one: it cannot be declared through
+# a route annotation.
+- longhorn:
+    url: http://longhorn-frontend.longhorn-system.svc.cluster.local
+    expanded: false
+    total: true
+    labels: true
+    nodes: false
+
 - search:
     provider: duckduckgo
     target: _blank

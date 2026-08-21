@@ -8,6 +8,6 @@
           href: https://fluxcd.io/flux/components/
 
 - Externe:
-    - GitHub:
-        - abbr: GH
-          href: https://github.com
+    - GitOps:
+        - abbr: GO
+          href: https://github.com/Derlinn/home-prov

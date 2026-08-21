@@ -35,6 +35,8 @@ spec:
             gethomepage.dev/group: "Infrastructure"
             gethomepage.dev/icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/prometheus.svg"
             gethomepage.dev/href: "https://prometheus.${DOMAIN}"
+            gethomepage.dev/siteMonitor: "http://prometheus-operated.observability.svc.cluster.local:9090/-/healthy"
+            gethomepage.dev/pod-selector: "app.kubernetes.io/name=prometheus"
             gethomepage.dev/widget.type: "prometheus"
             gethomepage.dev/widget.url: "http://prometheus-operated.observability.svc.cluster.local:9090"
           hostnames:

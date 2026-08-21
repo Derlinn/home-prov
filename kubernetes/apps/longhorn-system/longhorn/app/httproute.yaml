@@ -9,8 +9,8 @@ metadata:
     gethomepage.dev/group: "Infrastructure"
     gethomepage.dev/icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/longhorn.svg"
     gethomepage.dev/href: "https://longhorn.${DOMAIN}"
-    gethomepage.dev/widget.type: "longhorn"
-    gethomepage.dev/widget.url: "http://longhorn-frontend.longhorn-system.svc.cluster.local"
+    gethomepage.dev/siteMonitor: "http://longhorn-frontend.longhorn-system.svc.cluster.local"
+    gethomepage.dev/pod-selector: "app=longhorn-ui"
   name: longhorn-dashboard
 spec:
   parentRefs:

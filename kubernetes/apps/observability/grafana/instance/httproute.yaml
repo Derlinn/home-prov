@@ -9,6 +9,8 @@ metadata:
     gethomepage.dev/group: "Infrastructure"
     gethomepage.dev/icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/grafana.svg"
     gethomepage.dev/href: "https://grafana.${DOMAIN}"
+    gethomepage.dev/siteMonitor: "http://grafana-service.observability.svc.cluster.local:3000/api/health"
+    gethomepage.dev/pod-selector: "app=grafana"
     gethomepage.dev/widget.type: "grafana"
     gethomepage.dev/widget.url: "http://grafana-service.observability.svc.cluster.local:3000"
     gethomepage.dev/widget.username: "{{HOMEPAGE_VAR_GRAFANA_USER}}"

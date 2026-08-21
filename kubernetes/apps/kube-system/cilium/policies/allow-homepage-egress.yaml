@@ -53,3 +53,9 @@ spec:
         - ports:
             - port: "8006" # API Proxmox
               protocol: TCP
+    - toCIDR:
+        - 10.25.30.1/32
+      toPorts:
+        - ports:
+            - port: "8000" # UI asustor
+              protocol: TCP

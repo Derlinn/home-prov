@@ -6,7 +6,7 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/name: "Social Analyzer"
     gethomepage.dev/group: "OSINT"
-    gethomepage.dev/icon: "fa://fa-search"
+    gethomepage.dev/icon: "mdi-magnify-scan"
     gethomepage.dev/href: "https://social-analyzer.${DOMAIN}"
   name: social-analyzer
 spec:
