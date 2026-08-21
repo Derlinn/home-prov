@@ -36,7 +36,8 @@ spec:
               NGINX_RESOLVER: 10.43.0.10
               RACKULA_LISTEN_PORT: "8080"
               RACKULA_STORAGE_MODE: server
-              RACKULA_AUTH_MODE: oidc
+              # Authentication is enforced by the SecurityPolicy on the gateway.
+              RACKULA_AUTH_MODE: none
               RACKULA_TRUST_PROXY: "1"
               RACKULA_BASE_URL: https://rackula.${DOMAIN}
               API_WRITE_TOKEN:
@@ -86,25 +87,7 @@ spec:
               # The API parses this as a boolean, the nginx frontend as 0/1.
               RACKULA_TRUST_PROXY: "true"
               RACKULA_BASE_URL: https://rackula.${DOMAIN}
-              RACKULA_AUTH_MODE: oidc
-              RACKULA_OIDC_ISSUER: https://authentik.${DOMAIN}/application/o/rackula/
-              RACKULA_OIDC_CLIENT_ID: rackula-web
-              RACKULA_OIDC_REDIRECT_URI: https://rackula.${DOMAIN}/auth/callback
-              RACKULA_AUTH_CSRF_PROTECTION: "true"
-              RACKULA_AUTH_SESSION_COOKIE_SECURE: "true"
-              RACKULA_AUTH_SESSION_COOKIE_SAMESITE: Lax
-              RACKULA_AUTH_SESSION_MAX_AGE_SECONDS: "43200"
-              RACKULA_AUTH_SESSION_IDLE_TIMEOUT_SECONDS: "1800"
-              RACKULA_AUTH_SESSION_SECRET:
-                valueFrom:
-                  secretKeyRef:
-                    name: rackula-secret
-                    key: RACKULA_AUTH_SESSION_SECRET
-              RACKULA_OIDC_CLIENT_SECRET:
-                valueFrom:
-                  secretKeyRef:
-                    name: rackula-secret
-                    key: RACKULA_OIDC_CLIENT_SECRET
+              RACKULA_AUTH_MODE: none
               RACKULA_API_WRITE_TOKEN:
                 valueFrom:
                   secretKeyRef:

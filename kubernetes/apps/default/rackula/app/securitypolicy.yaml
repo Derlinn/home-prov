@@ -1,0 +1,29 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
+# Temporary: Rackula's own OIDC cannot authenticate against Authentik, whose
+# issuer carries a trailing slash that the app strips before validating the
+# `iss` claim. Upstream RackulaLives/Rackula#3140. Drop this and restore
+# RACKULA_AUTH_MODE=oidc once it is fixed.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: rackula-oidc
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: rackula
+  oidc:
+    provider:
+      issuer: https://authentik.${DOMAIN}/application/o/rackula/
+      # Endpoints are pinned rather than discovered: the issuer's trailing slash
+      # would produce a double slash in the well-known URL.
+      authorizationEndpoint: https://authentik.${DOMAIN}/application/o/authorize/
+      tokenEndpoint: https://authentik.${DOMAIN}/application/o/token/
+      endSessionEndpoint: https://authentik.${DOMAIN}/application/o/rackula/end-session/
+    clientID: rackula-web
+    clientSecret:
+      name: rackula-secret
+    redirectURL: https://rackula.${DOMAIN}/oauth2/callback
+    logoutPath: /logout
+    scopes: ["openid", "email", "profile"]
