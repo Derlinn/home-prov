@@ -16,7 +16,7 @@ spec:
   values:
     provider:
       name: pdns
-    policy: upsert-only
+    policy: sync
     sources:
       - gateway-httproute
     txtOwnerId: external-dns
