@@ -11,6 +11,8 @@ spec:
   interval: 1h
   timeout: 20m # default 5min is too short for update
   values:
+    global:
+      storageClass: longhorn-production-v1
     timezone: 'Europe\Paris'
     resources:
       requests:
