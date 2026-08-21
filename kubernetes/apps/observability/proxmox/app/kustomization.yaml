@@ -8,3 +8,4 @@ resources:
   - ./service.yaml
   - ./servicemonitor.yaml
   - ./scrapeconfig.yaml
+  - ./grafanadashboard.yaml
