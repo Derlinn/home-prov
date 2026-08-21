@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
-# DevTools internal: tous les pods du namespace devtools peuvent communiquer entre eux
+# DevTools internal: every pod in the devtools namespace can talk to the others
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:

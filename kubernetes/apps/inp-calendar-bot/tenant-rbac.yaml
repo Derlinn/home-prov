@@ -1,8 +1,6 @@
 ---
-# Identity Flux impersonates when applying ./inp-calendar-bot/app, which is
-# co-owned by an external contributor (see .github/CODEOWNERS). Without it
-# Flux applies as cluster-admin and a ClusterRoleBinding dropped in that
-# directory would own the cluster.
+# Flux impersonates this when applying ./inp-calendar-bot/app, co-owned by an
+# outside contributor. Otherwise it applies as cluster-admin.
 apiVersion: v1
 kind: ServiceAccount
 metadata:

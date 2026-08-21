@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
-# Headscale control plane — accès interne (subnet-router et clients in-cluster)
+# Headscale control plane - internal access (subnet-router and in-cluster clients)
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:

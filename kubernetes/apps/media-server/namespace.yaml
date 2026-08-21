@@ -4,7 +4,7 @@ kind: Namespace
 metadata:
   name: media-server
   labels:
-    # Gluetun nécessite NET_ADMIN + hostPath /dev/net/tun
+    # Gluetun needs NET_ADMIN + hostPath /dev/net/tun
     pod-security.kubernetes.io/enforce: privileged
     pod-security.kubernetes.io/warn: privileged
   annotations:

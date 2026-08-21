@@ -11,7 +11,7 @@ resources:
   - ./namespace.yaml
   - ./kube-prometheus-stack/ks.yaml
   - ./grafana/ks.yaml
-  # DEPRECATED 2026-08-11 : ./uptime-kuma/ remplace par ./gatus/ (manifests conserves dans le repo)
+  # DEPRECATED 2026-08-11: ./uptime-kuma/ replaced by ./gatus/ (manifests kept in the repo)
   - ./gatus/ks.yaml
   - ./mikrotik/ks.yaml
   - ./asustor/ks.yaml

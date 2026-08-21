@@ -12,14 +12,8 @@ spec:
   # drain, eviction) cancels the context of every in-flight reconciliation
   exclusionList:
     - "context canceled"
-  # The Alert CRD documents `*` on `name` only ("If multiple resources are
-  # targeted `*` may be set"); `namespace` is an exact match, and an event whose
-  # namespace does not match is silently discarded by the event server. Since
-  # kubernetes/apps/<ns>/kustomization.yaml sets `namespace: <ns>`, the CRs live
-  # in the namespace of the app they deploy, so every namespace has to be listed.
-  #
-  # Adding a namespace under kubernetes/apps/ means adding it here too, or its
-  # failures never reach Discord.
+  # `namespace` is an exact match, no wildcard. A new namespace under
+  # kubernetes/apps/ must be added here or its failures never reach Discord.
   eventSources:
     - { kind: Kustomization, name: "*", namespace: authentik }
     - { kind: Kustomization, name: "*", namespace: cert-manager }

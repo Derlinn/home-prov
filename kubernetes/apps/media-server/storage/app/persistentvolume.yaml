@@ -1,14 +1,6 @@
 ---
-# PersistentVolume pointant vers le partage NFS du NAS Asustor.
-# Ce PV couvre l'ensemble du dossier partagé (équivalent de $MEDIA_SHARE dans Docker).
-# Structure attendue sur le NAS :
-#   <nfs-path>/
-#   ├── media/
-#   │   ├── movies/
-#   │   └── tv/
-#   └── downloads/
-#       ├── complete/
-#       └── incomplete/
+# Whole NAS share, not a subfolder: media/ and downloads/ must sit under one
+# mount for hardlinks to work. Expects media/{movies,tv} and downloads/.
 apiVersion: v1
 kind: PersistentVolume
 metadata:

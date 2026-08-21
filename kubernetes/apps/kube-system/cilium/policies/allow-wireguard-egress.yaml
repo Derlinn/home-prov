@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
-# Autorise gluetun (vpn-stack) à envoyer des paquets WireGuard UDP 51820 vers internet.
-# Sans cette règle, le tunnel WireGuard s'établit silencieusement mais le trafic est bloqué.
+# Lets gluetun (vpn-stack) send WireGuard UDP 51820 to the internet.
+# Without it the tunnel comes up silently but no traffic passes.
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:

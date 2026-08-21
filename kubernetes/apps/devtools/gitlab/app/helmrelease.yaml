@@ -44,34 +44,34 @@ spec:
             - secret: gitlab-authentik-oidc
               key: provider
 
-    # Ingress controller bundlé désactivé — on utilise Envoy Gateway
+    # Bundled ingress controller disabled - Envoy Gateway handles ingress
     nginx-ingress:
       enabled: false
 
-    # Cert-manager bundlé désactivé — on utilise l'externe
+    # Bundled cert-manager disabled - the cluster one is used instead
     certmanager:
       install: false
     certmanager-issuer:
       email: false
 
-    # Prometheus bundlé désactivé — on utilise kube-prometheus-stack
+    # Bundled Prometheus disabled - kube-prometheus-stack is used instead
     prometheus:
       install: false
 
-    # PostgreSQL et Redis bundlés
+    # Bundled PostgreSQL and Redis
     postgresql:
       install: true
 
     redis:
       install: true
 
-    # MinIO bundlé pour les artefacts, LFS et uploads
+    # Bundled MinIO for artifacts, LFS and uploads
     minio:
       enabled: true
       ingress:
         enabled: false
 
-    # Registre désactivé pour l'instant (Harbor prévu)
+    # Registry disabled for now (Harbor planned)
     registry:
       enabled: false
 

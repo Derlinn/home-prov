@@ -43,7 +43,7 @@ endpoints:
     conditions: *http-2xx
     alerts: *discord-alert
 
-  # --- Réseau -----------------------------------------------------------
+  # --- Network ----------------------------------------------------------
   # Headscale and Headplane were disabled in Uptime Kuma and are left out.
   - name: PowerDNS
     group: Réseau
@@ -59,7 +59,7 @@ endpoints:
     conditions: *http-2xx
     alerts: *discord-alert
 
-  # --- Sécurité ---------------------------------------------------------
+  # --- Security ---------------------------------------------------------
   - name: Vaultwarden
     group: Sécurité
     url: https://vaultwarden.${DOMAIN}/alive
@@ -149,7 +149,7 @@ endpoints:
       - "[CONNECTED] == true"
     alerts: *discord-alert
 
-  # --- Domotique --------------------------------------------------------
+  # --- Home automation --------------------------------------------------
   - name: Home Assistant
     group: Domotique
     url: https://ha.${DOMAIN}
@@ -188,7 +188,7 @@ endpoints:
       - "[DNS_RCODE] == NOERROR"
     alerts: *discord-alert
 
-  # --- Certificats ------------------------------------------------------
+  # --- Certificates -----------------------------------------------------
   - name: Certificat TLS
     group: Sécurité
     url: https://grafana.${DOMAIN}

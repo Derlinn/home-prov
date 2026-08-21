@@ -21,11 +21,8 @@ spec:
       repository: lscr.io/linuxserver/jellyfin
       tag: 10.11.11
 
-    # Jellyfin keeps its library in a SQLite file on a RWO PVC. With
-    # RollingUpdate the new pod starts before the old one stops: on a
-    # single-node cluster both mount the same volume and open the same
-    # database, and the second process fails to create its -shm file, which
-    # surfaces as `SQLite Error 10: disk I/O error` on every query.
+    # RollingUpdate briefly runs two pods against the same SQLite library on a
+    # RWO PVC, surfacing as `SQLite Error 10: disk I/O error`.
     deploymentStrategy:
       type: Recreate
 

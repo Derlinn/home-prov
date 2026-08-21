@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
-# Dispatcharr (mode aio — Redis embarqué) — trafic HTTP/HTTPS via proxy gluetun.
+# Dispatcharr (aio mode, embedded Redis) - HTTP/HTTPS via the gluetun proxy.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:

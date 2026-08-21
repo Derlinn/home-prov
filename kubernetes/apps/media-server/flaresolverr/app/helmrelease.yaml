@@ -1,11 +1,7 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
-# FlareSolverr — accès interne uniquement via cluster DNS :
-#   http://flaresolverr.media-server.svc.cluster.local:8191
-#
-# Note : nodriver/Chrome ne respecte pas forcément HTTP_PROXY.
-# Si le bypass Cloudflare échoue, envisager de passer flaresolverr
-# dans le pod vpn-stack (partage réseau complet avec gluetun).
+# nodriver/Chrome does not reliably honour HTTP_PROXY. If the Cloudflare bypass
+# fails, move this into the vpn-stack pod to share gluetun's netns outright.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:

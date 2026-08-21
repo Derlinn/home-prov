@@ -6,7 +6,7 @@ metadata:
   namespace: media-server
 data:
   recyclarr.yml: |
-    # Configuration Recyclarr pour Radarr et Sonarr - Profil VOSTFR
+    # Recyclarr config for Radarr and Sonarr - VOSTFR profile
     # Documentation: https://recyclarr.dev/
 
     ###################################################################################################
@@ -31,13 +31,13 @@ data:
           - template: radarr-custom-formats-hd-bluray-web
 
         custom_formats:
-          # OBLIGATOIRE: Custom Formats pour VOSTFR
-          # Language: Original + French (pour fallback MULTi si besoin)
+          # REQUIRED: custom formats for VOSTFR
+          # Language: Original + French (MULTi fallback if needed)
           - trash_ids:
               - 0542a48746585dc4444bbbb8a6bdf6ea  # Language: Original + French
             assign_scores_to:
               - name: HD Bluray + WEB
-                score: 0  # 0 pour VOSTFR pur, 500 si vous voulez fallback MULTi
+                score: 0  # 0 for pure VOSTFR, 500 to allow a MULTi fallback
 
           # Language: Not Original (bloque tout sauf VO)
           - trash_ids:
@@ -46,14 +46,14 @@ data:
               - name: HD Bluray + WEB
                 score: -10000
 
-          # VOSTFR (boost pour prioriser VOSTFR)
+          # VOSTFR (boost to prioritise VOSTFR)
           - trash_ids:
               - 9172b2f683f6223e3a1846427b417a3d  # VOSTFR
             assign_scores_to:
               - name: HD Bluray + WEB
                 score: 1000
 
-          # OPTIONNEL: Versions françaises audio (pour renommage uniquement)
+          # OPTIONAL: French audio versions (renaming only)
           - trash_ids:
               - 404c08fd0bd67f39b4d8e5709319094e  # VFF
               - b6ace47331a1d3b77942fc18156f6df6  # VFQ

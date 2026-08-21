@@ -33,6 +33,5 @@ resources:
     - ./allow-blackbox-egress.yaml
     - ./allow-vpn-proxy.yaml
     - ./deny-direct-egress.yaml
-    # DEPRECATED 2026-08-11: ./allow-uptime-kuma-egress.yaml replaced by ./allow-gatus-egress.yaml
     - ./allow-gatus-egress.yaml
     - ./default-deny.yaml

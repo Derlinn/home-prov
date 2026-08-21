@@ -1,10 +1,7 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
-# Pod unique : gluetun (VPN) + qbittorrent partagent le même namespace réseau.
-# Équivalent K8s de network_mode: "service:gluetun".
-#
-# Gluetun expose également un proxy HTTP sur :8888 utilisé par les autres apps
-# (prowlarr, bazarr, flaresolverr, dispatcharr) via HTTP_PROXY — 1 seule connexion ProtonVPN.
+# gluetun and qbittorrent share a netns. Gluetun's :8888 proxy is what the other
+# *arr apps use via HTTP_PROXY, so ProtonVPN only ever sees one connection.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -49,9 +46,9 @@ spec:
               DOT: "off"
               DNS_ADDRESS: "1.1.1.1"
               FIREWALL_OUTBOUND_SUBNETS: "10.25.0.0/16,10.42.0.0/16,10.43.0.0/16,192.168.0.0/16"
-              # Proxy HTTP sur :8888 — utilisé par prowlarr/bazarr/flaresolverr/dispatcharr
+              # HTTP proxy on :8888 - used by prowlarr/bazarr/flaresolverr/dispatcharr
               BLOCK_IPV6: "on"
-              # Permettre l'accès entrant aux ports qbittorrent et proxy HTTP
+              # Allow inbound traffic to the qbittorrent and HTTP proxy ports
               FIREWALL_INPUT_PORTS: "8080,8888"
               WIREGUARD_ALLOWED_IPS: "0.0.0.0/0"
               HTTPPROXY: "on"

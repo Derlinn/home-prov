@@ -55,7 +55,7 @@ spec:
       data:
         existingClaim: media-server-nas-data
         globalMounts:
-          - path: /data # montage complet pour hardlinks (downloads + media)
+          - path: /data # whole share mounted so hardlinks work (downloads + media)
 
     defaultPodOptions:
       labels:

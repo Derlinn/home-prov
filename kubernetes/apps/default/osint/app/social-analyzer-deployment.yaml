@@ -43,10 +43,8 @@ spec:
                 sleep 30
               done
               cd /app/src
-              # NodeJS ignores HTTPS_PROXY, and the app only wires a proxy agent
-              # when one is saved from the web UI. Patch the shared request
-              # options instead, otherwise every scan is dropped by the
-              # deny-direct-egress policy.
+              # NodeJS ignores HTTPS_PROXY and the app only wires an agent from
+              # its UI, so every scan would hit deny-direct-egress.
               grep -q HttpsProxyAgent modules/helper.js || sed -i \
                 -e "s#^const proxy = ''#const proxy = process.env.HTTPS_PROXY || ''#" \
                 -e "s#^export default {#import HttpsProxyAgent from 'https-proxy-agent'\nif (proxy !== '') { header_options.agent = HttpsProxyAgent(proxy) }\nexport default {#" \

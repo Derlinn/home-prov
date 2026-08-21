@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
-# Recyclarr — sync des profils de qualité Sonarr/Radarr. Pas d'interface web.
+# Recyclarr - syncs Sonarr/Radarr quality profiles. No web UI.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:

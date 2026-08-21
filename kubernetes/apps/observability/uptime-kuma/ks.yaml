@@ -1,14 +1,10 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 #
-# ============================ DEPRECATED (2026-08-11) ============================
-# Uptime Kuma est remplace par Gatus : ../gatus/
-# Cette Kustomization n'est plus referencee dans ../kustomization.yaml et n'est
-# donc plus reconciliee par Flux. Les manifests sont conserves pour historique /
-# rollback eventuel. `suspend: true` evite toute reconciliation accidentelle si
-# la ressource venait a etre reactivee sans revue.
-# A supprimer une fois Gatus valide en production.
-# ================================================================================
+# DEPRECATED (2026-08-11): replaced by Gatus (../gatus/).
+# Not referenced in ../kustomization.yaml, so Flux never reconciles it;
+# `suspend: true` guards against it being re-added without review.
+# Delete once Gatus is proven in production.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:

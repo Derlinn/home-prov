@@ -1,8 +1,8 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 #
-# DEPRECATED (2026-08-11) : remplace par Gatus (../../gatus/).
-# Conserve dans le repo pour historique, plus deploye par Flux.
+# DEPRECATED (2026-08-11): replaced by Gatus (../../gatus/).
+# Kept in the repo for reference, no longer deployed by Flux.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
