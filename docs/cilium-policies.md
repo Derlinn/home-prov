@@ -173,8 +173,6 @@ C'est `allow-observability-internal` qui autorise Prometheus a scraper Gatus (80
 | `allow-gatus-egress` | `policies/allow-gatus-egress.yaml` | gatus | `10.25.30.0/24` | ICMP echo (type 8) |
 | `allow-wireguard-egress` | `policies/allow-wireguard-egress.yaml` | vpn-stack (`media-server`) | `world` | 51820 UDP |
 
-> `allow-uptime-kuma-egress` est **obsolete depuis le 2026-08-11** (uptime-kuma remplace par Gatus).
-> Le fichier reste dans le repo mais n'est plus reference dans `policies/kustomization.yaml`.
 
 ---
 
