@@ -48,9 +48,8 @@ spec:
     nginx-ingress:
       enabled: false
 
-    # Bundled cert-manager disabled - the cluster one is used instead
-    certmanager:
-      install: false
+    # `certmanager.install` is deprecated: the subchart's schema rejects it.
+    installCertmanager: false
     certmanager-issuer:
       email: false
 

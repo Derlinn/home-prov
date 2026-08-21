@@ -62,7 +62,6 @@ spec:
                 memory: 384Mi
 
     defaultPodOptions:
-      serviceAccountName: homepage
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

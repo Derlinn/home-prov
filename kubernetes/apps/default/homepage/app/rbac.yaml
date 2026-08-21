@@ -1,9 +1,4 @@
 ---
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: homepage
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -31,5 +26,6 @@ roleRef:
   name: homepage
 subjects:
   - kind: ServiceAccount
+    # Created by app-template, named after the release.
     name: homepage
     namespace: default

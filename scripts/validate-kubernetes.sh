@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 # Renders every kustomization under kubernetes/ and validates the result against
-# the Kubernetes API schemas plus the CRD schemas published by home-operations.
+# the Kubernetes API schemas plus the CRD schemas published by home-operations,
+# then renders every HelmRelease's values against its own chart schema.
 #
 # Runs in CI on every pull request, which is what makes `ignoreTests: false` in
 # .renovaterc.json5 mean something. Runnable locally the same way:
 #
 #   ./scripts/validate-kubernetes.sh
+#
+# The chart step pulls every chart, so it needs network access. Set
+# SKIP_HELM_SCHEMA=1 to skip it.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -118,3 +122,92 @@ kubeconform \
   -summary \
   -n 4 \
   "${RENDER_DIR}"
+
+# kubeconform validates the HelmRelease manifest but never the values it
+# carries, so a key the chart's values.schema.json rejects only surfaces when
+# Flux runs the install. Rendering each chart locally closes that gap.
+if [[ -n "${SKIP_HELM_SCHEMA:-}" ]]; then
+  echo "Skipping HelmRelease values validation (SKIP_HELM_SCHEMA is set)"
+  exit 0
+fi
+
+for tool in helm yq; do
+  if ! command -v "${tool}" >/dev/null 2>&1; then
+    echo "${tool} is required to validate HelmRelease values." >&2
+    echo "Install it, or set SKIP_HELM_SCHEMA=1 to skip this step." >&2
+    exit 1
+  fi
+done
+
+echo "Validating HelmRelease values against chart schemas"
+CHART_CACHE="${RENDER_DIR}/charts"
+mkdir -p "${CHART_CACHE}"
+
+# Sources are matched by name alone: a HelmRelease may reference a repository
+# declared in another namespace, and the rendered output does not always carry
+# one (targetNamespace is set by the parent Flux Kustomization).
+declare -A SRC_URL SRC_TAG
+while IFS=$'\t' read -r kind name url tag; do
+  [[ -n "${name}" ]] || continue
+  SRC_URL["${kind}/${name}"]="${url}"
+  SRC_TAG["${kind}/${name}"]="${tag}"
+done < <(yq -N '. | select(.kind == "OCIRepository" or .kind == "HelmRepository")
+                | [.kind, .metadata.name, .spec.url, (.spec.ref.tag // "")] | @tsv' \
+  "${RENDER_DIR}"/*.yaml 2>/dev/null | sort -u)
+
+helm_failed=0
+declare -A SEEN
+while IFS=$'\t' read -r file name refkind refname chart version srcname; do
+  [[ -n "${name}" && -z "${SEEN[${name}]:-}" ]] || continue
+  SEEN["${name}"]=1
+
+  if [[ "${refkind}" != "-" ]]; then
+    url="${SRC_URL[${refkind}/${refname}]:-}"
+    version="${SRC_TAG[${refkind}/${refname}]:-}"
+    chart="${url##*/}"
+    pull_args=("${url}" --version "${version}")
+  else
+    url="${SRC_URL[HelmRepository/${srcname}]:-}"
+    pull_args=("${chart}" --repo "${url}")
+    [[ "${version}" == "-" ]] || pull_args+=(--version "${version}")
+  fi
+
+  if [[ -z "${url}" ]]; then
+    echo "  ? ${name}: chart source not found in the rendered output, skipped" >&2
+    continue
+  fi
+
+  dir="${CHART_CACHE}/${name}"
+  if ! helm pull "${pull_args[@]}" -d "${dir}" --untar >/dev/null 2>&1; then
+    echo "  ? ${name}: could not pull ${url}, skipped" >&2
+    continue
+  fi
+
+  yq -N "select(.kind == \"HelmRelease\" and .metadata.name == \"${name}\")
+         | .spec.values" "${file}" >"${RENDER_DIR}/values.yaml"
+
+  # Template failures have many causes that do not apply in-cluster, chiefly
+  # values Flux supplies from a Secret through valuesFrom. Only a schema
+  # violation is unambiguous, so only that one fails the run.
+  if ! out="$(helm template "${name}" "${dir}/${chart}" -f "${RENDER_DIR}/values.yaml" 2>&1)"; then
+    if grep -qF "don't meet the specifications of the schema" <<<"${out}"; then
+      echo "  ✗ ${name}: values rejected by the chart schema" >&2
+      grep -E "^(-| at )" <<<"${out}" | sed 's/^/      /' >&2
+      helm_failed=1
+    else
+      echo "  ? ${name}: helm template failed for another reason, not a schema error" >&2
+    fi
+  fi
+done < <(for f in "${RENDER_DIR}"/*.yaml; do
+  yq -N "select(.kind == \"HelmRelease\" and .spec.values != null)
+         | [\"${f}\", .metadata.name, (.spec.chartRef.kind // \"-\"),
+            (.spec.chartRef.name // \"-\"), (.spec.chart.spec.chart // \"-\"),
+            (.spec.chart.spec.version // \"-\"),
+            (.spec.chart.spec.sourceRef.name // \"-\")] | @tsv" "${f}" 2>/dev/null
+done)
+
+if ((helm_failed)); then
+  echo "HelmRelease values rejected by their chart schema." >&2
+  exit 1
+fi
+

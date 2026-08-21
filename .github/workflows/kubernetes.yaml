@@ -37,10 +37,10 @@ jobs:
         with:
           install: false
 
-      # Only the two tools the script needs: a bare `mise install` would also
-      # build Python and every CLI pinned for local cluster work.
+      # Only the tools the script needs: a bare `mise install` would also build
+      # Python and every CLI pinned for local cluster work.
       - name: Install tools
-        run: mise install aqua:kubernetes-sigs/kustomize aqua:yannh/kubeconform
+        run: mise install aqua:kubernetes-sigs/kustomize aqua:yannh/kubeconform aqua:helm/helm aqua:mikefarah/yq
 
       - name: Validate manifests
-        run: mise exec aqua:kubernetes-sigs/kustomize aqua:yannh/kubeconform -- ./scripts/validate-kubernetes.sh
+        run: mise exec aqua:kubernetes-sigs/kustomize aqua:yannh/kubeconform aqua:helm/helm aqua:mikefarah/yq -- ./scripts/validate-kubernetes.sh
