@@ -35,6 +35,16 @@ spec:
             secretKeyRef:
               name: authentik-credentials
               key: rackula-client-secret
+        - name: AUTHENTIK_GRAFANA_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-credentials
+              key: grafana-client-secret
+        - name: AUTHENTIK_JELLYFIN_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-credentials
+              key: jellyfin-client-secret
 
     blueprints:
       configMaps:
