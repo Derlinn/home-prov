@@ -10,3 +10,4 @@ resources:
   - ./httproute.yaml
   - ./httproute-external.yaml
   - ./secret.sops.yaml
+  - ./configmap-blueprints.yaml

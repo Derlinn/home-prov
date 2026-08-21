@@ -28,6 +28,18 @@ spec:
       targetPath: authentik.postgresql.password
       optional: false
   values:
+    global:
+      env:
+        - name: AUTHENTIK_RACKULA_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-credentials
+              key: rackula-client-secret
+
+    blueprints:
+      configMaps:
+        - authentik-blueprints
+
     authentik:
       error_reporting:
         enabled: false

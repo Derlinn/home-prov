@@ -1,0 +1,59 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authentik-blueprints
+data:
+  # Authentik's own config lives in PostgreSQL and is otherwise unreproducible
+  # from Git. References use !Find rather than the UUIDs `ak export_blueprint`
+  # emits, which differ on every install.
+  rackula.yaml: |
+    version: 1
+    metadata:
+      name: rackula
+    entries:
+      - model: authentik_providers_oauth2.oauth2provider
+        id: rackula-provider
+        state: present
+        identifiers:
+          name: Provider for Rackula
+        attrs:
+          client_id: rackula-web
+          client_secret: !Env AUTHENTIK_RACKULA_CLIENT_SECRET
+          client_type: confidential
+          sub_mode: hashed_user_id
+          include_claims_in_id_token: true
+          issuer_mode: per_provider
+          access_code_validity: minutes=1
+          access_token_validity: minutes=5
+          refresh_token_validity: days=30
+          authorization_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-authorization-explicit-consent]
+          invalidation_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-invalidation-flow]
+          signing_key: !Find
+            - authentik_crypto.certificatekeypair
+            - [name, authentik Self-signed Certificate]
+          property_mappings:
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+          redirect_uris:
+            # /oauth2/callback is the Envoy Gateway SecurityPolicy; /auth/callback
+            # is Rackula's own, kept for the day upstream #3140 is fixed.
+            - matching_mode: strict
+              redirect_uri_type: authorization
+              url: https://rackula.${DOMAIN}/oauth2/callback
+            - matching_mode: strict
+              redirect_uri_type: authorization
+              url: https://rackula.${DOMAIN}/auth/callback
+      - model: authentik_core.application
+        state: present
+        identifiers:
+          slug: rackula
+        attrs:
+          name: Rackula
+          provider: !KeyOf rackula-provider
+          policy_engine_mode: any
