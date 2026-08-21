@@ -115,7 +115,7 @@ Tous les pods du namespace `longhorn-system` peuvent communiquer entre eux (ingr
 
 Trafic entrant vers les pods Envoy proxy (gateway externe et interne).
 
-- `allow-envoy-gateway` (envoy-external) : accepte tout trafic entrant depuis `0.0.0.0/0` sur 80, 443, 10080, 10443. Les ports 10080/10443 sont les ports reels du container (le service mappe 80->10080 et 443->10443 car un container ne peut pas binder < 1024 sans privileges). Necessaire egalement pour le hairpin NAT (pods internes qui passent par l'URL externe). Accepte aussi le port 19003 depuis le subnet des noeuds (`10.25.30.0/24`) pour les readiness probes Kubelet.
+- `allow-envoy-gateway` (envoy-external) : ce Gateway n'a pas d'IP LoadBalancer, il n'est servi que par le tunnel Cloudflare. Seul le pod `cloudflare-tunnel` du namespace `network` est autorise en entree, sur 443 et 10443. Les ports 10080/10443 sont les ports reels du container (le service mappe 80->10080 et 443->10443 car un container ne peut pas binder < 1024 sans privileges). Accepte aussi le port 19003 depuis le subnet des noeuds (`10.25.30.0/24`) pour les readiness probes Kubelet.
 - `allow-envoy-gateway-xds` (control plane) : les pods du namespace `network` peuvent atteindre le control plane Envoy Gateway sur 18000 (protocole xDS/gRPC pour la distribution de configuration).
 - `allow-envoy-gateway-internal` (envoy-internal) : accepte le trafic entrant depuis `10.25.0.0/16` sur 80, 443, 10080, 10443.
 

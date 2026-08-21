@@ -13,28 +13,14 @@ spec:
       io.kubernetes.pod.namespace: network
       gateway.envoyproxy.io/owning-gateway-name: envoy-external
   ingress:
-    - fromCIDR:
-        - 0.0.0.0/0
-      toPorts:
-        - ports:
-            - port: "80"
-              protocol: TCP
-            - port: "443"
-              protocol: TCP
-            - port: "10080"
-              protocol: TCP
-            - port: "10443"
-              protocol: TCP
-    # Allow intra-cluster pods (fromCIDR does not match Cilium-managed endpoints)
+    # envoy-external has no LoadBalancer IP: cloudflared is its only client.
     - fromEndpoints:
-        - {}
+        - matchLabels:
+            io.kubernetes.pod.namespace: network
+            app.kubernetes.io/name: cloudflare-tunnel
       toPorts:
         - ports:
-            - port: "80"
-              protocol: TCP
             - port: "443"
-              protocol: TCP
-            - port: "10080"
               protocol: TCP
             - port: "10443"
               protocol: TCP

@@ -71,6 +71,38 @@ spec:
           - kind: Secret
             name: linderis-fr-tls
 ---
+# Duplicates the `envoy` EnvoyProxy: a Gateway-level parametersRef replaces the
+# GatewayClass one instead of merging with it.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: EnvoyProxy
+metadata:
+  name: envoy-external
+spec:
+  logging:
+    level:
+      default: info
+  provider:
+    type: Kubernetes
+    kubernetes:
+      envoyDeployment:
+        replicas: 1
+        container:
+          imageRepository: mirror.gcr.io/envoyproxy/envoy
+          resources:
+            requests:
+              cpu: 100m
+            limits:
+              memory: 1Gi
+      envoyService:
+        type: ClusterIP
+  shutdown:
+    drainTimeout: 180s
+  telemetry:
+    metrics:
+      prometheus:
+        compression:
+          type: Gzip
+---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/gateway_v1.json
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
@@ -81,8 +113,10 @@ metadata:
 spec:
   gatewayClassName: envoy
   infrastructure:
-    annotations:
-      lbipam.cilium.io/ips: 10.25.50.127
+    parametersRef:
+      group: gateway.envoyproxy.io
+      kind: EnvoyProxy
+      name: envoy-external
   listeners:
     - name: http
       protocol: HTTP
