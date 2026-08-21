@@ -13,6 +13,9 @@ spec:
   values:
     global:
       storageClass: longhorn-production-v1
+    replicaCount: 1
+    worker:
+      replicaCount: 1
     timezone: 'Europe\Paris'
     resources:
       requests:
@@ -32,6 +35,10 @@ spec:
     # Memory keeps a limit exceeding it kills the container instead of slowing
     # it down. Postgres was sitting at 169Mi against a 192Mi cap.
     postgresql:
+      # Bitnami only publishes `latest` on Docker Hub since 2025, so a digest is
+      # the only way to pin. Currently 18.3.0.
+      image:
+        digest: sha256:228ef23ed3b9eb678ae557f3dcaf80fe1d217fb9e0a4fcb75279b2b2b858c3ff
       primary:
         resourcesPreset: "none"
         resources:
@@ -42,6 +49,9 @@ spec:
             memory: 384Mi
     valkey:
       enabled: true
+      # Same as postgresql: digest-pinned. Currently 9.0.3.
+      image:
+        digest: sha256:c64a71d6d44c08c9fd5d7a4c4e23e85c8f7bd54ad782ca062e52a54c25b110a1
       replica:
         replicaCount: 0
       primary:
