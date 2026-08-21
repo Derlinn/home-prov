@@ -35,13 +35,15 @@ spec:
             - name: tmp
               mountPath: /tmp
           readinessProbe:
-            httpGet: {path: /healthz, port: metrics}
+            httpGet: {path: /, port: metrics}
             initialDelaySeconds: 5
             periodSeconds: 15
+            timeoutSeconds: 5
           livenessProbe:
-            httpGet: {path: /healthz, port: metrics}
+            httpGet: {path: /, port: metrics}
             initialDelaySeconds: 15
             periodSeconds: 30
+            timeoutSeconds: 5
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
