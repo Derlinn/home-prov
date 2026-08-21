@@ -22,6 +22,7 @@ resources:
     - ./allow-authentik-internal.yaml
     - ./allow-devtools-internal.yaml
     - ./allow-netbox-internal.yaml
+    - ./allow-rackula-internal.yaml
     - ./allow-rathole-egress.yaml
     - ./allow-envoy-clusterip.yaml
     - ./allow-media-server-internal.yaml
@@ -32,6 +33,6 @@ resources:
     - ./allow-blackbox-egress.yaml
     - ./allow-vpn-proxy.yaml
     - ./deny-direct-egress.yaml
-    # DEPRECATED 2026-08-11 : ./allow-uptime-kuma-egress.yaml remplace par ./allow-gatus-egress.yaml
+    # DEPRECATED 2026-08-11: ./allow-uptime-kuma-egress.yaml replaced by ./allow-gatus-egress.yaml
     - ./allow-gatus-egress.yaml
     - ./default-deny.yaml
