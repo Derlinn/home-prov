@@ -15,6 +15,12 @@ spec:
     - action: replace
       targetLabel: job
       replacement: node-exporter
+  # job=node-exporter applies every kube-prometheus-stack node rule to the NAS.
+  # These two can never clear: single disk in a two-bay unit, and no NTP daemon.
+  metricRelabelings:
+    - action: drop
+      sourceLabels: [__name__]
+      regex: node_md_.*|node_timex_.*
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/scrapeconfig_v1alpha1.json
 apiVersion: monitoring.coreos.com/v1alpha1

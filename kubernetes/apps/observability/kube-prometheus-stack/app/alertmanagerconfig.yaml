@@ -27,30 +27,6 @@ spec:
           - name: alertname
             value: InfoInhibitor
             matchType: "="
-      # asustor-1022t is a two-bay NAS running a single disk: md0 and md126 are
-      # two-disk mirrors and will report degraded forever. Nothing to act on,
-      # and a permanently firing alert is how a notification channel stops
-      # being read. Remove this route the day a second disk goes in.
-      - receiver: "null"
-        matchers:
-          - name: alertname
-            value: NodeRAIDDegraded
-            matchType: "="
-          - name: instance
-            value: asustor-1022t
-            matchType: "="
-      # The NAS steps its clock once a day instead of running an NTP daemon, so
-      # the kernel keeps STA_UNSYNC set and this alert can never clear, even
-      # though the clock measures within 50 ms of Prometheus. AsustorClockDrift
-      # watches the offset itself, which is what actually breaks TOTP.
-      - receiver: "null"
-        matchers:
-          - name: alertname
-            value: NodeClockNotSynchronising
-            matchType: "="
-          - name: instance
-            value: asustor-1022t
-            matchType: "="
   receivers:
     - name: "null"
     - name: discord
