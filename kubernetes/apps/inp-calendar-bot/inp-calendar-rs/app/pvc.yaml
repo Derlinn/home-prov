@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: inp-calendar-bot-data
+  name: inp-calendar-rs-data
 spec:
   accessModes:
     - ReadWriteOnce

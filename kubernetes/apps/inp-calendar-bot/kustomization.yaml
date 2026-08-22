@@ -10,4 +10,4 @@ components:
 resources:
   - ./namespace.yaml
   - ./tenant-rbac.yaml
-  - ./inp-calendar-bot/ks.yaml
+  - ./inp-calendar-rs/ks.yaml
