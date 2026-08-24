@@ -21,7 +21,7 @@ spec:
         runAsGroup: 1000
       containers:
         - name: pve-exporter
-          image: ghcr.io/prometheus-pve/prometheus-pve-exporter:3.5.5
+          image: ghcr.io/prometheus-pve/prometheus-pve-exporter:3.10.0
           args:
             - --config.file=/etc/pve/pve.yml
             - --web.listen-address=0.0.0.0:9221
