@@ -28,7 +28,7 @@ spec:
           app:
             image:
               repository: ghcr.io/rackulalives/rackula
-              tag: v26.7.0-persist
+              tag: v26.8.0-persist
             env:
               # nginx resolves the upstream at request time: FQDN + cluster DNS IP required
               API_HOST: rackula-api.default.svc.cluster.local
