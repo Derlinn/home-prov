@@ -78,7 +78,7 @@ spec:
           api:
             image:
               repository: ghcr.io/rackulalives/rackula-api
-              tag: "26.7.0"
+              tag: "26.8.0"
             env:
               DATA_DIR: /data
               RACKULA_API_PORT: "3001"
