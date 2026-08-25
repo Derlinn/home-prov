@@ -36,7 +36,7 @@ declare -A CHARTS_VERSION=(
     # renovate: datasource=docker depName=mirror.gcr.io/envoyproxy/gateway-helm
     ["envoy-gateway"]="v1.9.0"
     # renovate: datasource=docker depName=ghcr.io/grafana/helm-charts/grafana-operator
-    ["grafana-operator"]="5.24.0"
+    ["grafana-operator"]="5.25.0"
     # renovate: datasource=docker depName=ghcr.io/prometheus-community/charts/kube-prometheus-stack
     ["kube-prometheus-stack"]="88.1.5"
 )
