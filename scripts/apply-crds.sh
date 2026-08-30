@@ -34,7 +34,7 @@ declare -A CHARTS_VERSION=(
     # renovate: datasource=docker depName=ghcr.io/home-operations/charts-mirror/external-dns
     ["cloudflare-dns"]="1.21.1"
     # renovate: datasource=docker depName=mirror.gcr.io/envoyproxy/gateway-helm
-    ["envoy-gateway"]="v1.9.0"
+    ["envoy-gateway"]="v1.9.1"
     # renovate: datasource=docker depName=ghcr.io/grafana/helm-charts/grafana-operator
     ["grafana-operator"]="5.25.0"
     # renovate: datasource=docker depName=ghcr.io/prometheus-community/charts/kube-prometheus-stack
