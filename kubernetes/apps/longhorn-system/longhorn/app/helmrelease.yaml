@@ -18,6 +18,7 @@ spec:
       defaultDataPath: /var/lib/longhorn
       orphanResourceAutoDeletion: "replica-data"
       defaultReplicaCount: 1
+      storageReservedPercentageForDefaultDisk: 10
       concurrentAutomaticEngineUpgradePerNodeLimit: 3 # for upgrade of volume engine
     defaultBackupStore:
       backupTarget: "cifs://lin-nas-01.${DOMAIN}/Backups?cifsOptions=vers=3.1.1,seal,soft"
