@@ -32,6 +32,9 @@ KUBE_PS1_SUFFIX     = ") "
 "aqua:derailed/k9s"               = "0.51.0"
 "aqua:ahmetb/kubectx"             = "0.11.0"
 "aqua:ahmetb/kubens"             = "0.9.5"
+"aqua:hashicorp/terraform" = "1.16.0"
+"aqua:terraform-linters/tflint" = "0.64.0"
+"aqua:aquasecurity/tfsec" = "1.28.14"
 
 [tasks.install-kube-ps1]
 description = "Installe kube-ps1 dans /usr/local/bin"
