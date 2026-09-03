@@ -17,12 +17,29 @@ data "talos_image_factory_extensions_versions" "this" {
   }
 }
 
-resource "talos_image_factory_schematic" "this" {
+locals {
+  proxmox_extensions   = data.talos_image_factory_extensions_versions.this.extensions_info.*.name
+  baremetal_extensions = [for name in local.proxmox_extensions : name if name != "siderolabs/qemu-guest-agent"]
+}
+
+resource "talos_image_factory_schematic" "proxmox" {
   schematic = yamlencode(
     {
       customization = {
         systemExtensions = {
-          officialExtensions = data.talos_image_factory_extensions_versions.this.extensions_info.*.name
+          officialExtensions = local.proxmox_extensions
+        }
+      }
+    }
+  )
+}
+
+resource "talos_image_factory_schematic" "baremetal" {
+  schematic = yamlencode(
+    {
+      customization = {
+        systemExtensions = {
+          officialExtensions = local.baremetal_extensions
         }
       }
     }
@@ -30,12 +47,13 @@ resource "talos_image_factory_schematic" "this" {
 }
 
 locals {
-  image_combinations = toset([for _, v in var.nodes : "${v.host_node}_base"])
+  image_combinations = toset([for _, v in local.proxmox_nodes : "${v.host_node}_base"])
 
   # Installer image used by `talosctl upgrade`. It must embed the same
   # schematic as the boot image, otherwise a reinstall wipes the system
   # extensions (iscsi-tools, nfs-utils...).
-  installer_image = "${trimprefix(var.image.factory_url, "https://")}/metal-installer/${talos_image_factory_schematic.this.id}:${var.image.version}"
+  installer_image_proxmox   = "${trimprefix(var.image.factory_url, "https://")}/metal-installer/${talos_image_factory_schematic.proxmox.id}:${var.image.version}"
+  installer_image_baremetal = "${trimprefix(var.image.factory_url, "https://")}/metal-installer/${talos_image_factory_schematic.baremetal.id}:${var.image.version}"
 }
 
 resource "proxmox_virtual_environment_download_file" "this" {
@@ -50,7 +68,7 @@ resource "proxmox_virtual_environment_download_file" "this" {
   datastore_id = var.image.proxmox_datastore
   file_name    = local.file_name
 
-  url                     = "${var.image.factory_url}/image/${talos_image_factory_schematic.this.id}/${var.image.version}/${var.image.platform}-${var.image.arch}.raw.gz"
+  url                     = "${var.image.factory_url}/image/${talos_image_factory_schematic.proxmox.id}/${var.image.version}/${var.image.platform}-${var.image.arch}.raw.gz"
   decompression_algorithm = "gz"
   overwrite               = false
 }

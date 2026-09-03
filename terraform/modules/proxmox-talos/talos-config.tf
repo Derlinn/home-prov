@@ -6,6 +6,10 @@ resource "time_sleep" "wait_for_proxmox_boot" {
 
 resource "talos_machine_secrets" "this" {
   talos_version = var.cluster.talos_version
+
+  # Changing this after creation regenerates the cluster CA/tokens, which
+  # would break every already-running node's trust chain.
+  lifecycle { ignore_changes = [talos_version] }
 }
 
 locals {
@@ -57,21 +61,23 @@ data "talos_machine_configuration" "this" {
           node_name       = each.value.host_node
           cluster_name    = var.cluster.proxmox_cluster
           hostname        = each.key
-          installer_image = local.installer_image
+          installer_image = each.value.provisioning == "proxmox" ? local.installer_image_proxmox : local.installer_image_baremetal
+          install_disk    = each.value.install_disk
         }) :
         templatefile("${path.module}/machine-config/worker.yaml.tftpl", {
           node_name       = each.value.host_node
           cluster_name    = var.cluster.proxmox_cluster
           hostname        = each.key
-          installer_image = local.installer_image
+          installer_image = each.value.provisioning == "proxmox" ? local.installer_image_proxmox : local.installer_image_baremetal
+          install_disk    = each.value.install_disk
         })
       ]
     )
   )
 }
 
-resource "talos_machine_configuration_apply" "this" {
-  for_each = var.nodes
+resource "talos_machine_configuration_apply" "proxmox" {
+  for_each = local.proxmox_nodes
 
   node                        = local.node_ips[each.key]
   client_configuration        = talos_machine_secrets.this.client_configuration
@@ -81,30 +87,55 @@ resource "talos_machine_configuration_apply" "this" {
   lifecycle { replace_triggered_by = [proxmox_virtual_environment_vm.this[each.key]] }
 }
 
+resource "talos_machine_configuration_apply" "baremetal" {
+  for_each = local.baremetal_nodes
+
+  node                        = local.node_ips[each.key]
+  client_configuration        = talos_machine_secrets.this.client_configuration
+  machine_configuration_input = data.talos_machine_configuration.this[each.key].machine_configuration
+}
+
 resource "talos_machine_bootstrap" "this" {
   node                 = local.controlplane_ips[0]
   endpoint             = var.cluster.endpoint
   client_configuration = talos_machine_secrets.this.client_configuration
 
-  depends_on = [proxmox_virtual_environment_vm.this, time_sleep.wait_for_proxmox_boot, talos_machine_configuration_apply.this]
+  depends_on = [
+    proxmox_virtual_environment_vm.this,
+    time_sleep.wait_for_proxmox_boot,
+    talos_machine_configuration_apply.proxmox,
+    talos_machine_configuration_apply.baremetal,
+  ]
+
+  # One-time action already performed on the running cluster; never let a
+  # change in controlplane_ips[0] (nodes added/removed) re-trigger it.
+  lifecycle { ignore_changes = [node, endpoint, client_configuration] }
 }
 
 data "talos_cluster_health" "this" {
+  count = var.wait_for_cluster_health ? 1 : 0
+
   client_configuration   = data.talos_client_configuration.this.client_configuration
   control_plane_nodes    = local.controlplane_ips
   worker_nodes           = local.worker_ips
   endpoints              = data.talos_client_configuration.this.endpoints
   skip_kubernetes_checks = true
 
-  timeouts   = { read = "10m" }
-  depends_on = [talos_machine_configuration_apply.this, talos_machine_bootstrap.this]
+  timeouts = { read = "10m" }
+  depends_on = [
+    talos_machine_configuration_apply.proxmox,
+    talos_machine_configuration_apply.baremetal,
+    talos_machine_bootstrap.this,
+  ]
 }
 
 resource "talos_cluster_kubeconfig" "this" {
+  count = var.wait_for_cluster_health ? 1 : 0
+
   node                 = local.controlplane_ips[0]
   endpoint             = var.cluster.endpoint
   client_configuration = talos_machine_secrets.this.client_configuration
 
   timeouts   = { read = "10m" }
-  depends_on = [talos_machine_bootstrap.this, data.talos_cluster_health.this, ]
+  depends_on = [talos_machine_bootstrap.this, data.talos_cluster_health.this]
 }

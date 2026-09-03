@@ -15,6 +15,12 @@ spec:
   interval: 1h
   values:
     alloy:
+      stabilityLevel: experimental
+      extraPorts:
+        - name: talos-logs
+          port: 12346
+          targetPort: 12346
+          protocol: UDP
       configMap:
         content: |
           discovery.kubernetes "pods" {
@@ -52,6 +58,16 @@ spec:
             forward_to = [loki.write.default.receiver]
           }
 
+          loki.source.syslog "talos" {
+            listener {
+              address       = "0.0.0.0:12346"
+              protocol      = "udp"
+              syslog_format = "raw"
+              labels        = { job = "talos" }
+            }
+            forward_to = [loki.write.default.receiver]
+          }
+
           loki.write "default" {
             endpoint {
               url = "http://loki.observability.svc.cluster.local:3100/loki/api/v1/push"
@@ -61,6 +77,11 @@ spec:
     controller:
       type: deployment
       replicas: 1
+
+    service:
+      type: LoadBalancer
+      annotations:
+        lbipam.cilium.io/ips: 10.25.50.121
 
     serviceMonitor:
       enabled: true

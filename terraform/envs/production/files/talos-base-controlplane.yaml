@@ -54,6 +54,10 @@ machine:
     nodeIP:
       validSubnets:
         - 10.25.30.0/24
+  logging:
+    destinations:
+      - endpoint: udp://10.25.50.121:12346
+        format: json_lines
   nodeLabels:
     topology.kubernetes.io/region: main
   sysctls:
