@@ -80,10 +80,6 @@ Tous les pods acceptent du trafic entrant depuis le reseau local.
 - `10.25.0.0/16` — tout le reseau home (temporaire, a restreindre)
 - `10.25.200.0/24` — VLAN mgmt (permanent)
 
-Exception : les pods du Gateway `envoy-admin` sont exclus du selecteur (`NotIn`
-sur le label `gateway.envoyproxy.io/owning-gateway-name`). Sans cette exclusion
-le bloc `10.25.0.0/16` ci-dessus rendrait `allow-envoy-gateway-admin` inutile.
-
 ---
 
 ## allow-flux-internal
@@ -133,12 +129,11 @@ Tous les pods du namespace `longhorn-system` peuvent communiquer entre eux (ingr
 
 **Fichier :** `policies/allow-envoy-gateway.yaml`
 
-Trafic entrant vers les pods Envoy proxy (gateway externe, interne et admin).
+Trafic entrant vers les pods Envoy proxy (gateway externe et interne).
 
 - `allow-envoy-gateway` (envoy-external) : ce Gateway n'a pas d'IP LoadBalancer, il n'est servi que par le tunnel Cloudflare. Seul le pod `cloudflare-tunnel` du namespace `network` est autorise en entree, sur 443 et 10443. Les ports 10080/10443 sont les ports reels du container (le service mappe 80->10080 et 443->10443 car un container ne peut pas binder < 1024 sans privileges). Accepte aussi le port 19003 depuis le subnet des noeuds (`10.25.30.0/24`) pour les readiness probes Kubelet.
 - `allow-envoy-gateway-xds` (control plane) : les pods du namespace `network` peuvent atteindre le control plane Envoy Gateway sur 18000 (protocole xDS/gRPC pour la distribution de configuration).
 - `allow-envoy-gateway-internal` (envoy-internal) : accepte le trafic entrant depuis `10.25.0.0/16` sur 80, 443, 10080, 10443.
-- `allow-envoy-gateway-admin` (envoy-admin) : le Gateway des applications d'administration, sur une VIP distincte (`10.25.50.125`) de celle d'`envoy-internal` (`10.25.50.126`). Une seule IP ne permettant aucun filtrage L3 entre vhosts, c'est ce dedoublement qui rend le filtrage possible cote MikroTik comme ici. N'accepte que `10.25.200.0/24` (VLAN mgmt), le pod `netbird-router` (acces distant, DNAT intra-cluster qui ne passe jamais par le routeur) et le pod `gatus` (sondes par hostname), sur 80, 443, 10080, 10443. Plus 19003 depuis `10.25.30.0/24` pour les readiness probes. Contrairement a `envoy-internal`, aucun `fromEndpoints: {}` : chaque appelant doit etre nomme.
 
 ---
 
@@ -154,7 +149,7 @@ Tous les pods du namespace `network` (Envoy proxies) peuvent se connecter vers n
 
 **Fichier :** `policies/allow-envoy-backends.yaml`
 
-Tous les pods du cluster acceptent du trafic entrant depuis les pods Envoy des trois Gateways (`network`, label `gateway.envoyproxy.io/owning-gateway-name` valant `envoy-internal`, `envoy-admin` ou `envoy-external`), sur la liste de ports des backends declares dans le fichier. Le port 8000 couvre l'UI Longhorn.
+Tous les pods du cluster acceptent du trafic entrant depuis les pods Envoy external (`network`, label `gateway.envoyproxy.io/owning-gateway-name: envoy-external`) sur : 80, 443, 8000, 8080, 8443. Le port 8000 couvre l'UI Longhorn.
 
 ---
 
@@ -174,7 +169,6 @@ Meme forme pour toutes : les pods selectionnes acceptent l'ingress et l'egress d
 |---|---|---|
 | `allow-observability-internal` | `policies/allow-observability-internal.yaml` | namespace `observability` |
 | `allow-authentik-internal` | `policies/allow-authentik-internal.yaml` | namespace `authentik` |
-| `allow-netbird-internal` | `policies/allow-netbird-internal.yaml` | namespace `netbird` |
 | `allow-devtools-internal` | `policies/allow-devtools-internal.yaml` | namespace `devtools` |
 | `allow-media-server-internal` | `policies/allow-media-server-internal.yaml` | namespace `media-server` |
 | `allow-vaultwarden-internal` | `policies/allow-vaultwarden-internal.yaml` | namespace `vaultwarden` |
@@ -217,7 +211,6 @@ Homepage interroge l'API de chaque service pour alimenter ses widgets : 7878 (ra
 | `allow-gatus-egress` | `policies/allow-gatus-egress.yaml` | gatus | `10.25.30.0/24`, plus `longhorn-ui` en interne | ICMP echo (type 8), 53, 8006, 8000 |
 | `allow-homepage-egress` | `policies/allow-homepage-egress.yaml` | homepage (`default`) |  `media-server`, `observability`, `longhorn-system`, `10.25.30.20/32`, `10.25.30.1/32` | 7878, 8989, 9696, 6767, 8096, 8080, 9090, 3000, 8000, 8006 (Proxmox), 8001 (NAS) |
 | `allow-wireguard-egress` | `policies/allow-wireguard-egress.yaml` | vpn-stack (`media-server`) | `world` | 51820 UDP |
-| `allow-netbird-router-egress` | `policies/allow-netbird-router-egress.yaml` | netbird-router (`netbird`) | `10.25.0.0/16` (LAN route), `world` | tous vers le LAN ; 3478, 5555, 49152-65535 UDP (STUN + hole punching) |
 
 
 ---

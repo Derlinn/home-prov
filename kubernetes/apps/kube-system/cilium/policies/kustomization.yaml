@@ -21,8 +21,6 @@ resources:
     - ./allow-longhorn-backup-egress.yaml
     - ./allow-vaultwarden-internal.yaml
     - ./allow-authentik-internal.yaml
-    - ./allow-netbird-internal.yaml
-    - ./allow-netbird-router-egress.yaml
     - ./allow-devtools-internal.yaml
     - ./allow-netbox-internal.yaml
     - ./allow-rackula-internal.yaml
