@@ -13,14 +13,14 @@ resource "local_file" "talos_config" {
 }
 
 resource "local_file" "kube_config" {
-  count           = local.talos_enabled ? 1 : 0
+  count           = local.talos_enabled && var.wait_for_cluster_health ? 1 : 0
   content         = module.talos[0].kube_config.kubeconfig_raw
   filename        = "output/kube-config.yaml"
   file_permission = "0600"
 }
 
 output "kube_config" {
-  value     = local.talos_enabled ? module.talos[0].kube_config.kubeconfig_raw : null
+  value     = local.talos_enabled && var.wait_for_cluster_health ? module.talos[0].kube_config.kubeconfig_raw : null
   sensitive = true
 }
 

@@ -48,17 +48,19 @@ variable "cluster" {
 variable "talos_nodes" {
   description = "Talos nodes definition for the cluster"
   type = map(object({
+    provisioning  = optional(string, "proxmox")
     host_node     = string
     machine_type  = string
     datastore_id  = optional(string, "local-zfs")
     ip            = optional(string)
-    mac_address   = string
-    vm_id         = number
-    cpu           = number
-    ram_dedicated = number
+    mac_address   = optional(string)
+    vm_id         = optional(number)
+    cpu           = optional(number)
+    ram_dedicated = optional(number)
     update        = optional(bool, false)
     igpu          = optional(bool, false)
     size_disk     = optional(number, 20)
+    install_disk  = optional(string)
     # USB passthrough. Set host = "vendor:product" or mapping = datacenter mapping name.
     usb_devices = optional(list(object({
       host    = optional(string)
@@ -78,4 +80,10 @@ variable "k8s_bootstrap" {
 variable "sops_age_key_path" {
   description = "Path of the file for the SOPS key"
   type        = string
+}
+
+variable "wait_for_cluster_health" {
+  description = "Run the post-apply cluster health check and fetch the kubeconfig. Set to false when talos_nodes only declares a subset of an already-running cluster."
+  type        = bool
+  default     = true
 }

@@ -48,4 +48,12 @@ talos_nodes = {
   #  size_disk     = 20
   #  usb_devices   = [{ host = "10c4:ea60" }]
   #}
+
+  #"lin-node-01" = {
+  #  provisioning = "baremetal"
+  #  host_node    = "lin-node-01"
+  #  machine_type = "controlplane"
+  #  ip           = "192.168.1.32"
+  #  install_disk = "/dev/nvme0n1"
+  #}
 }

@@ -1,8 +1,14 @@
 machine:
-  network:
-    hostname: ${hostname}
   install:
     image: ${installer_image}
+%{ if install_disk != null ~}
+    disk: ${install_disk}
+%{ endif ~}
   nodeLabels:
     topology.kubernetes.io/region: ${cluster_name}
     topology.kubernetes.io/zone: ${node_name}
+---
+apiVersion: v1alpha1
+kind: HostnameConfig
+auto: off
+hostname: ${hostname}

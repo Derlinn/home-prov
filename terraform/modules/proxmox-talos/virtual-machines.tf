@@ -1,5 +1,10 @@
+locals {
+  proxmox_nodes   = { for k, v in var.nodes : k => v if v.provisioning == "proxmox" }
+  baremetal_nodes = { for k, v in var.nodes : k => v if v.provisioning == "baremetal" }
+}
+
 resource "proxmox_virtual_environment_vm" "this" {
-  for_each = var.nodes
+  for_each = local.proxmox_nodes
 
   node_name = each.value.host_node
 

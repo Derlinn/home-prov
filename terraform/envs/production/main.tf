@@ -31,6 +31,8 @@ module "talos" {
   cluster = local.talos_cluster
   nodes   = var.talos_nodes
 
+  wait_for_cluster_health = var.wait_for_cluster_health
+
   talos_base_patches = {
     controlplane = abspath("${path.module}/files/talos-base-controlplane.yaml")
     worker       = abspath("${path.module}/files/talos-base-worker.yaml")
