@@ -56,7 +56,7 @@ machine:
         - 10.25.30.0/24
   logging:
     destinations:
-      - endpoint: udp://10.25.50.121:12346
+      - endpoint: udp://127.0.0.1:12346
         format: json_lines
   nodeLabels:
     topology.kubernetes.io/region: main

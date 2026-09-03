@@ -20,6 +20,7 @@ spec:
         - name: talos-logs
           port: 12346
           targetPort: 12346
+          hostPort: 12346
           protocol: UDP
       configMap:
         content: |
@@ -75,13 +76,7 @@ spec:
           }
 
     controller:
-      type: deployment
-      replicas: 1
-
-    service:
-      type: LoadBalancer
-      annotations:
-        lbipam.cilium.io/ips: 10.25.50.121
+      type: daemonset
 
     serviceMonitor:
       enabled: true
