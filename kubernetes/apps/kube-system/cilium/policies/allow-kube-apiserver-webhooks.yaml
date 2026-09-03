@@ -1,0 +1,25 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-kube-apiserver-webhooks
+spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
+  endpointSelector: {}
+  ingress:
+    - fromEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            # cert-manager-webhook, kube-prometheus-stack-admission, metrics-server aggregated API
+            - port: "10250"
+              protocol: TCP
+            # tuppr, kube-green, envoy-gateway topology-injector
+            - port: "9443"
+              protocol: TCP
+            # longhorn admission webhook
+            - port: "9502"
+              protocol: TCP

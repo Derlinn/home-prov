@@ -30,6 +30,22 @@ Tous les pods peuvent atteindre l'API Kubernetes.
 
 ---
 
+## allow-kube-apiserver-webhooks
+
+**Fichier :** `policies/allow-kube-apiserver-webhooks.yaml`
+
+`default-deny` n'autorise l'ingress que depuis l'entite `host` (le noeud local). Avec un seul control-plane, un appel du kube-apiserver vers un webhook d'admission ou une API agregee restait toujours local au noeud et passait donc par hasard. Des qu'un deuxieme control-plane existe, cet appel peut traverser le reseau inter-noeuds (identite `remote-node`, pas `host`) et se faire bloquer silencieusement.
+
+Cette policy autorise l'ingress depuis l'entite `kube-apiserver` (valable quel que soit le noeud source) vers les ports des webhooks/API agregees existants :
+
+- 10250 : cert-manager-webhook, kube-prometheus-stack-admission, metrics-server (API agregee)
+- 9443 : tuppr, kube-green, envoy-gateway (topology-injector)
+- 9502 : longhorn admission webhook
+
+Sans cette regle, ces appels echouent de facon intermittente selon le noeud qui traite la requete et celui qui heberge le pod cible (`context deadline exceeded`), ce qui declenche `KubeAggregatedAPIErrors`/`KubeAggregatedAPIDown` et fait echouer le dry-run des `KubernetesUpgrade`/`TalosUpgrade` de tuppr.
+
+---
+
 ## allow-dns / allow-dns-ingress
 
 **Fichier :** `policies/allow-dns.yaml`
@@ -63,6 +79,10 @@ Tous les pods acceptent du trafic entrant depuis le reseau local.
 
 - `10.25.0.0/16` — tout le reseau home (temporaire, a restreindre)
 - `10.25.200.0/24` — VLAN mgmt (permanent)
+
+Exception : les pods du Gateway `envoy-admin` sont exclus du selecteur (`NotIn`
+sur le label `gateway.envoyproxy.io/owning-gateway-name`). Sans cette exclusion
+le bloc `10.25.0.0/16` ci-dessus rendrait `allow-envoy-gateway-admin` inutile.
 
 ---
 
@@ -113,11 +133,12 @@ Tous les pods du namespace `longhorn-system` peuvent communiquer entre eux (ingr
 
 **Fichier :** `policies/allow-envoy-gateway.yaml`
 
-Trafic entrant vers les pods Envoy proxy (gateway externe et interne).
+Trafic entrant vers les pods Envoy proxy (gateway externe, interne et admin).
 
 - `allow-envoy-gateway` (envoy-external) : ce Gateway n'a pas d'IP LoadBalancer, il n'est servi que par le tunnel Cloudflare. Seul le pod `cloudflare-tunnel` du namespace `network` est autorise en entree, sur 443 et 10443. Les ports 10080/10443 sont les ports reels du container (le service mappe 80->10080 et 443->10443 car un container ne peut pas binder < 1024 sans privileges). Accepte aussi le port 19003 depuis le subnet des noeuds (`10.25.30.0/24`) pour les readiness probes Kubelet.
 - `allow-envoy-gateway-xds` (control plane) : les pods du namespace `network` peuvent atteindre le control plane Envoy Gateway sur 18000 (protocole xDS/gRPC pour la distribution de configuration).
 - `allow-envoy-gateway-internal` (envoy-internal) : accepte le trafic entrant depuis `10.25.0.0/16` sur 80, 443, 10080, 10443.
+- `allow-envoy-gateway-admin` (envoy-admin) : le Gateway des applications d'administration, sur une VIP distincte (`10.25.50.125`) de celle d'`envoy-internal` (`10.25.50.126`). Une seule IP ne permettant aucun filtrage L3 entre vhosts, c'est ce dedoublement qui rend le filtrage possible cote MikroTik comme ici. N'accepte que `10.25.200.0/24` (VLAN mgmt), le pod `netbird-router` (acces distant, DNAT intra-cluster qui ne passe jamais par le routeur) et le pod `gatus` (sondes par hostname), sur 80, 443, 10080, 10443. Plus 19003 depuis `10.25.30.0/24` pour les readiness probes. Contrairement a `envoy-internal`, aucun `fromEndpoints: {}` : chaque appelant doit etre nomme.
 
 ---
 
@@ -133,7 +154,7 @@ Tous les pods du namespace `network` (Envoy proxies) peuvent se connecter vers n
 
 **Fichier :** `policies/allow-envoy-backends.yaml`
 
-Tous les pods du cluster acceptent du trafic entrant depuis les pods Envoy external (`network`, label `gateway.envoyproxy.io/owning-gateway-name: envoy-external`) sur : 80, 443, 8000, 8080, 8443. Le port 8000 couvre l'UI Longhorn.
+Tous les pods du cluster acceptent du trafic entrant depuis les pods Envoy des trois Gateways (`network`, label `gateway.envoyproxy.io/owning-gateway-name` valant `envoy-internal`, `envoy-admin` ou `envoy-external`), sur la liste de ports des backends declares dans le fichier. Le port 8000 couvre l'UI Longhorn.
 
 ---
 
@@ -153,6 +174,7 @@ Meme forme pour toutes : les pods selectionnes acceptent l'ingress et l'egress d
 |---|---|---|
 | `allow-observability-internal` | `policies/allow-observability-internal.yaml` | namespace `observability` |
 | `allow-authentik-internal` | `policies/allow-authentik-internal.yaml` | namespace `authentik` |
+| `allow-netbird-internal` | `policies/allow-netbird-internal.yaml` | namespace `netbird` |
 | `allow-devtools-internal` | `policies/allow-devtools-internal.yaml` | namespace `devtools` |
 | `allow-media-server-internal` | `policies/allow-media-server-internal.yaml` | namespace `media-server` |
 | `allow-vaultwarden-internal` | `policies/allow-vaultwarden-internal.yaml` | namespace `vaultwarden` |
@@ -195,13 +217,14 @@ Homepage interroge l'API de chaque service pour alimenter ses widgets : 7878 (ra
 | `allow-gatus-egress` | `policies/allow-gatus-egress.yaml` | gatus | `10.25.30.0/24`, plus `longhorn-ui` en interne | ICMP echo (type 8), 53, 8006, 8000 |
 | `allow-homepage-egress` | `policies/allow-homepage-egress.yaml` | homepage (`default`) |  `media-server`, `observability`, `longhorn-system`, `10.25.30.20/32`, `10.25.30.1/32` | 7878, 8989, 9696, 6767, 8096, 8080, 9090, 3000, 8000, 8006 (Proxmox), 8001 (NAS) |
 | `allow-wireguard-egress` | `policies/allow-wireguard-egress.yaml` | vpn-stack (`media-server`) | `world` | 51820 UDP |
+| `allow-netbird-router-egress` | `policies/allow-netbird-router-egress.yaml` | netbird-router (`netbird`) | `10.25.0.0/16` (LAN route), `world` | tous vers le LAN ; 3478, 5555, 49152-65535 UDP (STUN + hole punching) |
 
 
 ---
 
 ## Namespaces sans policy dediee
 
-`cert-manager`, `kube-green`, `kubernetes-replicator` et `system-upgrade` n'ont aucune policy propre. Ils fonctionnent uniquement grace aux policies a `endpointSelector: {}` qui s'appliquent a tous les pods : `default-deny` (vers l'hote et l'API), `allow-kube-api`, `allow-dns`, `allow-https-egress` et `allow-lan-ingress`.
+`cert-manager`, `kube-green`, `kubernetes-replicator` et `system-upgrade` n'ont aucune policy propre. Ils fonctionnent uniquement grace aux policies a `endpointSelector: {}` qui s'appliquent a tous les pods : `default-deny` (vers l'hote et l'API), `allow-kube-api`, `allow-kube-apiserver-webhooks`, `allow-dns`, `allow-https-egress` et `allow-lan-ingress`.
 
 Consequence pratique : ces composants peuvent joindre l'API Kubernetes, le DNS et l'exterieur en HTTPS, mais rien d'autre. Un besoin sortant sur un port different demande une policy dediee.
 
