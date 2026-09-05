@@ -11,6 +11,7 @@ spec:
   ingress:
     - fromEntities:
         - host
+        - remote-node
   egress:
     - toEntities:
         - host
