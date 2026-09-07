@@ -21,7 +21,7 @@ spec:
             # single day, one of them with a YAML parsing regression.
             image:
               repository: ghcr.io/gethomepage/homepage
-              tag: v2.1.2
+              tag: v2.2.0
             env:
               TZ: Europe/Paris
               HOMEPAGE_ALLOWED_HOSTS: home.${DOMAIN}
