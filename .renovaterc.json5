@@ -10,8 +10,8 @@
   // revision in `grafanadashboard.yaml`. Without it the dashboards stop being
   // tracked and the auto-merge rule below matches nothing.
   extends: [
-    "github>home-operations/renovate-presets#7.0.0",
-    "github>home-operations/renovate-presets//apps/grafanaDashboards.json5#7.0.0",
+    "github>home-operations/renovate-presets#8.1.0",
+    "github>home-operations/renovate-presets//apps/grafanaDashboards.json5#8.1.0",
     ":timezone(Europe/Paris)",
   ],
   // `docker/` is the pre-Kubernetes Compose deployment, kept as an archive.
