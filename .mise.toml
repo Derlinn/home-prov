@@ -12,8 +12,8 @@ KUBE_PS1_SUFFIX     = ") "
 
 [tools]
 "python" = "3.14.7"
+"aqua:cilium/cilium-cli" = "0.20.0"
 "aqua:budimanjojo/talhelper" = "3.1.17"
-"aqua:cilium/cilium-cli" = "0.19.7"
 "aqua:cli/cli" = "2.100.0"
 "aqua:go-task/task" = "3.53.1"
 "aqua:helmfile/helmfile" = "1.7.4"
