@@ -30,7 +30,7 @@ cluster = {
   talos_version      = "v1.13.9"
   proxmox_cluster    = "cluster-name"
   flux_enabled       = false
-  kubernetes_version = "v1.36.4"
+  kubernetes_version = "v1.37.0"
 }
 
 enable_talos_config = false
