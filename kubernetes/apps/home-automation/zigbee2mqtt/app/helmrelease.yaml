@@ -44,6 +44,8 @@ spec:
                 memory: 512Mi
 
     defaultPodOptions:
+      nodeSelector:
+        kubernetes.io/hostname: lin-master-01
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
