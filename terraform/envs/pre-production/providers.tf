@@ -6,7 +6,7 @@ terraform {
     }
     proxmox = {
       source  = "bpg/proxmox"
-      version = "0.111.1"
+      version = "0.113.1"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
@@ -18,7 +18,7 @@ terraform {
     }
     flux = {
       source  = "fluxcd/flux"
-      version = "1.9.4"
+      version = "1.9.5"
     }
     helm = {
       source  = "hashicorp/helm"
