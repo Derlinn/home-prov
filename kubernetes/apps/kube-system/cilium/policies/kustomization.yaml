@@ -23,6 +23,7 @@ resources:
     - ./allow-authentik-internal.yaml
     - ./allow-devtools-internal.yaml
     - ./allow-netbox-internal.yaml
+    - ./allow-glpi-internal.yaml
     - ./allow-rackula-internal.yaml
     - ./allow-envoy-clusterip.yaml
     - ./allow-media-server-internal.yaml

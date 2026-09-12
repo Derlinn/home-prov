@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "GLPI"
+    gethomepage.dev/group: "Applications"
+    gethomepage.dev/icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/glpi.svg"
+    gethomepage.dev/href: "https://glpi.${DOMAIN}"
+  name: glpi
+spec:
+  parentRefs:
+    - name: envoy-admin
+      namespace: network
+      sectionName: https
+  hostnames:
+    - glpi.${DOMAIN}
+  rules:
+    - backendRefs:
+        - name: nginx
+          namespace: default
+          port: 80

@@ -12,6 +12,7 @@ resources:
   - bentopdf/ks.yaml
   - homepage/ks.yaml
   - netbox/ks.yaml
+  - glpi/ks.yaml
   - parkshield/ks.yaml
   - osint/ks.yaml
   - rackula/ks.yaml

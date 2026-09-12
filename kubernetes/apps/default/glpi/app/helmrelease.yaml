@@ -1,0 +1,38 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: glpi
+spec:
+  chart:
+    spec:
+      chart: glpi
+      version: '2.11.4'
+      interval: 5h
+      sourceRef:
+        kind: HelmRepository
+        name: glpi
+  releaseName: glpi
+  interval: 1h
+  timeout: 20m # default 5min is too short for the initial db install jobs
+  values:
+    glpi:
+      language: fr_FR
+      persistence:
+        files:
+          storageClass: longhorn-production-v1
+        marketplace:
+          storageClass: longhorn-production-v1
+        etc:
+          storageClass: longhorn-production-v1
+      ingress:
+        enabled: false
+    mariadb:
+      auth:
+        rootPassword: ""
+        password: ""
+        existingSecret: glpi-mariadb-auth
+      standalone:
+        persistence:
+          storageClass: longhorn-production-v1
