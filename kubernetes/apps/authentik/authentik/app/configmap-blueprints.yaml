@@ -1118,7 +1118,7 @@ data:
           invalidation_flow: !Find
             - authentik_flows.flow
             - [slug, default-provider-invalidation-flow]
-          acs_url: https://glpi.${DOMAIN}/marketplace/samlsso/front/acs/
+          acs_url: https://glpi.${DOMAIN}/marketplace/samlsso/front/acs/1
           sls_url: https://glpi.${DOMAIN}/marketplace/samlsso/front/logout/
           audience: https://glpi.${DOMAIN}/
           issuer: https://authentik.${DOMAIN}/application/saml/glpi/metadata/
