@@ -12,7 +12,7 @@ metadata:
   name: glpi
 spec:
   parentRefs:
-    - name: envoy-admin
+    - name: envoy-internal
       namespace: network
       sectionName: https
   hostnames:
