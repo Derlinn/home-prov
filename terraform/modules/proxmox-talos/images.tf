@@ -56,7 +56,7 @@ locals {
   installer_image_baremetal = "${trimprefix(var.image.factory_url, "https://")}/metal-installer/${talos_image_factory_schematic.baremetal.id}:${var.image.version}"
 }
 
-resource "proxmox_virtual_environment_download_file" "this" {
+resource "proxmox_download_file" "this" {
 
   for_each = {
     for combo in local.image_combinations :

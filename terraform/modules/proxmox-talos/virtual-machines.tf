@@ -3,6 +3,9 @@ locals {
   baremetal_nodes = { for k, v in var.nodes : k => v if v.provisioning == "baremetal" }
 }
 
+# bpg/proxmox's replacement `proxmox_vm` is still missing disk, network_device,
+# initialization, cpu and usb blocks used below; not a viable migration yet
+# despite the deprecation warning.
 resource "proxmox_virtual_environment_vm" "this" {
   for_each = local.proxmox_nodes
 
@@ -49,7 +52,7 @@ resource "proxmox_virtual_environment_vm" "this" {
     ssd          = true
     file_format  = "raw"
     size         = each.value.size_disk
-    file_id      = proxmox_virtual_environment_download_file.this["${each.value.host_node}_base"].id
+    file_id      = proxmox_download_file.this["${each.value.host_node}_base"].id
   }
 
   boot_order = ["virtio0"]
@@ -76,5 +79,5 @@ resource "proxmox_virtual_environment_vm" "this" {
     ignore_changes = [disk[0].file_id]
   }
 
-  depends_on = [resource.proxmox_virtual_environment_download_file.this]
+  depends_on = [resource.proxmox_download_file.this]
 }
