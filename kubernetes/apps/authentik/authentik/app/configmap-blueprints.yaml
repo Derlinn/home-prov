@@ -1126,6 +1126,8 @@ data:
           signing_kp: !Find
             - authentik_crypto.certificatekeypair
             - [name, authentik Self-signed Certificate]
+          sign_assertion: true
+          sign_response: true
           name_id_mapping: !Find
             - authentik_providers_saml.samlpropertymapping
             - [name, "authentik default SAML Mapping: Email"]
