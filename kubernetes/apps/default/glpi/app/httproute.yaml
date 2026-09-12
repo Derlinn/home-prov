@@ -22,3 +22,15 @@ spec:
         - name: nginx
           namespace: default
           port: 80
+      filters:
+        # Envoy sets X-Forwarded-Proto but not X-Forwarded-Port; without it
+        # the samlSSO plugin (proxyVars mode) rebuilds the ACS URL with the
+        # backend port (:8080) and rejects the SAML response on Destination
+        # mismatch.
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            set:
+              - name: X-Forwarded-Proto
+                value: https
+              - name: X-Forwarded-Port
+                value: "443"
