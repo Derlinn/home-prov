@@ -1118,7 +1118,8 @@ data:
           invalidation_flow: !Find
             - authentik_flows.flow
             - [slug, default-provider-invalidation-flow]
-          acs_url: https://glpi.${DOMAIN}/plugins/samlsso/front/acs/1
+          acs_url: https://glpi.${DOMAIN}/marketplace/samlsso/front/acs/
+          sls_url: https://glpi.${DOMAIN}/marketplace/samlsso/front/logout/
           audience: https://glpi.${DOMAIN}/
           issuer: https://authentik.${DOMAIN}/application/saml/glpi/metadata/
           sp_binding: post
@@ -1129,6 +1130,9 @@ data:
             - authentik_providers_saml.samlpropertymapping
             - [name, "authentik default SAML Mapping: Email"]
           property_mappings:
+            - !Find
+              - authentik_providers_saml.samlpropertymapping
+              - [name, "authentik default SAML Mapping: Email"]
             - !KeyOf glpi-givenname
             - !KeyOf glpi-surname
       - model: authentik_core.application
