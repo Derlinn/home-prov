@@ -132,18 +132,22 @@ data "talos_cluster_health" "after_coredns" {
   depends_on = [helm_release.coredns]
 }
 
-resource "kubernetes_namespace" "example" {
+resource "kubernetes_namespace_v1" "flux_system" {
+  count = var.enable_talos_config && var.k8s_bootstrap ? 1 : 0
+
   metadata {
     name = "flux-system"
   }
+
+  depends_on = [data.talos_cluster_health.after_coredns]
 }
 
-resource "kubernetes_secret" "sops_age_key" {
+resource "kubernetes_secret_v1" "sops_age_key" {
   count = var.enable_talos_config && var.k8s_bootstrap ? 1 : 0
 
   metadata {
     name      = "sops-age"
-    namespace = "flux-system"
+    namespace = kubernetes_namespace_v1.flux_system[0].metadata[0].name
   }
 
   type = "Opaque"
@@ -152,5 +156,5 @@ resource "kubernetes_secret" "sops_age_key" {
     "age.agekey" = file(var.sops_age_key_path)
   }
 
-  depends_on = [data.talos_cluster_health.after_coredns]
+  depends_on = [kubernetes_namespace_v1.flux_system]
 }

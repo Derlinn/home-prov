@@ -79,6 +79,11 @@ fi
 
 DEBUG=${DEBUG:-}
 
+# kube-ps1 falls back to literal "\033" text when tput fails (e.g. TERM=xterm-kitty without terminfo entry)
+if ! tput setaf 1 &>/dev/null && tput -T xterm-256color setaf 1 &>/dev/null; then
+  export TERM=xterm-256color
+fi
+
 source /usr/local/bin/kube-ps1.sh
 
 if command -v kubectl >/dev/null 2>&1; then
