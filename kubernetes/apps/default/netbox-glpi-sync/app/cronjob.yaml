@@ -1,0 +1,56 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/batch_v1.json
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: netbox-glpi-sync
+  namespace: default
+spec:
+  schedule: "*/15 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 300
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: netbox-glpi-sync
+            app.kubernetes.io/instance: netbox-glpi-sync
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: sync
+              image: docker.io/python:3.14-slim
+              imagePullPolicy: IfNotPresent
+              command: ["python3", "/app/sync.py"]
+              envFrom:
+                - secretRef:
+                    name: netbox-glpi-sync
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  cpu: 250m
+                  memory: 128Mi
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 65534
+                runAsGroup: 65534
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+                seccompProfile:
+                  type: RuntimeDefault
+              volumeMounts:
+                - name: script
+                  mountPath: /app
+                  readOnly: true
+          volumes:
+            - name: script
+              configMap:
+                name: netbox-glpi-sync
+                defaultMode: 0555

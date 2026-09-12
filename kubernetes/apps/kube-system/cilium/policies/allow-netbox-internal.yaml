@@ -19,6 +19,10 @@ spec:
         - matchLabels:
             io.kubernetes.pod.namespace: default
             app.kubernetes.io/instance: netbox
+        # Periodic NetBox -> GLPI sync job (APIs over HTTP)
+        - matchLabels:
+            io.kubernetes.pod.namespace: default
+            app.kubernetes.io/instance: netbox-glpi-sync
   egress:
     - toEndpoints:
         - matchLabels:

@@ -1,0 +1,204 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: netbox-glpi-sync
+  namespace: default
+data:
+  sync.py: |
+    """One-way sync NetBox devices/VMs -> GLPI Computers.
+
+    Reads devices and virtual machines from NetBox, creates or updates the
+    matching Computer in GLPI. Matching order: serial number, then name.
+    Only stdlib is used so any python:slim image can run this.
+
+    Required env: NETBOX_URL, NETBOX_TOKEN, GLPI_URL, GLPI_APP_TOKEN,
+    GLPI_USER_TOKEN. Optional: DRY_RUN=1, GLPI_ENTITIES_ID=0.
+    """
+
+    import json
+    import os
+    import sys
+    import urllib.parse
+    import urllib.request
+
+    NETBOX_URL = os.environ["NETBOX_URL"].rstrip("/")
+    NETBOX_TOKEN = os.environ["NETBOX_TOKEN"]
+    GLPI_URL = os.environ["GLPI_URL"].rstrip("/")
+    GLPI_APP_TOKEN = os.environ["GLPI_APP_TOKEN"]
+    GLPI_USER_TOKEN = os.environ["GLPI_USER_TOKEN"]
+    GLPI_ENTITIES_ID = int(os.environ.get("GLPI_ENTITIES_ID", "0"))
+    DRY_RUN = os.environ.get("DRY_RUN", "0") == "1"
+
+
+    def log(*args):
+        print(*args, flush=True)
+
+
+    def nb_get(path, params=None):
+        url = NETBOX_URL + path
+        if params:
+            url += "?" + urllib.parse.urlencode(params)
+        req = urllib.request.Request(url, headers={"Authorization": f"Bearer {NETBOX_TOKEN}"})
+        with urllib.request.urlopen(req, timeout=30) as res:
+            return json.load(res)
+
+
+    def nb_all(path):
+        out, params = [], {"limit": 100, "offset": 0}
+        while True:
+            page = nb_get(path, params)
+            out.extend(page["results"])
+            if not page["next"]:
+                return out
+            params["offset"] += params["limit"]
+
+
+    class Glpi:
+        def __init__(self):
+            self.session = self._call("/initSession", auth="user_token " + GLPI_USER_TOKEN)[
+                "session_token"
+            ]
+            self._dropdown_cache = {}
+
+        def _call(self, path, method="GET", payload=None, auth=None):
+            headers = {"App-Token": GLPI_APP_TOKEN, "Content-Type": "application/json"}
+            headers["Authorization" if auth else "Session-Token"] = (
+                auth if auth else self.session
+            )
+            data = json.dumps(payload).encode() if payload is not None else None
+            req = urllib.request.Request(
+                GLPI_URL + path, data=data, headers=headers, method=method
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=30) as res:
+                    body = res.read().decode()
+                    return json.loads(body) if body else None
+            except urllib.error.HTTPError as exc:
+                detail = exc.read().decode()[:300]
+                raise RuntimeError(f"GLPI {method} {path}: HTTP {exc.code}: {detail}")
+
+        def close(self):
+            try:
+                self._call("/killSession")
+            except RuntimeError:
+                pass
+
+        def list_computers(self):
+            return self._call("/Computer?range=0-5000") or []
+
+        def dropdown_id(self, itemtype, name):
+            """Resolve a dropdown value by name, creating it when missing."""
+            key = (itemtype, name)
+            if key not in self._dropdown_cache:
+                found = self._call(
+                    f"/{itemtype}?searchText[name]={urllib.parse.quote(name)}"
+                )
+                match = next((m for m in found or [] if m.get("name") == name), None)
+                if match is None:
+                    if DRY_RUN:
+                        return -1
+                    match = self._call(f"/{itemtype}", method="POST", payload={"input": {"name": name}})
+                self._dropdown_cache[key] = int(match["id"])
+            return self._dropdown_cache[key]
+
+        def create_computer(self, fields):
+            if DRY_RUN:
+                return -1
+            return int(self._call("/Computer", method="POST", payload={"input": fields})["id"])
+
+        def update_computer(self, computer_id, fields):
+            if DRY_RUN:
+                return
+            fields["id"] = computer_id
+            self._call("/Computer", method="PUT", payload={"input": fields})
+
+
+    def build_fields(item, is_vm, glpi):
+        """Map a NetBox device/VM dict to GLPI Computer fields."""
+        if is_vm:
+            name = item["name"]
+            serial = item.get("serial") or ""
+            manufacturer = None
+            model = None
+            comment = f"Virtual machine synced from NetBox (cluster: {item['cluster']['name']}, vCPUs: {item['vcpus']}, RAM: {item['memory']} MB)"
+        else:
+            name = item["name"]
+            serial = item.get("serial") or ""
+            manufacturer = (item.get("device_type") or {}).get("manufacturer", {}).get("name")
+            model = (item.get("device_type") or {}).get("model")
+            site = (item.get("site") or {}).get("name", "")
+            role = (item.get("role") or {}).get("name", "")
+            status = (item.get("status") or {}).get("label", "")
+            comment = f"Device synced from NetBox (site: {site}, role: {role}, status: {status})"
+        fields = {
+            "name": name,
+            "serial": serial,
+            "entities_id": GLPI_ENTITIES_ID,
+            "comment": comment,
+        }
+        if item.get("asset_tag"):
+            fields["otherserial"] = item["asset_tag"]
+        if manufacturer:
+            fields["manufacturers_id"] = glpi.dropdown_id("Manufacturer", manufacturer)
+        if model:
+            fields["computermodels_id"] = glpi.dropdown_id("ComputerModel", model)
+        return fields
+
+
+    def main():
+        devices = nb_all("/api/dcim/devices/")
+        vms = nb_all("/api/virtualization/virtual-machines/")
+        log(f"NetBox: {len(devices)} devices, {len(vms)} VMs")
+        if DRY_RUN:
+            log("DRY RUN - no writes")
+
+        glpi = Glpi()
+        try:
+            existing = {}
+            for comp in glpi.list_computers():
+                if comp.get("serial"):
+                    existing[("serial", comp["serial"])] = comp
+                existing[("name", comp["name"])] = comp
+            log(f"GLPI: {len(existing)} known computers")
+
+            created, updated, skipped = 0, 0, 0
+            for item, is_vm in [(d, False) for d in devices] + [(v, True) for v in vms]:
+                if not item.get("name"):
+                    skipped += 1
+                    continue
+                fields = build_fields(item, is_vm, glpi)
+                target = None
+                if fields["serial"]:
+                    target = existing.get(("serial", fields["serial"]))
+                if target is None:
+                    target = existing.get(("name", fields["name"]))
+                if target is None:
+                    new_id = glpi.create_computer(fields)
+                    existing[("name", fields["name"])] = {"id": new_id, **fields}
+                    if fields["serial"]:
+                        existing[("serial", fields["serial"])] = existing[("name", fields["name"])]
+                    created += 1
+                    log(f"+ {fields['name']}")
+                else:
+                    current = {k: target.get(k) for k in fields}
+                    if any(
+                        str(current.get(k) or "") != str(v or "")
+                        for k, v in fields.items()
+                    ):
+                        glpi.update_computer(int(target["id"]), fields)
+                        updated += 1
+                        log(f"~ {fields['name']}")
+                    target.update(fields)
+            log(f"done: {created} created, {updated} updated, {skipped} skipped")
+        finally:
+            glpi.close()
+
+
+    if __name__ == "__main__":
+        try:
+            main()
+        except Exception as exc:  # noqa: BLE001 - sync job must report and exit nonzero
+            log(f"ERROR: {exc}")
+            sys.exit(1)

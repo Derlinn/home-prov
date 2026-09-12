@@ -172,8 +172,9 @@ Meme forme pour toutes : les pods selectionnes acceptent l'ingress et l'egress d
 | `allow-devtools-internal` | `policies/allow-devtools-internal.yaml` | namespace `devtools` |
 | `allow-media-server-internal` | `policies/allow-media-server-internal.yaml` | namespace `media-server` |
 | `allow-vaultwarden-internal` | `policies/allow-vaultwarden-internal.yaml` | namespace `vaultwarden` |
-| `allow-netbox-internal` | `policies/allow-netbox-internal.yaml` | namespace `default`, label `app.kubernetes.io/instance: netbox` |
-| `allow-glpi-internal` | `policies/allow-glpi-internal.yaml` | namespace `default`, label `app.kubernetes.io/instance: glpi` (nginx/php-fpm vers mariadb et valkey) |
+| `allow-netbox-internal` | `policies/allow-netbox-internal.yaml` | namespace `default`, label `app.kubernetes.io/instance: netbox`, plus ingress depuis le job `netbox-glpi-sync` |
+| `allow-glpi-internal` | `policies/allow-glpi-internal.yaml` | namespace `default`, label `app.kubernetes.io/instance: glpi` (nginx/php-fpm vers mariadb et valkey), plus ingress depuis le job `netbox-glpi-sync` |
+| `allow-netbox-glpi-sync` | `policies/allow-netbox-glpi-sync.yaml` | job `netbox-glpi-sync` (`default`) vers les instances `netbox` et `glpi` (APIs, port 80) |
 | `allow-rackula-internal` | `policies/allow-rackula-internal.yaml` | namespace `default`, label `app.kubernetes.io/instance: rackula` (frontend nginx vers son API sur 3001) |
 
 C'est `allow-observability-internal` qui autorise Prometheus a scraper Gatus (8080) et blackbox-exporter (9115) sans que ces ports figurent dans `allow-prometheus-egress`.

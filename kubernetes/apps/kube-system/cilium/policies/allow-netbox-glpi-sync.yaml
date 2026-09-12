@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# Netbox GLPI sync: the periodic sync job talks to the NetBox and GLPI APIs
+# and to nothing else within the cluster
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-netbox-glpi-sync
+spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
+  endpointSelector:
+    matchLabels:
+      io.kubernetes.pod.namespace: default
+      app.kubernetes.io/instance: netbox-glpi-sync
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: default
+            app.kubernetes.io/instance: netbox
+        - matchLabels:
+            io.kubernetes.pod.namespace: default
+            app.kubernetes.io/instance: glpi
