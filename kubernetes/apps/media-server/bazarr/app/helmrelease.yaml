@@ -71,6 +71,13 @@ spec:
         existingClaim: media-server-nas-data
         globalMounts:
           - path: /data
+      scripts:
+        type: configMap
+        name: bazarr-scripts
+        globalMounts:
+          - path: /scripts/save-alt-subtitle.sh
+            subPath: save-alt-subtitle.sh
+            readOnly: true
 
     defaultPodOptions:
       labels:

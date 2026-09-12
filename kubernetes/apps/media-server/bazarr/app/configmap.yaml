@@ -1,0 +1,81 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bazarr-scripts
+  namespace: media-server
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
+data:
+  save-alt-subtitle.sh: |
+    #!/bin/sh
+    # Bazarr custom post-processing hook.
+    # Bazarr keeps managing "movie.fr.srt" as usual (always its current best
+    # match). Whenever an upgrade replaces it with a distinct subtitle, this
+    # keeps up to CAP older distinct matches on disk as "movie.SCORE-PROVIDER.alt.srt",
+    # so Jellyfin lists them as extra selectable French tracks. The lowest
+    # scored alt is evicted once CAP is exceeded, and exact duplicate content
+    # is never re-added.
+    set -eu
+
+    CAP=4 # number of alt files kept alongside the Bazarr-managed primary one
+
+    SUB="$1"
+    SCORE="$2"
+    PROVIDER="$3"
+
+    SAFE_PROVIDER=$(printf '%s' "$PROVIDER" | tr -c 'A-Za-z0-9' '-' | tr -s '-')
+
+    CACHE="$SUB.prevcopy"
+    META="$SUB.prevmeta"
+
+    hash_of() { md5sum "$1" | cut -d' ' -f1; }
+
+    add_to_pool() {
+      old_score="$1"
+      old_provider="$2"
+      old_file="$3"
+      old_hash=$(hash_of "$old_file")
+
+      for existing in "${SUB%.srt}".*.alt.srt; do
+        [ -e "$existing" ] || continue
+        if [ "$(hash_of "$existing")" = "$old_hash" ]; then
+          return 0
+        fi
+      done
+
+      dest="${SUB%.srt}.${old_score}-${old_provider}.alt.srt"
+      cp "$old_file" "$dest"
+
+      count=0
+      for f in "${SUB%.srt}".*.alt.srt; do
+        [ -e "$f" ] && count=$((count + 1))
+      done
+
+      if [ "$count" -gt "$CAP" ]; then
+        lowest=""
+        lowest_score=999999
+        for f in "${SUB%.srt}".*.alt.srt; do
+          [ -e "$f" ] || continue
+          base=$(basename "$f")
+          score=$(printf '%s' "$base" | sed -n 's/.*\.\([0-9][0-9]*\)-[^.]*\.alt\.srt$/\1/p')
+          [ -n "$score" ] || score=0
+          if [ "$score" -lt "$lowest_score" ]; then
+            lowest_score=$score
+            lowest=$f
+          fi
+        done
+        [ -n "$lowest" ] && rm -f "$lowest"
+      fi
+    }
+
+    if [ -f "$CACHE" ] && [ -f "$META" ]; then
+      if [ "$(hash_of "$CACHE")" != "$(hash_of "$SUB")" ]; then
+        old_score=$(cut -d' ' -f1 "$META")
+        old_provider=$(cut -d' ' -f2 "$META")
+        add_to_pool "$old_score" "$old_provider" "$CACHE"
+      fi
+    fi
+
+    cp "$SUB" "$CACHE"
+    printf '%s %s\n' "$SCORE" "$SAFE_PROVIDER" > "$META"
