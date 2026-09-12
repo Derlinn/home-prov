@@ -66,8 +66,6 @@ EXTERNAL_VARS=(
   GF_AUTH_GENERIC_OAUTH_CLIENT_ID
   GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
   DISCORD_WEBHOOK_URL
-  old_score
-  old_provider
   datasource
   logsource
   namespace

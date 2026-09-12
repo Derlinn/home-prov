@@ -11,25 +11,45 @@ data:
     #!/bin/sh
     # Bazarr custom post-processing hook.
     # Bazarr keeps managing "movie.fr.srt" as usual (always its current best
-    # match). Whenever an upgrade replaces it with a distinct subtitle, this
-    # keeps up to CAP older distinct matches on disk as "movie.SCORE-PROVIDER.alt.srt",
-    # so Jellyfin lists them as extra selectable French tracks. The lowest
-    # scored alt is evicted once CAP is exceeded, and exact duplicate content
-    # is never re-added.
+    # match). This hook archives every distinct replaced subtitle into a pool
+    # of "movie.SCORE-PROVIDER.alt.srt" fallbacks (up to CAP), and - for French
+    # only - proactively asks Bazarr for more candidates from other providers
+    # right after the first download, so the pool fills itself with no manual
+    # search. Jellyfin lists the .alt files as extra selectable French tracks,
+    # with the score and provider visible in the track title.
     set -eu
 
-    CAP=4 # number of alt files kept alongside the Bazarr-managed primary one
+    CAP=4
+    MIN_FETCH_SCORE=60
+    MARKER_TTL_SECONDS=86400
+    BASE_URL="http://localhost:6767"
+    CONFIG_FILE="/config/config/config.yaml"
 
     SUB="$1"
     SCORE="$2"
     PROVIDER="$3"
+    LANG2="$4"
+    SERIES_ID="$5"
+    EPISODE_ID="$6"
 
+    LANG2_NORM=$(printf '%s' "$LANG2" | cut -d: -f1 | tr '[:upper:]' '[:lower:]')
     SAFE_PROVIDER=$(printf '%s' "$PROVIDER" | tr -c 'A-Za-z0-9' '-' | tr -s '-')
-
-    CACHE="$SUB.prevcopy"
-    META="$SUB.prevmeta"
+    ALT_BASE="${SUB%.srt}"
+    CACHE="$ALT_BASE.prevcopy"
+    META="$ALT_BASE.prevmeta"
+    MARKER="$ALT_BASE.autofetch.done"
+    LOCKTAG=$(printf '%s' "$SUB" | md5sum | cut -d' ' -f1)
+    LOCKDIR="/tmp/bazarr-autofetch-$LOCKTAG.lock"
 
     hash_of() { md5sum "$1" | cut -d' ' -f1; }
+
+    alt_count() {
+      count=0
+      for f in "$ALT_BASE".*.alt.srt; do
+        [ -e "$f" ] && count=$((count + 1))
+      done
+      printf '%s\n' "$count"
+    }
 
     add_to_pool() {
       old_score="$1"
@@ -37,25 +57,20 @@ data:
       old_file="$3"
       old_hash=$(hash_of "$old_file")
 
-      for existing in "${SUB%.srt}".*.alt.srt; do
+      for existing in "$ALT_BASE".*.alt.srt; do
         [ -e "$existing" ] || continue
         if [ "$(hash_of "$existing")" = "$old_hash" ]; then
           return 0
         fi
       done
 
-      dest="${SUB%.srt}.${old_score}-${old_provider}.alt.srt"
+      dest="$ALT_BASE.$old_score-$old_provider.alt.srt"
       cp "$old_file" "$dest"
 
-      count=0
-      for f in "${SUB%.srt}".*.alt.srt; do
-        [ -e "$f" ] && count=$((count + 1))
-      done
-
-      if [ "$count" -gt "$CAP" ]; then
+      if [ "$(alt_count)" -gt "$CAP" ]; then
         lowest=""
         lowest_score=999999
-        for f in "${SUB%.srt}".*.alt.srt; do
+        for f in "$ALT_BASE".*.alt.srt; do
           [ -e "$f" ] || continue
           base=$(basename "$f")
           score=$(printf '%s' "$base" | sed -n 's/.*\.\([0-9][0-9]*\)-[^.]*\.alt\.srt$/\1/p')
@@ -69,6 +84,7 @@ data:
       fi
     }
 
+    # 1. Archive the subtitle being replaced.
     if [ -f "$CACHE" ] && [ -f "$META" ]; then
       if [ "$(hash_of "$CACHE")" != "$(hash_of "$SUB")" ]; then
         old_score=$(cut -d' ' -f1 "$META")
@@ -79,3 +95,158 @@ data:
 
     cp "$SUB" "$CACHE"
     printf '%s %s\n' "$SCORE" "$SAFE_PROVIDER" > "$META"
+
+    # 2. Proactive fetch: French only, at most once per TTL, never re-entrant.
+    # Chained downloads triggered below re-enter this hook but stop here thanks
+    # to the marker, while still going through step 1 above.
+    [ "$LANG2_NORM" = "fr" ] || exit 0
+    if [ -f "$MARKER" ]; then
+      marked=$(cat "$MARKER" 2>/dev/null || printf '0')
+      now=$(date +%s)
+      case "$marked" in
+        ''|*[!0-9]*) marked=0 ;;
+      esac
+      if [ $((now - marked)) -lt "$MARKER_TTL_SECONDS" ]; then
+        exit 0
+      fi
+    fi
+    mkdir "$LOCKDIR" 2>/dev/null || exit 0
+    trap 'rmdir "$LOCKDIR"' EXIT INT TERM
+    date +%s > "$MARKER"
+
+    needed=$((CAP - $(alt_count)))
+    [ "$needed" -gt 0 ] || exit 0
+    command -v python3 >/dev/null 2>&1 || exit 0
+
+    python3 - "$BASE_URL" "$CONFIG_FILE" "$SERIES_ID" "$EPISODE_ID" "$needed" "$MIN_FETCH_SCORE" "$PROVIDER" <<'PYEOF' || true
+    import json
+    import os
+    import re
+    import sys
+    import urllib.parse
+    import urllib.request
+
+    base, cfg_path, series_id, episode_id, needed, min_score, current_provider = sys.argv[1:8]
+    needed = int(needed)
+    min_score = int(min_score)
+
+    def log(msg):
+        sys.stderr.write("autofetch: " + msg + "\n")
+
+    apikey = os.environ.get("BAZARR_API_KEY") or None
+    if not apikey:
+        try:
+            with open(cfg_path) as f:
+                m = re.search(r"apikey:\s*([0-9a-fA-F]{8,})", f.read())
+                if m:
+                    apikey = m.group(1)
+        except Exception as e:
+            log("cannot read api key: " + str(e))
+    if not apikey:
+        log("no api key, skipping")
+        sys.exit(0)
+
+    def api(method, path, params):
+        qs = urllib.parse.urlencode(params)
+        headers = {"X-API-KEY": apikey}
+        if method == "POST":
+            req = urllib.request.Request(base + path + "?" + qs,
+                                         data=qs.encode(),
+                                         headers=dict(headers, **{"Content-Type": "application/x-www-form-urlencoded"}),
+                                         method="POST")
+        else:
+            req = urllib.request.Request(base + path + "?" + qs, headers=headers, method="GET")
+        with urllib.request.urlopen(req, timeout=120) as r:
+            body = r.read().decode("utf-8", "replace")
+            return json.loads(body) if body else {}
+
+    is_episode = bool(series_id)
+    if is_episode:
+        search = api("GET", "/api/providers/episodes", {"episodeid": episode_id})
+        dl_path = "/api/providers/episodes"
+    else:
+        search = api("GET", "/api/providers/movies", {"radarrid": episode_id})
+        dl_path = "/api/providers/movies"
+
+    cands = search.get("data", []) if isinstance(search, dict) else []
+    log("search returned %d candidates" % len(cands))
+
+    FR_NAMES = ("fr", "fra", "fre", "french", "francais")
+
+    def norm_lang(v):
+        if v is None:
+            return ""
+        if isinstance(v, dict):
+            for k in ("code2", "code3", "code", "name"):
+                if v.get(k):
+                    return str(v[k]).lower()
+            return ""
+        return str(v).lower()
+
+    def is_true(v):
+        if isinstance(v, bool):
+            return v
+        return str(v).lower() in ("true", "1", "yes")
+
+    def prov_name(p):
+        if isinstance(p, dict):
+            for k in ("name", "id"):
+                if p.get(k):
+                    return str(p[k])
+            return ""
+        return str(p)
+
+    def slug(p):
+        return re.sub(r"[^A-Za-z0-9]+", "-", p).strip("-").lower()
+
+    seen = set([slug(current_provider)])
+    picked = []
+    for c in sorted(cands, key=lambda c: c.get("score", 0) or 0, reverse=True):
+        try:
+            score = int(c.get("score", 0) or 0)
+        except Exception:
+            continue
+        if score < min_score:
+            continue
+        if is_true(c.get("hearing_impaired", False)):
+            continue
+        if is_true(c.get("forced", False)):
+            continue
+        lang = norm_lang(c.get("language"))
+        if lang not in FR_NAMES and not lang.startswith("fr"):
+            continue
+        prov = prov_name(c.get("provider"))
+        key = slug(prov)
+        if not prov or key in seen:
+            continue
+        if not c.get("subtitle"):
+            continue
+        seen.add(key)
+        picked.append(c)
+        if len(picked) >= needed:
+            break
+
+    def b2s(v):
+        return "True" if is_true(v) else "False"
+
+    # Ascending order so the best-scored candidate ends up as the primary file.
+    for c in reversed(picked):
+        prov = prov_name(c.get("provider"))
+        params = {
+            "provider": prov,
+            "subtitle": c.get("subtitle"),
+            "hi": b2s(c.get("hearing_impaired", False)),
+            "forced": b2s(c.get("forced", False)),
+            "original_format": b2s(c.get("original_format", False)),
+        }
+        if is_episode:
+            params["seriesid"] = series_id
+            params["episodeid"] = episode_id
+        else:
+            params["radarrid"] = episode_id
+        try:
+            api("POST", dl_path, params)
+            log("downloaded score=%s provider=%s" % (c.get("score"), prov))
+        except Exception as e:
+            log("download failed provider=" + prov + ": " + str(e))
+    PYEOF
