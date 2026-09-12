@@ -87,6 +87,16 @@ data:
         state: created
         identifiers:
           name: linderis_social_analyzer
+      - model: authentik_core.group
+        id: g-netbird
+        state: created
+        identifiers:
+          name: linderis_netbird
+      - model: authentik_core.group
+        id: g-glpi
+        state: created
+        identifiers:
+          name: linderis_glpi
       # A child is a member of every parent. `users` drops UI additions.
       - model: authentik_core.group
         state: present
@@ -112,6 +122,8 @@ data:
             - !KeyOf g-prometheus
             - !KeyOf g-maigret
             - !KeyOf g-social-analyzer
+            - !KeyOf g-netbird
+            - !KeyOf g-glpi
   homepage.yaml: |
     version: 1
     metadata:
@@ -988,6 +1000,153 @@ data:
         identifiers:
           target: !KeyOf social-analyzer-app
           group: !KeyOf social-analyzer-group
+        attrs:
+          order: 0
+          enabled: true
+  netbird.yaml: |
+    version: 1
+    metadata:
+      name: netbird
+    entries:
+      - model: authentik_core.group
+        id: netbird-group
+        state: present
+        identifiers:
+          name: linderis_netbird
+        attrs:
+          is_superuser: false
+      - model: authentik_providers_oauth2.oauth2provider
+        id: netbird-provider
+        state: present
+        identifiers:
+          name: Provider for NetBird
+        attrs:
+          client_id: netbird
+          client_secret: !Env AUTHENTIK_NETBIRD_CLIENT_SECRET
+          client_type: confidential
+          grant_types:
+            - authorization_code
+            - refresh_token
+          sub_mode: hashed_user_id
+          include_claims_in_id_token: true
+          issuer_mode: per_provider
+          access_code_validity: minutes=1
+          access_token_validity: minutes=5
+          refresh_token_validity: days=30
+          authorization_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-authorization-explicit-consent]
+          invalidation_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-invalidation-flow]
+          signing_key: !Find
+            - authentik_crypto.certificatekeypair
+            - [name, authentik Self-signed Certificate]
+          property_mappings:
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+            - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+          redirect_uris:
+            # NetBird brokers through its own embedded Dex, so the callback is
+            # Dex's, not the dashboard's. Confirm against Settings > Identity
+            # Providers, which prints the exact URL it expects.
+            - matching_mode: strict
+              redirect_uri_type: authorization
+              url: https://netbird.${DOMAIN}/oauth2/callback
+            - matching_mode: strict
+              redirect_uri_type: authorization
+              url: https://netbird.${DOMAIN}/oauth2/logout/callback
+      - model: authentik_core.application
+        id: netbird-app
+        state: present
+        identifiers:
+          slug: netbird
+        attrs:
+          name: NetBird
+          provider: !KeyOf netbird-provider
+          policy_engine_mode: any
+          icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/netbird.svg
+          group: Infrastructure
+      - model: authentik_policies.policybinding
+        state: present
+        identifiers:
+          target: !KeyOf netbird-app
+          group: !KeyOf netbird-group
+        attrs:
+          order: 0
+          enabled: true
+  glpi.yaml: |
+    version: 1
+    metadata:
+      name: glpi
+    entries:
+      - model: authentik_core.group
+        id: glpi-group
+        state: present
+        identifiers:
+          name: linderis_glpi
+        attrs:
+          is_superuser: false
+      - model: authentik_providers_saml.samlpropertymapping
+        id: glpi-givenname
+        state: present
+        identifiers:
+          name: GLPI givenname
+        attrs:
+          saml_name: givenname
+          expression: |
+            return request.user.name.split(" ")[0]
+      - model: authentik_providers_saml.samlpropertymapping
+        id: glpi-surname
+        state: present
+        identifiers:
+          name: GLPI surname
+        attrs:
+          saml_name: surname
+          expression: |
+            parts = request.user.name.split(" ", 1)
+            return parts[1] if len(parts) > 1 else ""
+      - model: authentik_providers_saml.samlprovider
+        id: glpi-provider
+        state: present
+        identifiers:
+          name: Provider for GLPI
+        attrs:
+          authorization_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-authorization-explicit-consent]
+          invalidation_flow: !Find
+            - authentik_flows.flow
+            - [slug, default-provider-invalidation-flow]
+          acs_url: https://glpi.${DOMAIN}/plugins/samlsso/front/acs/1
+          audience: https://glpi.${DOMAIN}/
+          issuer: https://authentik.${DOMAIN}/application/saml/glpi/metadata/
+          sp_binding: post
+          signing_kp: !Find
+            - authentik_crypto.certificatekeypair
+            - [name, authentik Self-signed Certificate]
+          name_id_mapping: !Find
+            - authentik_providers_saml.samlpropertymapping
+            - [name, "authentik default SAML Mapping: Email"]
+          property_mappings:
+            - !KeyOf glpi-givenname
+            - !KeyOf glpi-surname
+      - model: authentik_core.application
+        id: glpi-app
+        state: present
+        identifiers:
+          slug: glpi
+        attrs:
+          name: GLPI
+          provider: !KeyOf glpi-provider
+          policy_engine_mode: any
+          icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/glpi.svg
+          group: Applications
+      - model: authentik_policies.policybinding
+        state: present
+        identifiers:
+          target: !KeyOf glpi-app
+          group: !KeyOf glpi-group
         attrs:
           order: 0
           enabled: true
