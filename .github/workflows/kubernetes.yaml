@@ -7,7 +7,9 @@ on:
     branches: ["main"]
     paths:
       - "kubernetes/**"
+      - "terraform/**"
       - "scripts/validate-kubernetes.sh"
+      - "scripts/check-talos-k8s-matrix.sh"
       - ".github/workflows/kubernetes.yaml"
       - ".mise.toml"
   workflow_dispatch:
@@ -31,6 +33,11 @@ jobs:
 
       - name: Check SOPS files are encrypted
         run: ./scripts/check-sops-encrypted.sh
+
+      # No tools needed: fails a PR that pairs a Kubernetes version its Talos
+      # version does not support, before any manifest is rendered.
+      - name: Check Talos/Kubernetes support matrix
+        run: ./scripts/check-talos-k8s-matrix.sh
 
       - name: Setup Mise
         uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
