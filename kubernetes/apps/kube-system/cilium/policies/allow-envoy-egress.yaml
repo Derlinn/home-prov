@@ -63,6 +63,9 @@ spec:
             # dispatcharr
             - port: "9191"
               protocol: TCP
+            # tdarr
+            - port: "8265"
+              protocol: TCP
             # home-assistant
             - port: "8123"
               protocol: TCP
