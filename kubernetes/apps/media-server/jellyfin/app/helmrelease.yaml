@@ -21,8 +21,6 @@ spec:
       repository: lscr.io/linuxserver/jellyfin
       tag: 10.11.11
 
-    # RollingUpdate briefly runs two pods against the same SQLite library on a
-    # RWO PVC, surfacing as `SQLite Error 10: disk I/O error`.
     deploymentStrategy:
       type: Recreate
 
@@ -44,8 +42,41 @@ spec:
         mountPath: /media
         subPath: media
 
+    volumes:
+      - name: transcodes
+        emptyDir: {}
+      # AMD iGPU render node for VAAPI hardware transcoding. Only lin-node-01/02/03
+      # have the amdgpu kernel module loaded (see talos-base-controlplane.yaml).
+      - name: render
+        hostPath:
+          path: /dev/dri
+          type: Directory
+    volumeMounts:
+      - name: transcodes
+        mountPath: /config/cache/transcodes
+      - name: render
+        mountPath: /dev/dri
+
+    # GID 105 matches the udev rule that owns /dev/dri/renderD128 on the host
+    podSecurityContext:
+      supplementalGroups:
+        - 105
+
+    # Only these 3 nodes are real bare metal with the AMD iGPU passed through;
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: kubernetes.io/hostname
+                  operator: In
+                  values:
+                    - lin-node-01
+                    - lin-node-02
+                    - lin-node-03
+
     ingress:
-      enabled: false   # on utilise HTTPRoute (Envoy Gateway)
+      enabled: false
 
     resources:
       requests:

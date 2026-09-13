@@ -44,6 +44,8 @@ machine:
       - name: nbd
       # Silicon Labs USB-serial bridge, for the Zigbee coordinator.
       - name: cp210x
+      # AMD iGPU (Ryzen 7430U) for Jellyfin VAAPI hardware transcoding.
+      - name: amdgpu
   kubelet:
     defaultRuntimeSeccompProfileEnabled: true
     disableManifestsDirectory: true
@@ -83,6 +85,8 @@ machine:
     rules:
       # Zigbee coordinator readable by GID 20, so Zigbee2MQTT stays non-root.
       - SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0660", GROUP="20"
+      # AMD render node readable by GID 105, so Jellyfin's VAAPI transcoding stays non-root.
+      - SUBSYSTEM=="drm", KERNEL=="renderD*", MODE="0660", GROUP="105"
 cluster:
   clusterName: talos
   controlPlane:

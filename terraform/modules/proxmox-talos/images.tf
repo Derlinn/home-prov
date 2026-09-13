@@ -7,6 +7,9 @@ data "talos_image_factory_extensions_versions" "this" {
   talos_version = var.image.version
   filters = {
     names = [
+      # AMD iGPU (Ryzen 7430U) firmware + kernel modules, for Jellyfin VAAPI
+      # hardware transcoding.
+      "amdgpu",
       "iscsi-tools",
       "nfs-utils",
       "qemu-guest-agent",
