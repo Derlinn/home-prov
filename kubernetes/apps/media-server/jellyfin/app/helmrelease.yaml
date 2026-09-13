@@ -47,20 +47,31 @@ spec:
         emptyDir: {}
       # AMD iGPU render node for VAAPI hardware transcoding. Only lin-node-01/02/03
       # have the amdgpu kernel module loaded (see talos-base-controlplane.yaml).
+      # Must be CharDevice (not a Directory mount of /dev/dri): only that type
+      # makes containerd add the matching device-cgroup allow rule, otherwise
+      # the file is visible but open()/ioctl() fails with -EPERM.
       - name: render
         hostPath:
-          path: /dev/dri
-          type: Directory
+          path: /dev/dri/renderD128
+          type: CharDevice
     volumeMounts:
       - name: transcodes
         mountPath: /config/cache/transcodes
       - name: render
-        mountPath: /dev/dri
+        mountPath: /dev/dri/renderD128
 
     # GID 105 matches the udev rule that owns /dev/dri/renderD128 on the host
     podSecurityContext:
       supplementalGroups:
         - 105
+
+    # A CharDevice hostPath mount alone isn't enough here: containerd doesn't
+    # auto-add the render node to the container's device-cgroup allow list, so
+    # open() fails with EPERM even as root with the matching GID. privileged
+    # is required to actually use the device; the namespace already allows it
+    # for Gluetun's /dev/net/tun.
+    securityContext:
+      privileged: true
 
     # Only these 3 nodes are real bare metal with the AMD iGPU passed through;
     affinity:
