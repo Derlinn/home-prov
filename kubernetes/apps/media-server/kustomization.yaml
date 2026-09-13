@@ -22,3 +22,4 @@ resources:
   - ./dispatcharr/ks.yaml
   - ./recyclarr/ks.yaml
   - ./unpackerr/ks.yaml
+  - ./tdarr/ks.yaml

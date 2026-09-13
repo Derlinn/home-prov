@@ -196,7 +196,7 @@ Cilium refusant les deux sens, cette policy est le pendant obligatoire de la reg
 
 Pendant de `allow-homepage-egress`. Le selecteur porte sur trois namespaces a la fois (`matchExpressions` avec `operator: In` sur `media-server`, `observability`, `longhorn-system`), ce qui evite une policy par namespace cible.
 
-Homepage interroge l'API de chaque service pour alimenter ses widgets : 7878 (radarr), 8989 (sonarr), 9696 (prowlarr), 6767 (bazarr), 8096 (jellyfin), 8080 (qbittorrent), 9090 (prometheus), 3000 (grafana), 8000 (longhorn-ui). Ajouter un widget demande d'ouvrir le port dans **les deux** policies.
+Homepage interroge l'API de chaque service pour alimenter ses widgets : 7878 (radarr), 8989 (sonarr), 9696 (prowlarr), 6767 (bazarr), 8096 (jellyfin), 8080 (qbittorrent), 8265 (tdarr), 9090 (prometheus), 3000 (grafana), 8000 (longhorn-ui). Ajouter un widget demande d'ouvrir le port dans **les deux** policies.
 
 ---
 

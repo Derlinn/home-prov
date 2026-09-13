@@ -1,0 +1,99 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Tdarr - remuxes an AAC/EAC3 audio track alongside DTS/TrueHD so browsers can
+# Direct Play instead of forcing Jellyfin to transcode on every seek.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tdarr
+spec:
+  chart:
+    spec:
+      chart: app-template
+      version: '3.7.3'
+      interval: 5h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: media-server
+  releaseName: tdarr
+  interval: 1h
+  values:
+    controllers:
+      main:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/haveagitgat/tdarr
+              tag: 2.50.01
+            env:
+              TZ: "Europe/Paris"
+              PUID: "1000"
+              PGID: "1000"
+              UMASK_SET: "002"
+              serverIP: "0.0.0.0"
+              serverPort: "8266"
+              webUIPort: "8265"
+              internalNode: "true"
+              inContainer: "true"
+              ffmpegVersion: "7"
+              nodeName: "media-server-tdarr"
+              auth: "false"
+              # Disabled: no VPN egress on this app, avoid unattended internet fetches.
+              cronPluginUpdate: ""
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 8265
+                  initialDelaySeconds: 30
+                  periodSeconds: 30
+                  failureThreshold: 5
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 8265
+                  initialDelaySeconds: 15
+                  periodSeconds: 10
+
+    service:
+      main:
+        controller: main
+        ports:
+          http:
+            port: 8265
+
+    persistence:
+      server:
+        type: persistentVolumeClaim
+        storageClass: longhorn-production-v1
+        accessMode: ReadWriteOnce
+        size: 2Gi
+        globalMounts:
+          - path: /app/server
+      configs:
+        type: persistentVolumeClaim
+        storageClass: longhorn-production-v1
+        accessMode: ReadWriteOnce
+        size: 100Mi
+        globalMounts:
+          - path: /app/configs
+      logs:
+        type: emptyDir
+        globalMounts:
+          - path: /app/logs
+      # Local node scratch space for in-progress transcodes, not Longhorn: same
+      # reasoning as jellyfin's transcode cache (see its helmrelease.yaml).
+      temp:
+        type: emptyDir
+        globalMounts:
+          - path: /temp
+      media:
+        existingClaim: media-server-nas-data
+        globalMounts:
+          - path: /media
+            subPath: media

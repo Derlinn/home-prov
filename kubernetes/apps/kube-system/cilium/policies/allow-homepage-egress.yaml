@@ -31,6 +31,8 @@ spec:
               protocol: TCP
             - port: "8080" # qbittorrent
               protocol: TCP
+            - port: "8265" # tdarr
+              protocol: TCP
     - toEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: observability

@@ -1,0 +1,26 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Tdarr"
+    gethomepage.dev/group: "Média"
+    gethomepage.dev/icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/tdarr.svg"
+    gethomepage.dev/href: "https://tdarr.${DOMAIN}"
+    gethomepage.dev/widget.type: "tdarr"
+    gethomepage.dev/widget.url: "http://tdarr.media-server.svc.cluster.local:8265"
+  name: tdarr
+spec:
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+      sectionName: https
+  hostnames:
+    - tdarr.${DOMAIN}
+  rules:
+    - backendRefs:
+        - name: tdarr
+          namespace: media-server
+          port: 8265
