@@ -28,8 +28,12 @@ spec:
               tag: 2.50.01
             env:
               TZ: "Europe/Paris"
-              PUID: "1000"
-              PGID: "1000"
+              # 1001 to match the *arr stack (radarr/sonarr/bazarr) and the
+              # ownership of /media on the NAS. With 1000, every job needing
+              # to replace the original file failed with EACCES after minutes
+              # of ffmpeg (107/142 Transcode error, 0 success).
+              PUID: "1001"
+              PGID: "1001"
               UMASK_SET: "002"
               serverIP: "0.0.0.0"
               serverPort: "8266"
