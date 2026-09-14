@@ -26,6 +26,15 @@ spec:
             image:
               repository: ghcr.io/haveagitgat/tdarr
               tag: 2.50.01
+            # Cap ffmpeg CPU: every node is a control-plane member, an
+            # uncapped transcode drives etcd backend commits to seconds.
+            resources:
+              requests:
+                cpu: 2000m
+                memory: 2Gi
+              limits:
+                cpu: 4000m
+                memory: 4Gi
             env:
               TZ: "Europe/Paris"
               # 1001 to match the *arr stack (radarr/sonarr/bazarr) and the
