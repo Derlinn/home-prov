@@ -24,11 +24,16 @@ spec:
     deploymentStrategy:
       type: Recreate
 
-    env:
-      TZ: "Europe/Paris"
-      PUID: "1000"
-      PGID: "1000"
-      JELLYFIN_PublishedServerUrl: "https://jellyfin.${DOMAIN}"
+    jellyfin:
+      env:
+        - name: TZ
+          value: "Europe/Paris"
+        - name: PUID
+          value: "1001"
+        - name: PGID
+          value: "1001"
+        - name: JELLYFIN_PublishedServerUrl
+          value: "https://jellyfin.${DOMAIN}"
 
     persistence:
       config:
@@ -82,6 +87,19 @@ spec:
         volumeMounts:
           - name: render
             mountPath: /dev/dri/renderD128
+      # /config was created under the image's old default UID/GID (911:911)
+      # while PUID/PGID silently never applied (see above). Now that they
+      # actually take effect at 1001:1001, re-chown once per start so the app
+      # keeps read/write access to its own existing database and cache.
+      - name: fix-config-ownership
+        image: busybox:1.38
+        command:
+          - sh
+          - -c
+          - chown -R 1001:1001 /config
+        volumeMounts:
+          - name: config
+            mountPath: /config
 
     # A CharDevice hostPath mount alone isn't enough here: containerd doesn't
     # auto-add the render node to the container's device-cgroup allow list, so
