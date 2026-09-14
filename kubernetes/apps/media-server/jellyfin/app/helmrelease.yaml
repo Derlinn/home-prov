@@ -60,10 +60,28 @@ spec:
       - name: render
         mountPath: /dev/dri/renderD128
 
-    # GID 105 matches the udev rule that owns /dev/dri/renderD128 on the host
-    podSecurityContext:
-      supplementalGroups:
-        - 105
+    # podSecurityContext.supplementalGroups does NOT reach the jellyfin process:
+    # the linuxserver.io image's own entrypoint drops from root to PUID/PGID via
+    # its own group lookup, which discards any GID Kubernetes injected that has
+    # no name in the container's /etc/group. Their init script only special-cases
+    # /dev/dri/card0 (owned by group root here) to grant it to the app user; it
+    # never touches renderD128, which the host udev rule puts in a separate,
+    # unnamed GID 105. Net effect: every VAAPI init on renderD128 failed with
+    # "Device creation failed" (trickplay AND real hw transcode), 100% of the
+    # time, silently falling back to remux/software encode. Confirmed by
+    # reproducing the exact failure with the real jellyfin process's actual
+    # runtime groups (0,100,911 - no 105) and fixing it by regrouping the
+    # device to root below, which the image's own logic already trusts.
+    initContainers:
+      - name: fix-render-node-group
+        image: busybox:1.38
+        command:
+          - sh
+          - -c
+          - chgrp 0 /dev/dri/renderD128 && chmod 660 /dev/dri/renderD128
+        volumeMounts:
+          - name: render
+            mountPath: /dev/dri/renderD128
 
     # A CharDevice hostPath mount alone isn't enough here: containerd doesn't
     # auto-add the render node to the container's device-cgroup allow list, so
