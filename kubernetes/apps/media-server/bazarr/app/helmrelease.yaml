@@ -82,4 +82,3 @@ spec:
     defaultPodOptions:
       labels:
         vpn-proxy-client: "true"
-        egress: vpn-only
