@@ -1,0 +1,153 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clamav
+  labels:
+    app.kubernetes.io/name: clamav
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: clamav
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: clamav
+    spec:
+      securityContext:
+        fsGroup: 1001
+      containers:
+        - name: clamd
+          image: clamav/clamav-debian:stable
+          ports:
+            - name: clamd
+              containerPort: 3310
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: clamd
+            initialDelaySeconds: 180
+            periodSeconds: 30
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: clamd
+            initialDelaySeconds: 300
+            periodSeconds: 60
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+          volumeMounts:
+            - name: signatures
+              mountPath: /var/lib/clamav
+            - name: nas
+              mountPath: /data
+              readOnly: true
+            - name: clamav-conf
+              mountPath: /etc/clamav/clamd.conf
+              subPath: clamd.conf
+              readOnly: true
+        - name: scanner
+          image: python:3.13-alpine
+          command: ["python", "/app/scanner.py"]
+          env:
+            - name: QB_URL
+              value: http://vpn-stack.media-server.svc.cluster.local:8080
+            - name: CLAMD_HOST
+              value: 127.0.0.1
+            - name: POLL_INTERVAL
+              value: "120"
+            - name: SWEEP_HOUR
+              value: "2"
+          ports:
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /
+              port: metrics
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /
+              port: metrics
+            initialDelaySeconds: 120
+            periodSeconds: 60
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 128Mi
+          securityContext:
+            runAsUser: 1001
+            runAsGroup: 1001
+          volumeMounts:
+            - name: script
+              mountPath: /app
+              readOnly: true
+            - name: nas
+              mountPath: /data
+            - name: quarantine
+              mountPath: /quarantine
+        - name: browser
+          image: sigoden/dufs:v0.46.0
+          args: ["/quarantine", "-p", "8080", "--hidden", ".last-sweep"]
+          ports:
+            - name: browser
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: browser
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: browser
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 200m
+              memory: 64Mi
+          securityContext:
+            runAsUser: 1001
+            runAsGroup: 1001
+          volumeMounts:
+            - name: quarantine
+              mountPath: /quarantine
+              readOnly: true
+      volumes:
+        - name: nas
+          persistentVolumeClaim:
+            claimName: media-server-nas-data
+        - name: signatures
+          persistentVolumeClaim:
+            claimName: clamav-signatures
+        - name: quarantine
+          persistentVolumeClaim:
+            claimName: clamav-quarantine
+        - name: script
+          configMap:
+            name: clamav-scanner
+            defaultMode: 0755
+        - name: clamav-conf
+          configMap:
+            name: clamd-config

@@ -1,0 +1,28 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: clamav-signatures
+  labels:
+    app.kubernetes.io/name: clamav
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn-production-v1
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: clamav-quarantine
+  labels:
+    app.kubernetes.io/name: clamav
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn-encrypted-v1
+  resources:
+    requests:
+      storage: 20Gi

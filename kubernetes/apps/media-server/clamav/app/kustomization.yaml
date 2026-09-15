@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./pvc.yaml
+  - ./configmap.yaml
+  - ./clamd-config.yaml
+  - ./secret-oidc.sops.yaml
+  - ./deployment.yaml
+  - ./service.yaml
+  - ./httproute.yaml
+  - ./securitypolicy.yaml
+  - ./servicemonitor.yaml
+  - ./prometheusrule.yaml
+  - ./grafanadashboard.yaml

@@ -1,0 +1,43 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: clamav
+spec:
+  groups:
+    - name: clamav.availability
+      rules:
+        - alert: ClamAVScannerDown
+          expr: absent(clamav_scanner_up) or clamav_scanner_up == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "ClamAV scanner down, downloads are no longer being scanned"
+
+        - alert: ClamAVSweepStale
+          expr: time() - clamav_sweep_last_success_timestamp > 129600
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "ClamAV daily sweep has not succeeded for over 36h"
+
+    - name: clamav.detections
+      rules:
+        - alert: ClamAVInfectedFound
+          expr: increase(clamav_infected_total[6h]) > 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "ClamAV quarantined infected file(s), review PVC clamav-quarantine"
+
+        - alert: ClamAVScanErrors
+          expr: increase(clamav_errors_total[1h]) > 10
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "ClamAV scanner erroring, check logs (qbittorrent API or clamd unreachable?)"

@@ -1,0 +1,26 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
+# dufs has no login: access control lives here, same pattern as prometheus-oidc.
+# Requires an Authentik OAuth2 provider + application with slug "quarantaine".
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: quarantine-oidc
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: quarantine
+  oidc:
+    provider:
+      issuer: https://authentik.${DOMAIN}/application/o/quarantaine/
+      # Pinned, not discovered: the issuer's trailing slash doubles in the URL.
+      authorizationEndpoint: https://authentik.${DOMAIN}/application/o/authorize/
+      tokenEndpoint: https://authentik.${DOMAIN}/application/o/token/
+      endSessionEndpoint: https://authentik.${DOMAIN}/application/o/quarantaine/end-session/
+    clientID: quarantaine
+    clientSecret:
+      name: quarantine-oidc
+    redirectURL: https://quarantaine.${DOMAIN}/oauth2/callback
+    logoutPath: /logout
+    scopes: ["openid", "email", "profile"]

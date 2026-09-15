@@ -1,0 +1,18 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clamd-config
+  labels:
+    app.kubernetes.io/name: clamav
+data:
+  clamd.conf: |
+    LogFile /var/log/clamav/clamd.log
+    LogTime yes
+    LocalSocket /tmp/clamd.sock
+    TCPSocket 3310
+    User clamav
+    # Default caps single files at 100M, which silently skips most disk
+    # images and archives. 400M matches MaxScanSize and stays disk-backed,
+    # so no extra RAM. Anything bigger is skipped loudly client-side.
+    MaxFileSize 400M

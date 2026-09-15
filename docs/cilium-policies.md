@@ -212,6 +212,7 @@ Homepage interroge l'API de chaque service pour alimenter ses widgets : 7878 (ra
 | `allow-gatus-egress` | `policies/allow-gatus-egress.yaml` | gatus | `10.25.30.0/24`, plus `longhorn-ui` en interne | ICMP echo (type 8), 53, 8006, 8000 |
 | `allow-homepage-egress` | `policies/allow-homepage-egress.yaml` | homepage (`default`) |  `media-server`, `observability`, `longhorn-system`, `10.25.30.20/32`, `10.25.30.1/32` | 7878, 8989, 9696, 6767, 8096, 8080, 9090, 3000, 8000, 8006 (Proxmox), 8001 (NAS) |
 | `allow-wireguard-egress` | `policies/allow-wireguard-egress.yaml` | vpn-stack (`media-server`) | `world` | 51820 UDP |
+| `allow-clamav-egress` | `policies/allow-clamav-egress.yaml` | clamav (`media-server`) | `world` | 80 (freshclam CVD, 443/DNS déjà globaux) |
 | `allow-glpi-agent-egress` | `policies/allow-glpi-agent-egress.yaml` | glpi (`default`) | `10.25.0.0/16` (tout le LAN, futurs agents) | 62354 (GLPI-Agent httpd, inventaire distant) |
 
 

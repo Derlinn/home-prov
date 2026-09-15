@@ -67,6 +67,7 @@ EXTERNAL_VARS=(
   GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
   DISCORD_WEBHOOK_URL
   datasource
+  DS_PROMETHEUS
   logsource
   namespace
   pod

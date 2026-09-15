@@ -1,0 +1,386 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clamav-scanner
+  labels:
+    app.kubernetes.io/name: clamav
+data:
+  scanner.py: |
+    #!/usr/bin/env python3
+    # Polls the qBittorrent API for completed torrents, scans every file via
+    # clamd local-path SCAN, and moves hits to the quarantine PVC. Executable
+    # extensions are quarantined on sight, whatever their size. Runs a full
+    # sweep of torrents/ + downloads/ + media/ once a day. Stdlib only.
+    import datetime
+    import http.cookiejar
+    import http.server
+    import json
+    import os
+    import shutil
+    import socket
+    import threading
+    import time
+    import urllib.parse
+    import urllib.request
+
+    QB_URL = os.environ.get("QB_URL", "http://vpn-stack.media-server.svc.cluster.local:8080").rstrip("/")
+    CLAMD_HOST = os.environ.get("CLAMD_HOST", "127.0.0.1")
+    CLAMD_PORT = int(os.environ.get("CLAMD_PORT", "3310"))
+    POLL_INTERVAL = int(os.environ.get("POLL_INTERVAL", "120"))
+    SWEEP_HOUR = int(os.environ.get("SWEEP_HOUR", "2"))
+    QUARANTINE_DIR = "/quarantine"
+    SWEEP_ROOTS = ("/data/torrents", "/data/downloads", "/data/media")
+    TAG_CLEAN = "scanned-clean"
+    TAG_HIT = "infected"
+    TAG_SKIPPED = "scan-skipped"
+    # Must match MaxFileSize in clamd.conf: files above are skipped loudly.
+    MAX_SCAN_SIZE = 400 * 1024 * 1024
+    # Executables and scripts have no place in an *arr flow: quarantine on
+    # sight, whatever the size or the clamd verdict.
+    BLOCKED_EXTENSIONS = frozenset(
+        ".exe .dll .scr .lnk .bat .cmd .js .jse .vbs .vbe .wsf .wsh "
+        ".ps1 .psm1 .msi .jar .com .pif .hta .cpl .msc .gadget .inf .reg".split()
+    )
+    SWEEP_MARKER = os.path.join(QUARANTINE_DIR, ".last-sweep")
+    STATE_FILE = os.path.join(QUARANTINE_DIR, ".scanner-state.json")
+
+    metrics = {
+        "scanned": 0,
+        "infected": 0,
+        "blocked": 0,
+        "errors": 0,
+        "skipped_oversize": 0,
+        "quarantine_files": 0,
+        "last_run": 0.0,
+        "sweep_last_success": 0.0,
+    }
+
+
+    def load_state():
+        try:
+            with open(STATE_FILE) as f:
+                saved = json.load(f)
+            for key in metrics:
+                if key in saved and isinstance(saved[key], (int, float)):
+                    metrics[key] = saved[key]
+            log("loaded state: " + json.dumps(metrics, sort_keys=True))
+        except FileNotFoundError:
+            try:
+                mtime = os.path.getmtime(SWEEP_MARKER)
+                metrics["sweep_last_success"] = float(mtime)
+                log("no state file, seeded sweep timestamp from marker")
+            except OSError:
+                log("no state file, starting from zero")
+        except (OSError, ValueError) as e:
+            log("ERROR ignoring corrupt state file: " + str(e))
+
+
+    def save_state():
+        try:
+            tmp = STATE_FILE + ".tmp"
+            with open(tmp, "w") as f:
+                json.dump(metrics, f)
+            os.replace(tmp, STATE_FILE)
+        except OSError as e:
+            log("ERROR saving state: " + str(e))
+
+
+    def update_quarantine_count():
+        try:
+            metrics["quarantine_files"] = sum(
+                1 for name in os.listdir(QUARANTINE_DIR)
+                if not name.startswith(".")
+                and os.path.isfile(os.path.join(QUARANTINE_DIR, name))
+            )
+        except OSError as e:
+            log("ERROR listing quarantine: " + str(e))
+
+    jar = http.cookiejar.CookieJar()
+    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+
+
+    def log(msg):
+        print(datetime.datetime.now(datetime.timezone.utc).isoformat(), msg, flush=True)
+
+
+    def qb(method, path, params=None):
+        url = QB_URL + path
+        data = None
+        if params is not None:
+            qs = urllib.parse.urlencode(params)
+            if method == "GET":
+                url += ("&" if "?" in url else "?") + qs
+            else:
+                data = qs.encode()
+        req = urllib.request.Request(url, data=data, method=method)
+        try:
+            with opener.open(req, timeout=30) as resp:
+                return resp.read().decode("utf-8", "replace")
+        except urllib.error.HTTPError as e:
+            if e.code == 403:
+                user = os.environ.get("QB_USER", "admin")
+                password = os.environ.get("QB_PASS", "adminadmin")
+                login = urllib.request.Request(
+                    QB_URL + "/api/v2/auth/login",
+                    data=urllib.parse.urlencode({"username": user, "password": password}).encode(),
+                    method="POST",
+                )
+                with opener.open(login, timeout=30):
+                    pass
+                with opener.open(req, timeout=30) as resp:
+                    return resp.read().decode("utf-8", "replace")
+            raise
+
+
+    def qb_json(path, params=None):
+        return json.loads(qb("GET", path, params))
+
+
+    def qb_post(path, params):
+        qb("POST", path, params)
+
+
+    def clamd_ping():
+        s = socket.create_connection((CLAMD_HOST, CLAMD_PORT), timeout=10)
+        try:
+            s.sendall(b"zPING\x00")
+            return b"PONG" in s.recv(64)
+        finally:
+            s.close()
+
+
+    def blocked_extension(path):
+        _, dot, ext = os.path.basename(path).lower().rpartition(".")
+        return bool(dot) and ("." + ext) in BLOCKED_EXTENSIONS
+
+
+    def scan_file(path):
+        # Local-path SCAN: clamd reads the file itself, so everything up to
+        # MAX_SCAN_SIZE is covered with no extra RAM. Bigger files are
+        # skipped loudly. Returns the signature name on hit, None otherwise.
+        try:
+            if os.path.getsize(path) > MAX_SCAN_SIZE:
+                metrics["skipped_oversize"] += 1
+                return None
+        except OSError as e:
+            metrics["errors"] += 1
+            log("ERROR stat " + path + ": " + str(e))
+            return None
+        if "\n" in path:
+            metrics["errors"] += 1
+            log("ERROR newline in filename, skipping " + path)
+            return None
+        try:
+            s = socket.create_connection((CLAMD_HOST, CLAMD_PORT), timeout=900)
+        except OSError as e:
+            metrics["errors"] += 1
+            log("ERROR clamd connect: " + str(e))
+            return None
+        try:
+            s.sendall(("SCAN " + path + "\n").encode())
+            resp = b""
+            while not resp.endswith(b"\n"):
+                data = s.recv(65536)
+                if not data:
+                    break
+                resp += data
+            text = resp.decode("utf-8", "replace").strip(" \t\r\n\x00")
+            metrics["scanned"] += 1
+            if "FOUND" in text:
+                return text.rsplit(": ", 1)[-1]
+            if text.endswith("OK"):
+                return None
+            if "exceed" in text.lower():
+                metrics["skipped_oversize"] += 1
+                log("WARNING clamd skipped (limits) " + path + ": " + text)
+                return None
+            metrics["errors"] += 1
+            log("ERROR unexpected clamd reply for " + path + ": " + text)
+            return None
+        except OSError as e:
+            metrics["errors"] += 1
+            log("ERROR scan " + path + ": " + str(e))
+            return None
+        finally:
+            s.close()
+
+
+    def quarantine(path, context):
+        os.makedirs(QUARANTINE_DIR, exist_ok=True)
+        dest = os.path.join(
+            QUARANTINE_DIR,
+            str(int(time.time())) + "_" + context + "_" + os.path.basename(path),
+        )
+        shutil.move(path, dest)
+        metrics["infected"] += 1
+        log("QUARANTINED " + path + " -> " + dest)
+        return dest
+
+
+    def torrent_tags(t):
+        return [t.strip() for t in t.get("tags", "").split(",") if t.strip()]
+
+
+    def watch_once():
+        try:
+            torrents = qb_json("/api/v2/torrents/info", {"filter": "completed"})
+        except Exception as e:
+            metrics["errors"] += 1
+            log("ERROR listing torrents: " + str(e))
+            return
+        for t in torrents:
+            tags = torrent_tags(t)
+            if TAG_HIT in tags or TAG_CLEAN in tags or TAG_SKIPPED in tags:
+                continue
+            h = t["hash"]
+            name = t.get("name", h)
+            save = t.get("save_path", "")
+            try:
+                files = qb_json("/api/v2/torrents/files", {"hash": h})
+            except Exception as e:
+                metrics["errors"] += 1
+                log("ERROR listing files for " + name + ": " + str(e))
+                continue
+            hit = None
+            scanned = 0
+            for f in files:
+                p = os.path.join(save, f["name"])
+                if not os.path.isfile(p) or os.path.islink(p):
+                    continue
+                if blocked_extension(p):
+                    hit = (p, "blocked extension " + os.path.splitext(p)[1].lower())
+                    metrics["blocked"] += 1
+                    break
+                scanned += 1
+                sig = scan_file(p)
+                if sig:
+                    hit = (p, sig)
+                    break
+            try:
+                if hit:
+                    p, sig = hit
+                    log("HIT " + p + " [" + sig + "] torrent=" + name)
+                    quarantine(p, "qb")
+                    qb_post("/api/v2/torrents/pause", {"hashes": h})
+                    qb_post("/api/v2/torrents/addTags", {"hashes": h, "tags": TAG_HIT})
+                elif scanned:
+                    qb_post("/api/v2/torrents/addTags", {"hashes": h, "tags": TAG_CLEAN})
+                else:
+                    log("WARNING no files on disk for " + name + ", tagging " + TAG_SKIPPED)
+                    qb_post("/api/v2/torrents/addTags", {"hashes": h, "tags": TAG_SKIPPED})
+            except Exception as e:
+                metrics["errors"] += 1
+                log("ERROR handling torrent " + name + ": " + str(e))
+        metrics["last_run"] = time.time()
+
+
+    def sweep_once():
+        found = 0
+        seen = set()
+        for root in SWEEP_ROOTS:
+            for dirpath, _dirnames, filenames in os.walk(root):
+                for fn in filenames:
+                    p = os.path.join(dirpath, fn)
+                    if not os.path.isfile(p) or os.path.islink(p):
+                        continue
+                    try:
+                        st = os.stat(p)
+                    except OSError:
+                        continue
+                    if (st.st_dev, st.st_ino) in seen:
+                        continue
+                    seen.add((st.st_dev, st.st_ino))
+                    if blocked_extension(p):
+                        sig = "blocked extension " + os.path.splitext(p)[1].lower()
+                        metrics["blocked"] += 1
+                    else:
+                        sig = scan_file(p)
+                    if sig:
+                        log("HIT " + p + " [" + sig + "]")
+                        try:
+                            quarantine(p, "sweep")
+                            found += 1
+                        except Exception as e:
+                            metrics["errors"] += 1
+                            log("ERROR quarantining " + p + ": " + str(e))
+        metrics["sweep_last_success"] = time.time()
+        with open(SWEEP_MARKER, "w") as f:
+            f.write(datetime.date.today().isoformat())
+        log("sweep done, quarantined " + str(found) + " files")
+
+
+    def sweep_due():
+        if datetime.datetime.now().hour != SWEEP_HOUR:
+            return False
+        try:
+            with open(SWEEP_MARKER) as f:
+                return f.read().strip() != datetime.date.today().isoformat()
+        except OSError:
+            return True
+
+
+    def serve_metrics():
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def do_GET(self):
+                body = (
+                    "clamav_scanner_up 1\n"
+                    "clamav_scanned_total " + str(metrics["scanned"]) + "\n"
+                    "clamav_infected_total " + str(metrics["infected"]) + "\n"
+                    "clamav_blocked_total " + str(metrics["blocked"]) + "\n"
+                    "clamav_quarantine_files " + str(metrics["quarantine_files"]) + "\n"
+                    "clamav_errors_total " + str(metrics["errors"]) + "\n"
+                    "clamav_skipped_oversize_total " + str(metrics["skipped_oversize"]) + "\n"
+                    "clamav_last_run_timestamp " + str(metrics["last_run"]) + "\n"
+                    "clamav_sweep_last_success_timestamp " + str(metrics["sweep_last_success"]) + "\n"
+                )
+                data = body.encode()
+                self.send_response(200)
+                self.send_header("Content-Type", "text/plain")
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+
+            def log_message(self, *args):
+                pass
+
+        http.server.HTTPServer(("0.0.0.0", 9090), Handler).serve_forever()
+
+
+    def wait_for_clamd():
+        for _ in range(90):
+            try:
+                if clamd_ping():
+                    log("clamd reachable")
+                    return
+            except OSError:
+                pass
+            time.sleep(10)
+        log("FATAL clamd unreachable after 15m")
+        raise SystemExit(1)
+
+
+    def main():
+        load_state()
+        wait_for_clamd()
+        threading.Thread(target=serve_metrics, daemon=True).start()
+        while True:
+            update_quarantine_count()
+            try:
+                watch_once()
+            except Exception as e:
+                metrics["errors"] += 1
+                log("ERROR watch cycle: " + str(e))
+            try:
+                if sweep_due():
+                    log("starting daily sweep")
+                    sweep_once()
+            except Exception as e:
+                metrics["errors"] += 1
+                log("ERROR sweep cycle: " + str(e))
+            save_state()
+            time.sleep(POLL_INTERVAL)
+
+
+    if __name__ == "__main__":
+        main()

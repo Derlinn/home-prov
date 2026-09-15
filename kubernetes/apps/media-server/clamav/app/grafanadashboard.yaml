@@ -1,0 +1,113 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: clamav
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
+spec:
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      grafana.internal/instance: grafana
+  datasources:
+    - datasourceName: prometheus
+      inputName: DS_PROMETHEUS
+  json: |
+    {
+      "title": "ClamAV",
+      "uid": "clamav",
+      "schemaVersion": 39,
+      "version": 2,
+      "tags": ["media-server", "security"],
+      "panels": [
+        {
+          "id": 1,
+          "title": "Files in quarantine",
+          "description": "Files currently awaiting review in the quarantine browser.",
+          "type": "stat",
+          "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+          "targets": [{"expr": "max(clamav_quarantine_files)", "legendFormat": "files"}],
+          "fieldConfig": {
+            "defaults": {"unit": "none"},
+            "overrides": []
+          },
+          "gridPos": {"h": 4, "w": 8, "x": 0, "y": 0}
+        },
+        {
+          "id": 2,
+          "title": "Scanned files",
+          "description": "Files checked by clamd. Survives restarts.",
+          "type": "stat",
+          "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+          "targets": [{"expr": "max(clamav_scanned_total)", "legendFormat": "scanned"}],
+          "fieldConfig": {
+            "defaults": {"unit": "none"},
+            "overrides": []
+          },
+          "gridPos": {"h": 4, "w": 8, "x": 8, "y": 0}
+        },
+        {
+          "id": 3,
+          "title": "Blocked extensions",
+          "description": "Executable and script files quarantined on sight, whatever their size.",
+          "type": "stat",
+          "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+          "targets": [{"expr": "max(clamav_blocked_total)", "legendFormat": "blocked"}],
+          "fieldConfig": {
+            "defaults": {"unit": "none"},
+            "overrides": []
+          },
+          "gridPos": {"h": 4, "w": 8, "x": 16, "y": 0}
+        },
+        {
+          "id": 4,
+          "title": "Scan errors",
+          "description": "API or clamd failures. If this grows, check the scanner logs.",
+          "type": "stat",
+          "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+          "targets": [{"expr": "max(clamav_errors_total)", "legendFormat": "errors"}],
+          "fieldConfig": {
+            "defaults": {"unit": "none"},
+            "overrides": []
+          },
+          "gridPos": {"h": 4, "w": 6, "x": 0, "y": 4}
+        },
+        {
+          "id": 5,
+          "title": "Last daily sweep",
+          "description": "Full re-scan of torrents, downloads and media, once a day at 2am. Shows hours ago. Alert fires past 36h.",
+          "type": "stat",
+          "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+          "targets": [{"expr": "(time() - max(clamav_sweep_last_success_timestamp)) / 3600", "legendFormat": "hours ago"}],
+          "fieldConfig": {
+            "defaults": {"unit": "h"},
+            "overrides": []
+          },
+          "gridPos": {"h": 4, "w": 6, "x": 6, "y": 4}
+        },
+        {
+          "id": 6,
+          "title": "Skipped oversize",
+          "description": "Files above the 400M scan limit. Only videos land here.",
+          "type": "stat",
+          "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+          "targets": [{"expr": "max(clamav_skipped_oversize_total)", "legendFormat": "skipped"}],
+          "fieldConfig": {
+            "defaults": {"unit": "none"},
+            "overrides": []
+          },
+          "gridPos": {"h": 4, "w": 12, "x": 12, "y": 4}
+        },
+        {
+          "id": 7,
+          "title": "Quarantine events",
+          "description": "Files moved to quarantine per 5 minutes.",
+          "type": "timeseries",
+          "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+          "targets": [{"expr": "sum(increase(clamav_infected_total[5m]))", "legendFormat": "quarantined / 5m"}],
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
+        }
+      ]
+    }

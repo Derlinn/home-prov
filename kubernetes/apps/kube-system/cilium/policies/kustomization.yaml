@@ -30,6 +30,7 @@ resources:
     - ./allow-media-server-internal.yaml
     - ./allow-home-automation-internal.yaml
     - ./allow-wireguard-egress.yaml
+    - ./allow-clamav-egress.yaml
     - ./allow-mktxp-egress.yaml
     - ./allow-asustor-egress.yaml
     - ./allow-proxmox-egress.yaml

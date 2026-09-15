@@ -90,6 +90,11 @@ spec:
             secretKeyRef:
               name: authentik-credentials
               key: homepage-client-secret
+        - name: AUTHENTIK_QUARANTAINE_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-credentials
+              key: quarantaine-client-secret
 
     blueprints:
       configMaps:
