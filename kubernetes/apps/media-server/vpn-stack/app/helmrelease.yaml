@@ -89,6 +89,7 @@ spec:
               repository: lscr.io/linuxserver/qbittorrent
               tag: libtorrentv1
             env:
+              DOCKER_MODS: "ghcr.io/vuetorrent/vuetorrent-lsio-mod:2.35.0"
               PUID: "1001"
               PGID: "1001"
               TZ: "Europe/Paris"

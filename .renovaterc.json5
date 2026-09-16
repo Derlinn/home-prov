@@ -53,6 +53,14 @@
       datasourceTemplate: "github-releases",
       depNameTemplate: "kubernetes-sigs/gateway-api",
     },
+    {
+      customType: "regex",
+      description: "VueTorrent LSIO mod for qbittorrent",
+      managerFilePatterns: ["/kubernetes/apps/media-server/vpn-stack/app/helmrelease\\.yaml/"],
+      matchStrings: ["DOCKER_MODS.*ghcr\\.io/vuetorrent/vuetorrent-lsio-mod:(?<currentValue>[^\"'\\s]+)"],
+      datasourceTemplate: "docker",
+      depNameTemplate: "ghcr.io/vuetorrent/vuetorrent-lsio-mod",
+    },
   ],
   packageRules: [
     // Auto-merge rules
