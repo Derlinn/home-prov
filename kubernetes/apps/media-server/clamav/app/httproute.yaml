@@ -7,8 +7,11 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/name: "Quarantaine"
     gethomepage.dev/group: "Média"
-    gethomepage.dev/icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/clamav.svg"
+    gethomepage.dev/icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/dufs.svg"
     gethomepage.dev/href: "https://quarantaine.${DOMAIN}"
+    gethomepage.dev/app: "clamav"
+    gethomepage.dev/namespace: "media-server"
+    gethomepage.dev/siteMonitor: "http://clamav.media-server.svc.cluster.local:8080"
   name: quarantine
 spec:
   parentRefs:
