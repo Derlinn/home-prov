@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: glpi
-      version: '2.11.4'
+      version: '2.12.0'
       interval: 5h
       sourceRef:
         kind: HelmRepository
