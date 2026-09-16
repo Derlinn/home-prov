@@ -1,0 +1,119 @@
+# yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
+version: 1
+metadata:
+  name: admin
+entries:
+  # Redeclared only so !KeyOf resolves here; `created` never touches them.
+  - model: authentik_core.group
+    id: g-homepage
+    state: created
+    identifiers:
+      name: linderis_homepage
+  - model: authentik_core.group
+    id: g-rackula
+    state: created
+    identifiers:
+      name: linderis_rackula
+  - model: authentik_core.group
+    id: g-grafana
+    state: created
+    identifiers:
+      name: linderis_grafana
+  - model: authentik_core.group
+    id: g-grafana-admins
+    state: created
+    identifiers:
+      name: Grafana Admins
+  - model: authentik_core.group
+    id: g-jellyfin
+    state: created
+    identifiers:
+      name: linderis_jellyfin
+  - model: authentik_core.group
+    id: g-home-assistant
+    state: created
+    identifiers:
+      name: linderis_home_assistant
+  - model: authentik_core.group
+    id: g-home-assistant-admins
+    state: created
+    identifiers:
+      name: linderis_home_assistant_admins
+  - model: authentik_core.group
+    id: g-gatus
+    state: created
+    identifiers:
+      name: linderis_gatus
+  - model: authentik_core.group
+    id: g-netbox
+    state: created
+    identifiers:
+      name: linderis_netbox
+  - model: authentik_core.group
+    id: g-jellyseerr
+    state: created
+    identifiers:
+      name: linderis_jellyseerr
+  - model: authentik_core.group
+    id: g-vaultwarden
+    state: created
+    identifiers:
+      name: linderis_vaultwarden
+  - model: authentik_core.group
+    id: g-longhorn
+    state: created
+    identifiers:
+      name: linderis_longhorn
+  - model: authentik_core.group
+    id: g-prometheus
+    state: created
+    identifiers:
+      name: linderis_prometheus
+  - model: authentik_core.group
+    id: g-maigret
+    state: created
+    identifiers:
+      name: linderis_maigret
+  - model: authentik_core.group
+    id: g-social-analyzer
+    state: created
+    identifiers:
+      name: linderis_social_analyzer
+  - model: authentik_core.group
+    id: g-netbird
+    state: created
+    identifiers:
+      name: linderis_netbird
+  - model: authentik_core.group
+    id: g-quarantaine
+    state: created
+    identifiers:
+      name: linderis_quarantaine
+  # A child is a member of every parent. `users` drops UI additions.
+  - model: authentik_core.group
+    state: present
+    identifiers:
+      name: linderis_admin
+    attrs:
+      is_superuser: false
+      users:
+        - !Find [authentik_core.user, [username, theo]]
+      parents:
+        - !KeyOf g-homepage
+        - !KeyOf g-rackula
+        - !KeyOf g-grafana
+        - !KeyOf g-grafana-admins
+        - !KeyOf g-jellyfin
+        - !KeyOf g-home-assistant
+        - !KeyOf g-home-assistant-admins
+        - !KeyOf g-gatus
+        - !KeyOf g-netbox
+        - !KeyOf g-jellyseerr
+        - !KeyOf g-vaultwarden
+        - !KeyOf g-longhorn
+        - !KeyOf g-prometheus
+        - !KeyOf g-maigret
+        - !KeyOf g-social-analyzer
+        - !KeyOf g-netbird
+        - !KeyOf g-glpi
+        - !KeyOf g-quarantaine

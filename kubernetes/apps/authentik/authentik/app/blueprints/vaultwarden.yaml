@@ -1,0 +1,80 @@
+# yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
+version: 1
+metadata:
+  name: vaultwarden
+entries:
+  - model: authentik_core.group
+    id: vaultwarden-group
+    state: present
+    identifiers:
+      name: linderis_vaultwarden
+    attrs:
+      is_superuser: false
+  # Vaultwarden refuses signup on the stock scope's email_verified false.
+  - model: authentik_providers_oauth2.scopemapping
+    id: vaultwarden-email-scope
+    state: present
+    identifiers:
+      name: Vaultwarden email (verified)
+    attrs:
+      scope_name: email
+      description: Email claim with email_verified forced to true
+      expression: |
+        return {
+            "email": request.user.email,
+            "email_verified": True,
+        }
+  - model: authentik_providers_oauth2.oauth2provider
+    id: vaultwarden-provider
+    state: present
+    identifiers:
+      name: Provider for Vaultwarden
+    attrs:
+      client_id: vaultwarden
+      client_secret: !Env AUTHENTIK_VAULTWARDEN_CLIENT_SECRET
+      client_type: confidential
+      grant_types:
+        - authorization_code
+        - refresh_token
+      sub_mode: hashed_user_id
+      include_claims_in_id_token: true
+      issuer_mode: per_provider
+      # The Bitwarden frontend expires at 5 minutes, as does the default.
+      access_token_validity: minutes=30
+      authorization_flow: !Find
+        - authentik_flows.flow
+        - [slug, default-provider-authorization-explicit-consent]
+      invalidation_flow: !Find
+        - authentik_flows.flow
+        - [slug, default-provider-invalidation-flow]
+      signing_key: !Find
+        - authentik_crypto.certificatekeypair
+        - [name, authentik Self-signed Certificate]
+      property_mappings:
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, offline_access]]
+        - !KeyOf vaultwarden-email-scope
+      redirect_uris:
+        - matching_mode: strict
+          redirect_uri_type: authorization
+          url: https://vaultwarden.${DOMAIN}/identity/connect/oidc-signin
+  - model: authentik_core.application
+    id: vaultwarden-app
+    state: present
+    identifiers:
+      slug: vaultwarden
+    attrs:
+      name: Vaultwarden
+      provider: !KeyOf vaultwarden-provider
+      policy_engine_mode: any
+      icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/vaultwarden.svg
+      group: Sécurité
+  - model: authentik_policies.policybinding
+    state: present
+    identifiers:
+      target: !KeyOf vaultwarden-app
+      group: !KeyOf vaultwarden-group
+    attrs:
+      order: 0
+      enabled: true

@@ -95,6 +95,26 @@ spec:
             secretKeyRef:
               name: authentik-credentials
               key: quarantaine-client-secret
+        - name: AUTHENTIK_BAZARR_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-credentials
+              key: bazarr-client-secret
+        - name: AUTHENTIK_RADARR_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-credentials
+              key: radarr-client-secret
+        - name: AUTHENTIK_SONARR_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-credentials
+              key: sonarr-client-secret
+        - name: AUTHENTIK_QBITTORRENT_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-credentials
+              key: qbittorrent-client-secret
 
     blueprints:
       configMaps:

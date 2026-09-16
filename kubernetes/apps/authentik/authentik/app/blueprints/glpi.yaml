@@ -1,0 +1,81 @@
+# yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
+version: 1
+metadata:
+  name: glpi
+entries:
+  - model: authentik_core.group
+    id: glpi-group
+    state: present
+    identifiers:
+      name: linderis_glpi
+    attrs:
+      is_superuser: false
+  - model: authentik_providers_saml.samlpropertymapping
+    id: glpi-givenname
+    state: present
+    identifiers:
+      name: GLPI givenname
+    attrs:
+      saml_name: givenname
+      expression: |
+        return request.user.name.split(" ")[0]
+  - model: authentik_providers_saml.samlpropertymapping
+    id: glpi-surname
+    state: present
+    identifiers:
+      name: GLPI surname
+    attrs:
+      saml_name: surname
+      expression: |
+        parts = request.user.name.split(" ", 1)
+        return parts[1] if len(parts) > 1 else ""
+  - model: authentik_providers_saml.samlprovider
+    id: glpi-provider
+    state: present
+    identifiers:
+      name: Provider for GLPI
+    attrs:
+      authorization_flow: !Find
+        - authentik_flows.flow
+        - [slug, default-provider-authorization-explicit-consent]
+      invalidation_flow: !Find
+        - authentik_flows.flow
+        - [slug, default-provider-invalidation-flow]
+      acs_url: https://glpi.${DOMAIN}/marketplace/samlsso/front/acs/1
+      sls_url: https://glpi.${DOMAIN}/marketplace/samlsso/front/logout/
+      audience: https://glpi.${DOMAIN}/
+      issuer: https://authentik.${DOMAIN}/application/saml/glpi/metadata/
+      sp_binding: post
+      signing_kp: !Find
+        - authentik_crypto.certificatekeypair
+        - [name, authentik Self-signed Certificate]
+      sign_assertion: true
+      sign_response: true
+      name_id_mapping: !Find
+        - authentik_providers_saml.samlpropertymapping
+        - [name, "authentik default SAML Mapping: Email"]
+      property_mappings:
+        - !Find
+          - authentik_providers_saml.samlpropertymapping
+          - [name, "authentik default SAML Mapping: Email"]
+        - !KeyOf glpi-givenname
+        - !KeyOf glpi-surname
+  - model: authentik_core.application
+    id: glpi-app
+    state: present
+    identifiers:
+      slug: glpi
+    attrs:
+      name: GLPI
+      provider: !KeyOf glpi-provider
+      policy_engine_mode: any
+      icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/glpi.svg
+      group: Applications
+  - model: authentik_policies.policybinding
+    state: present
+    identifiers:
+      target: !KeyOf glpi-app
+      group: !KeyOf glpi-group
+    attrs:
+      order: 0
+      enabled: true
