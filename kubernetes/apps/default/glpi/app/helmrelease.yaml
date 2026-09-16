@@ -15,10 +15,7 @@ spec:
         name: glpi
   releaseName: glpi
   interval: 1h
-  timeout: 20m # default 5min is too short for the initial db install jobs
-  # The chart leaves Job/CronJob pod templates unlabeled, so their pods miss
-  # app.kubernetes.io/instance and fall out of allow-glpi-internal (Cilium
-  # default-deny then blocks their MariaDB/Valkey egress). Stamp it back on.
+  timeout: 20m 
   postRenderers:
     - kustomize:
         patches:
@@ -48,6 +45,15 @@ spec:
                       metadata:
                         labels:
                           app.kubernetes.io/instance: glpi
+                      spec:
+                        affinity:
+                          podAffinity:
+                            requiredDuringSchedulingIgnoredDuringExecution:
+                            - labelSelector:
+                                matchLabels:
+                                  app.kubernetes.io/component: php-fpm
+                                  app.kubernetes.io/instance: glpi
+                              topologyKey: kubernetes.io/hostname
   values:
     glpi:
       language: fr_FR
