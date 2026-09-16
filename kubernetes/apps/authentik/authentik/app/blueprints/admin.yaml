@@ -85,6 +85,11 @@ entries:
     identifiers:
       name: linderis_netbird
   - model: authentik_core.group
+    id: g-glpi
+    state: created
+    identifiers:
+      name: linderis_glpi
+  - model: authentik_core.group
     id: g-quarantaine
     state: created
     identifiers:
