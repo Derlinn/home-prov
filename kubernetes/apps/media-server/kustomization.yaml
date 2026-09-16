@@ -22,5 +22,5 @@ resources:
   - ./dispatcharr/ks.yaml
   - ./recyclarr/ks.yaml
   - ./unpackerr/ks.yaml
-  - ./tdarr/ks.yaml
+  # - ./tdarr/ks.yaml  # disabled 2026-09-16: HLS workaround obsolete (VAAPI + EnableSegmentDeletion:false) — see docs/jellyfin-hls-segment-deletion.md and Ticket #73
   - ./clamav/ks.yaml
