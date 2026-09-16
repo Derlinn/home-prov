@@ -20,6 +20,32 @@ spec:
   values:
     controllers:
       main:
+        initContainers:
+          disable-auth:
+            image:
+              repository: mikefarah/yq
+              tag: 4.53.6
+            command:
+              - /bin/sh
+              - -c
+              - |
+                set -eu
+                for f in /config/config/config.yaml /config/config.yaml /config/bazarr.yaml; do
+                  if [ -f "$f" ]; then
+                    CONFIG="$f"
+                    break
+                  fi
+                done
+                if [ -z "${CONFIG:-}" ] || [ ! -f "$CONFIG" ]; then
+                  echo "No Bazarr config found, skipping native auth disable (first run)"
+                  exit 0
+                fi
+                echo "Disabling native auth in $CONFIG (OIDC at gateway)"
+                yq -i '.auth.type = null' "$CONFIG"
+                yq -i '.auth.username = ""' "$CONFIG"
+                yq -i '.auth.password = ""' "$CONFIG"
+                echo "Patched $CONFIG:"
+                yq '.auth' "$CONFIG" || cat "$CONFIG"
         containers:
           app:
             image:

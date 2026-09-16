@@ -1,0 +1,78 @@
+# yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
+version: 1
+metadata:
+  name: home-assistant
+entries:
+  - model: authentik_core.group
+    id: home-assistant-group
+    state: present
+    identifiers:
+      name: linderis_home_assistant
+    attrs:
+      is_superuser: false
+  - model: authentik_core.group
+    id: home-assistant-admins-group
+    state: present
+    identifiers:
+      name: linderis_home_assistant_admins
+    attrs:
+      is_superuser: false
+  - model: authentik_providers_oauth2.oauth2provider
+    id: home-assistant-provider
+    state: present
+    identifiers:
+      name: Provider for home-assistant
+    attrs:
+      client_id: fu9wSbcb6PV8DQxH28Nh0oUSQgBah27Hv2VDC34a
+      client_type: public
+      grant_types:
+        - authorization_code
+        - refresh_token
+      sub_mode: hashed_user_id
+      include_claims_in_id_token: true
+      issuer_mode: per_provider
+      authorization_flow: !Find
+        - authentik_flows.flow
+        - [slug, default-provider-authorization-explicit-consent]
+      invalidation_flow: !Find
+        - authentik_flows.flow
+        - [slug, default-provider-invalidation-flow]
+      signing_key: !Find
+        - authentik_crypto.certificatekeypair
+        - [name, authentik Self-signed Certificate]
+      property_mappings:
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+      redirect_uris:
+        - matching_mode: strict
+          redirect_uri_type: authorization
+          url: https://ha.${DOMAIN}/auth/oidc/callback
+  - model: authentik_core.application
+    id: home-assistant-app
+    state: present
+    identifiers:
+      slug: home-assistant
+    attrs:
+      name: home-assistant
+      provider: !KeyOf home-assistant-provider
+      policy_engine_mode: any
+      icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/home-assistant.svg
+      group: Domotique
+  # Two bindings, mode any: admins are not in the user group.
+  - model: authentik_policies.policybinding
+    state: present
+    identifiers:
+      target: !KeyOf home-assistant-app
+      group: !KeyOf home-assistant-group
+    attrs:
+      order: 0
+      enabled: true
+  - model: authentik_policies.policybinding
+    state: present
+    identifiers:
+      target: !KeyOf home-assistant-app
+      group: !KeyOf home-assistant-admins-group
+    attrs:
+      order: 1
+      enabled: true

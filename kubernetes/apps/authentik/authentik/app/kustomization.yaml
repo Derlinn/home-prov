@@ -10,4 +10,29 @@ resources:
   - ./httproute.yaml
   - ./httproute-external.yaml
   - ./secret.sops.yaml
-  - ./configmap-blueprints.yaml
+configMapGenerator:
+  - name: authentik-blueprints
+    files:
+      - blueprints/admin.yaml
+      - blueprints/bazarr.yaml
+      - blueprints/gatus.yaml
+      - blueprints/glpi.yaml
+      - blueprints/grafana.yaml
+      - blueprints/home-assistant.yaml
+      - blueprints/homepage.yaml
+      - blueprints/jellyfin.yaml
+      - blueprints/jellyseerr.yaml
+      - blueprints/longhorn.yaml
+      - blueprints/maigret.yaml
+      - blueprints/netbird.yaml
+      - blueprints/netbox.yaml
+      - blueprints/prometheus.yaml
+      - blueprints/qbittorrent.yaml
+      - blueprints/quarantine.yaml
+      - blueprints/rackula.yaml
+      - blueprints/radarr.yaml
+      - blueprints/social-analyzer.yaml
+      - blueprints/sonarr.yaml
+      - blueprints/vaultwarden.yaml
+    options:
+      disableNameSuffixHash: true

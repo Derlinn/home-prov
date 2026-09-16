@@ -1,0 +1,26 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
+# qBittorrent < v5.2.0 cannot separate UI and API auth (github.com/qbittorrent/qBittorrent/issues/13238).
+# Until the image is on v5.2.0, keep WebUI\Bypass authentication for whitelisted subnets
+# and rely on AuthSubnetWhitelist + TrustedReverseProxies instead of fully disabling auth.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: qbittorrent-oidc
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: qbittorrent
+  oidc:
+    provider:
+      issuer: https://authentik.${DOMAIN}/application/o/qbittorrent/
+      authorizationEndpoint: https://authentik.${DOMAIN}/application/o/authorize/
+      tokenEndpoint: https://authentik.${DOMAIN}/application/o/token/
+      endSessionEndpoint: https://authentik.${DOMAIN}/application/o/qbittorrent/end-session/
+    clientID: qbittorrent
+    clientSecret:
+      name: qbittorrent-oidc
+    redirectURL: https://qbit.${DOMAIN}/oauth2/callback
+    logoutPath: /logout
+    scopes: ["openid", "email", "profile"]

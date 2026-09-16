@@ -19,6 +19,34 @@ spec:
   values:
     controllers:
       main:
+        initContainers:
+          disable-auth:
+            image:
+              repository: alpine
+              tag: "3.24"
+            command:
+              - /bin/sh
+              - -c
+              - |
+                set -eu
+                CONFIG=/config/config.xml
+                if [ ! -f "$CONFIG" ]; then
+                  echo "No $CONFIG yet, skipping native auth disable (first run)"
+                  exit 0
+                fi
+                echo "Disabling native auth in $CONFIG (OIDC at gateway)"
+                if grep -q "<AuthenticationMethod>" "$CONFIG"; then
+                  sed -i 's|<AuthenticationMethod>.*</AuthenticationMethod>|<AuthenticationMethod>External</AuthenticationMethod>|' "$CONFIG"
+                else
+                  sed -i 's|</Config>|  <AuthenticationMethod>External</AuthenticationMethod>\n</Config>|' "$CONFIG"
+                fi
+                if grep -q "<AuthenticationRequired>" "$CONFIG"; then
+                  sed -i 's|<AuthenticationRequired>.*</AuthenticationRequired>|<AuthenticationRequired>DisabledForLocalAddresses</AuthenticationRequired>|' "$CONFIG"
+                else
+                  sed -i 's|</Config>|  <AuthenticationRequired>DisabledForLocalAddresses</AuthenticationRequired>\n</Config>|' "$CONFIG"
+                fi
+                echo "Patched $CONFIG:"
+                grep -E "Authentication" "$CONFIG" || true
         containers:
           app:
             image:
