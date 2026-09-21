@@ -18,7 +18,9 @@ entries:
     attrs:
       saml_name: givenname
       expression: |
-        return request.user.name.split(" ")[0]
+        name = request.user.name or ""
+        parts = name.split(" ", 1)
+        return parts[0] if parts and parts[0] not in ("", "0") else request.user.email.split("@")[0]
   - model: authentik_providers_saml.samlpropertymapping
     id: glpi-surname
     state: present
@@ -27,8 +29,11 @@ entries:
     attrs:
       saml_name: surname
       expression: |
-        parts = request.user.name.split(" ", 1)
-        return parts[1] if len(parts) > 1 else ""
+        name = request.user.name or ""
+        parts = name.split(" ", 1)
+        if len(parts) > 1 and parts[1] not in ("", "0"):
+            return parts[1]
+        return ""
   - model: authentik_providers_saml.samlprovider
     id: glpi-provider
     state: present
