@@ -42,6 +42,8 @@ spec:
       # Access is gated by the Authentik application policy (linderis_jupyterhub
       # group), so no allowed_groups check is configured here.
       config:
+        Authenticator:
+          allow_all: true
         JupyterHub:
           authenticator_class: generic-oauth
           admin_access: true
