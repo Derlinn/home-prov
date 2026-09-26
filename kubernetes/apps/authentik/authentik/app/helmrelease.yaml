@@ -115,6 +115,11 @@ spec:
             secretKeyRef:
               name: authentik-credentials
               key: qbittorrent-client-secret
+        - name: AUTHENTIK_JUPYTERHUB_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-credentials
+              key: jupyterhub-client-secret
 
     blueprints:
       configMaps:

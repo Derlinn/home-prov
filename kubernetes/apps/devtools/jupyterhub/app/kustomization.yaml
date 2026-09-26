@@ -2,12 +2,8 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: devtools
-
-components:
-  - ../../components/cluster-settings
-
 resources:
-  - ./namespace.yaml
-  - ./jupyterhub/ks.yaml
-#  - gitlab/ks.yaml
+  - ./helmrepository.yaml
+  - ./helmrelease.yaml
+  - ./httproute.yaml
+  - ./hub-secrets.sops.yaml

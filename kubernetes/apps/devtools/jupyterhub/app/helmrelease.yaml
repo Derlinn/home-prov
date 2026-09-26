@@ -1,0 +1,114 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: jupyterhub
+spec:
+  interval: 30m
+  timeout: 20m
+  releaseName: jupyterhub
+  chart:
+    spec:
+      chart: jupyterhub
+      version: 4.3.2
+      sourceRef:
+        kind: HelmRepository
+        name: jupyterhub
+      interval: 1h
+  valuesFrom:
+    - kind: Secret
+      name: jupyterhub-secrets
+      valuesKey: cookie-secret
+      targetPath: hub.cookieSecret
+      optional: false
+    - kind: Secret
+      name: jupyterhub-secrets
+      valuesKey: proxy-token
+      targetPath: proxy.secretToken
+      optional: false
+    - kind: Secret
+      name: jupyterhub-secrets
+      valuesKey: client-id
+      targetPath: hub.config.GenericOAuthenticator.client_id
+      optional: false
+    - kind: Secret
+      name: jupyterhub-secrets
+      valuesKey: client-secret
+      targetPath: hub.config.GenericOAuthenticator.client_secret
+      optional: false
+  values:
+    hub:
+      # Access is gated by the Authentik application policy (linderis_jupyterhub
+      # group), so no allowed_groups check is configured here.
+      config:
+        JupyterHub:
+          authenticator_class: generic-oauth
+          admin_access: true
+        GenericOAuthenticator:
+          oauth_callback_url: https://jupyterhub.${DOMAIN}/hub/oauth_callback
+          authorize_url: https://authentik.${DOMAIN}/application/o/authorize/
+          token_url: https://authentik.${DOMAIN}/application/o/token/
+          userdata_url: https://authentik.${DOMAIN}/application/o/userinfo/
+          login_service: Authentik
+          username_key: preferred_username
+          scope:
+            - openid
+            - email
+            - profile
+      db:
+        pvc:
+          storage: 1Gi
+          storageClassName: longhorn-production-v1
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 1Gi
+    proxy:
+      service:
+        type: ClusterIP
+      chp:
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            memory: 512Mi
+    singleuser:
+      image:
+        name: quay.io/jupyter/datascience-notebook
+        tag: 2026-07-28
+      storage:
+        type: dynamic
+        capacity: 10Gi
+        dynamic:
+          storageClass: longhorn-production-v1
+          storageAccessModes:
+            - ReadWriteOnce
+      cpu:
+        guarantee: 0.2
+        limit: 2
+      memory:
+        guarantee: 512M
+        limit: 3G
+      startTimeout: 300
+    scheduling:
+      userScheduler:
+        enabled: false
+      userPlaceholder:
+        enabled: false
+    prePuller:
+      hook:
+        enabled: false
+      continuous:
+        enabled: false
+    cull:
+      enabled: true
+      timeout: 3600
+      every: 600
+    ingress:
+      enabled: false
+    httpRoute:
+      enabled: false

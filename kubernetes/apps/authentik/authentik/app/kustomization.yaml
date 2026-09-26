@@ -20,6 +20,7 @@ configMapGenerator:
       - blueprints/grafana.yaml
       - blueprints/home-assistant.yaml
       - blueprints/homepage.yaml
+      - blueprints/jupyterhub.yaml
       - blueprints/jellyfin.yaml
       - blueprints/jellyseerr.yaml
       - blueprints/longhorn.yaml
