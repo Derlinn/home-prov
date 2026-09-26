@@ -79,6 +79,8 @@ spec:
           limits:
             memory: 512Mi
     singleuser:
+      cloudMetadata:
+        blockWithIptables: false
       image:
         name: quay.io/jupyter/datascience-notebook
         tag: 2026-07-28
