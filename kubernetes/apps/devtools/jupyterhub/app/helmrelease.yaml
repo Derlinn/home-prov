@@ -83,7 +83,7 @@ spec:
         blockWithIptables: false
       image:
         name: quay.io/jupyter/datascience-notebook
-        tag: 2026-07-28
+        tag: "2026-07-28"
       storage:
         type: dynamic
         capacity: 10Gi
