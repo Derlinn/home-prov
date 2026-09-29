@@ -17,6 +17,7 @@ spec:
     defaultSettings:
       defaultDataPath: /var/lib/longhorn
       orphanResourceAutoDeletion: "replica-data"
+      allowRecurringJobWhileVolumeDetached: "true"
       defaultReplicaCount: 1
       storageReservedPercentageForDefaultDisk: 10
       concurrentAutomaticEngineUpgradePerNodeLimit: 3 # for upgrade of volume engine
