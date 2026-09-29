@@ -31,6 +31,15 @@ spec:
                   metadata:
                     labels:
                       app.kubernetes.io/instance: glpi
+                  spec:
+                    affinity:
+                      podAffinity:
+                        requiredDuringSchedulingIgnoredDuringExecution:
+                        - labelSelector:
+                            matchLabels:
+                              app.kubernetes.io/component: php-fpm
+                              app.kubernetes.io/instance: glpi
+                          topologyKey: kubernetes.io/hostname
           - target:
               kind: Deployment
               name: nginx
