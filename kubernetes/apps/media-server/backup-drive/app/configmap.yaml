@@ -1,0 +1,57 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backup-drive-scripts
+  namespace: media-server
+data:
+  exclude.txt: |
+    Download/
+    Media/
+    Music/
+    Docker/
+    Web/
+    *.partial
+    *.tmp
+    Thumbs.db
+    .DS_Store
+    @eaDir/
+    #recycle/
+  run.sh: |
+    #!/bin/sh
+    set -euo pipefail
+    export PATH="/shared:$PATH"
+    export RESTIC_CACHE_DIR=/cache
+    SOURCES="/nas/famille /nas/photos /nas/public /nas/homes /nas/backups"
+    RETENTION="--keep-daily 7 --keep-weekly 4 --keep-monthly 6"
+    unlock() {
+      restic unlock --remove-all-locks || true
+    }
+    ensure_repo() {
+      restic snapshots >/dev/null 2>&1 || restic init
+    }
+    case "$MODE" in
+      backup)
+        unlock
+        ensure_repo
+        # shellcheck disable=SC2086
+        restic backup --exclude-file=/scripts/exclude.txt --tag nas --tag selective $SOURCES
+        # shellcheck disable=SC2086
+        restic forget $RETENTION
+        ;;
+      check-weekly)
+        unlock
+        restic check --read-data-subset=10%
+        # shellcheck disable=SC2086
+        restic forget --prune $RETENTION
+        ;;
+      check-monthly)
+        unlock
+        restic check --read-data
+        restic snapshots >/dev/null
+        ;;
+      *)
+        echo "unknown MODE: $MODE" >&2
+        exit 1
+        ;;
+    esac

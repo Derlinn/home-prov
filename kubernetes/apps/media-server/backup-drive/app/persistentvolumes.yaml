@@ -1,0 +1,125 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: backup-drive-famille
+spec:
+  capacity:
+    storage: 2Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: lin-nas-01.${DOMAIN}
+    path: /volume1/Famille
+  mountOptions:
+    - nfsvers=4.1
+    - hard
+    - intr
+    - rsize=1048576
+    - wsize=1048576
+    - timeo=600
+    - retrans=2
+  claimRef:
+    namespace: media-server
+    name: backup-drive-famille
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: backup-drive-photos
+spec:
+  capacity:
+    storage: 2Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: lin-nas-01.${DOMAIN}
+    path: /volume1/Photos
+  mountOptions:
+    - nfsvers=4.1
+    - hard
+    - intr
+    - rsize=1048576
+    - wsize=1048576
+    - timeo=600
+    - retrans=2
+  claimRef:
+    namespace: media-server
+    name: backup-drive-photos
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: backup-drive-public
+spec:
+  capacity:
+    storage: 2Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: lin-nas-01.${DOMAIN}
+    path: /volume1/Public
+  mountOptions:
+    - nfsvers=4.1
+    - hard
+    - intr
+    - rsize=1048576
+    - wsize=1048576
+    - timeo=600
+    - retrans=2
+  claimRef:
+    namespace: media-server
+    name: backup-drive-public
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: backup-drive-homes
+spec:
+  capacity:
+    storage: 2Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: lin-nas-01.${DOMAIN}
+    path: /volume1/Home
+  mountOptions:
+    - nfsvers=4.1
+    - hard
+    - intr
+    - rsize=1048576
+    - wsize=1048576
+    - timeo=600
+    - retrans=2
+  claimRef:
+    namespace: media-server
+    name: backup-drive-homes
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: backup-drive-backups
+spec:
+  capacity:
+    storage: 2Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: lin-nas-01.${DOMAIN}
+    path: /volume1/Backups
+  mountOptions:
+    - nfsvers=4.1
+    - hard
+    - intr
+    - rsize=1048576
+    - wsize=1048576
+    - timeo=600
+    - retrans=2
+  claimRef:
+    namespace: media-server
+    name: backup-drive-backups

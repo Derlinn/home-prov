@@ -1,0 +1,346 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: backup-drive
+  namespace: media-server
+automountServiceAccountToken: false
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-drive-daily
+  namespace: media-server
+  labels:
+    app.kubernetes.io/name: backup-drive
+spec:
+  schedule: "30 4 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 82800
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: backup-drive
+        spec:
+          serviceAccountName: backup-drive
+          automountServiceAccountToken: false
+          restartPolicy: OnFailure
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          initContainers:
+            - name: restic-bin
+              image: restic/restic:0.18.1
+              command: ["sh", "-c", "cp /usr/bin/restic /shared/restic && chmod +x /shared/restic"]
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 16Mi
+                limits:
+                  cpu: 100m
+                  memory: 64Mi
+              volumeMounts:
+                - name: shared
+                  mountPath: /shared
+          containers:
+            - name: backup
+              image: rclone/rclone:1.71.2
+              command: ["sh", "/scripts/run.sh"]
+              env:
+                - name: MODE
+                  value: backup
+                - name: RESTIC_REPOSITORY
+                  value: rclone:drive:/nas-selectif
+                - name: RESTIC_PASSWORD_FILE
+                  value: /secrets/RESTIC_PASSWORD
+                - name: RCLONE_CONFIG_DRIVE_TYPE
+                  value: drive
+                - name: RCLONE_DRIVE_CHUNK_SIZE
+                  value: 128M
+                - name: RCLONE_TRANSFERS
+                  value: "4"
+              envFrom:
+                - secretRef:
+                    name: backup-drive-secrets
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests:
+                  cpu: 200m
+                  memory: 512Mi
+                limits:
+                  cpu: 2000m
+                  memory: 2Gi
+              volumeMounts:
+                - name: nas-famille
+                  mountPath: /nas/famille
+                  readOnly: true
+                - name: nas-photos
+                  mountPath: /nas/photos
+                  readOnly: true
+                - name: nas-public
+                  mountPath: /nas/public
+                  readOnly: true
+                - name: nas-homes
+                  mountPath: /nas/homes
+                  readOnly: true
+                - name: nas-backups
+                  mountPath: /nas/backups
+                  readOnly: true
+                - name: cache
+                  mountPath: /cache
+                - name: scripts
+                  mountPath: /scripts
+                  readOnly: true
+                - name: secrets
+                  mountPath: /secrets
+                  readOnly: true
+                - name: shared
+                  mountPath: /shared
+                  readOnly: true
+          volumes:
+            - name: nas-famille
+              persistentVolumeClaim:
+                claimName: backup-drive-famille
+            - name: nas-photos
+              persistentVolumeClaim:
+                claimName: backup-drive-photos
+            - name: nas-public
+              persistentVolumeClaim:
+                claimName: backup-drive-public
+            - name: nas-homes
+              persistentVolumeClaim:
+                claimName: backup-drive-homes
+            - name: nas-backups
+              persistentVolumeClaim:
+                claimName: backup-drive-backups
+            - name: cache
+              persistentVolumeClaim:
+                claimName: backup-drive-cache
+            - name: scripts
+              configMap:
+                name: backup-drive-scripts
+                defaultMode: 0755
+            - name: secrets
+              secret:
+                secretName: backup-drive-secrets
+                defaultMode: 0400
+            - name: shared
+              emptyDir: {}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-drive-check-weekly
+  namespace: media-server
+  labels:
+    app.kubernetes.io/name: backup-drive
+spec:
+  schedule: "0 5 * * 0"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 172800
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: backup-drive
+        spec:
+          serviceAccountName: backup-drive
+          automountServiceAccountToken: false
+          restartPolicy: OnFailure
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          initContainers:
+            - name: restic-bin
+              image: restic/restic:0.18.1
+              command: ["sh", "-c", "cp /usr/bin/restic /shared/restic && chmod +x /shared/restic"]
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 16Mi
+                limits:
+                  cpu: 100m
+                  memory: 64Mi
+              volumeMounts:
+                - name: shared
+                  mountPath: /shared
+          containers:
+            - name: check
+              image: rclone/rclone:1.71.2
+              command: ["sh", "/scripts/run.sh"]
+              env:
+                - name: MODE
+                  value: check-weekly
+                - name: RESTIC_REPOSITORY
+                  value: rclone:drive:/nas-selectif
+                - name: RESTIC_PASSWORD_FILE
+                  value: /secrets/RESTIC_PASSWORD
+                - name: RCLONE_CONFIG_DRIVE_TYPE
+                  value: drive
+                - name: RCLONE_DRIVE_CHUNK_SIZE
+                  value: 128M
+                - name: RCLONE_TRANSFERS
+                  value: "4"
+              envFrom:
+                - secretRef:
+                    name: backup-drive-secrets
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests:
+                  cpu: 200m
+                  memory: 512Mi
+                limits:
+                  cpu: 2000m
+                  memory: 2Gi
+              volumeMounts:
+                - name: cache
+                  mountPath: /cache
+                - name: scripts
+                  mountPath: /scripts
+                  readOnly: true
+                - name: secrets
+                  mountPath: /secrets
+                  readOnly: true
+                - name: shared
+                  mountPath: /shared
+                  readOnly: true
+          volumes:
+            - name: cache
+              persistentVolumeClaim:
+                claimName: backup-drive-cache
+            - name: scripts
+              configMap:
+                name: backup-drive-scripts
+                defaultMode: 0755
+            - name: secrets
+              secret:
+                secretName: backup-drive-secrets
+                defaultMode: 0400
+            - name: shared
+              emptyDir: {}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-drive-check-monthly
+  namespace: media-server
+  labels:
+    app.kubernetes.io/name: backup-drive
+spec:
+  schedule: "0 6 1 * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 259200
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: backup-drive
+        spec:
+          serviceAccountName: backup-drive
+          automountServiceAccountToken: false
+          restartPolicy: OnFailure
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          initContainers:
+            - name: restic-bin
+              image: restic/restic:0.18.1
+              command: ["sh", "-c", "cp /usr/bin/restic /shared/restic && chmod +x /shared/restic"]
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 16Mi
+                limits:
+                  cpu: 100m
+                  memory: 64Mi
+              volumeMounts:
+                - name: shared
+                  mountPath: /shared
+          containers:
+            - name: check
+              image: rclone/rclone:1.71.2
+              command: ["sh", "/scripts/run.sh"]
+              env:
+                - name: MODE
+                  value: check-monthly
+                - name: RESTIC_REPOSITORY
+                  value: rclone:drive:/nas-selectif
+                - name: RESTIC_PASSWORD_FILE
+                  value: /secrets/RESTIC_PASSWORD
+                - name: RCLONE_CONFIG_DRIVE_TYPE
+                  value: drive
+                - name: RCLONE_DRIVE_CHUNK_SIZE
+                  value: 128M
+                - name: RCLONE_TRANSFERS
+                  value: "4"
+              envFrom:
+                - secretRef:
+                    name: backup-drive-secrets
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests:
+                  cpu: 200m
+                  memory: 512Mi
+                limits:
+                  cpu: 2000m
+                  memory: 2Gi
+              volumeMounts:
+                - name: cache
+                  mountPath: /cache
+                - name: scripts
+                  mountPath: /scripts
+                  readOnly: true
+                - name: secrets
+                  mountPath: /secrets
+                  readOnly: true
+                - name: shared
+                  mountPath: /shared
+                  readOnly: true
+          volumes:
+            - name: cache
+              persistentVolumeClaim:
+                claimName: backup-drive-cache
+            - name: scripts
+              configMap:
+                name: backup-drive-scripts
+                defaultMode: 0755
+            - name: secrets
+              secret:
+                secretName: backup-drive-secrets
+                defaultMode: 0400
+            - name: shared
+              emptyDir: {}

@@ -1,0 +1,26 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: backup-drive
+spec:
+  groups:
+    - name: backup-drive.jobs
+      rules:
+        - alert: BackupDriveJobFailed
+          expr: |
+            increase(kube_job_failed{job_name=~"backup-drive-.*"}[6h]) > 0
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: "NAS -> Drive backup job failed ({{ $labels.job_name }})"
+        - alert: BackupDriveStale
+          expr: |
+            time() - kube_cronjob_status_last_successful_time{cronjob="backup-drive-daily"} > 129600
+          for: 1h
+          labels:
+            severity: critical
+          annotations:
+            summary: "No successful NAS -> Drive backup for {{ $value | humanizeDuration }}"
