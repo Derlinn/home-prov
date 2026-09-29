@@ -32,7 +32,7 @@ declare -A CHARTS_URL=(
 # installs CRDs older than the chart that will own them.
 declare -A CHARTS_VERSION=(
     # renovate: datasource=docker depName=ghcr.io/home-operations/charts-mirror/external-dns
-    ["cloudflare-dns"]="1.21.1"
+    ["cloudflare-dns"]="1.22.0"
     # renovate: datasource=docker depName=mirror.gcr.io/envoyproxy/gateway-helm
     ["envoy-gateway"]="v1.9.1"
     # renovate: datasource=docker depName=ghcr.io/grafana/helm-charts/grafana-operator
