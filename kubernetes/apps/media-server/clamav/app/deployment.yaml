@@ -56,7 +56,7 @@ spec:
               subPath: clamd.conf
               readOnly: true
         - name: scanner
-          image: python:3.13-alpine
+          image: python:3.14-alpine
           command: ["python", "/app/scanner.py"]
           env:
             - name: QB_URL
