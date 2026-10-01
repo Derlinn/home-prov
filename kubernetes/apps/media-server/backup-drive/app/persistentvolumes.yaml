@@ -9,17 +9,25 @@ spec:
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
-  nfs:
-    server: lin-nas-01.${DOMAIN}
-    path: /volume1/Famille
+  storageClassName: ""
   mountOptions:
-    - nfsvers=4.1
-    - hard
-    - intr
-    - rsize=1048576
-    - wsize=1048576
-    - timeo=600
-    - retrans=2
+    - vers=3.1.1
+    - seal
+    - ro
+    - dir_mode=0755
+    - file_mode=0644
+    - noperm
+    - mfsymlinks
+    - cache=strict
+    - noserverino
+  csi:
+    driver: smb.csi.k8s.io
+    volumeHandle: lin-nas-01.${DOMAIN}#backup-drive-famille#Famille
+    volumeAttributes:
+      source: //lin-nas-01.${DOMAIN}/Famille
+    nodeStageSecretRef:
+      name: backup-drive-secrets
+      namespace: media-server
   claimRef:
     namespace: media-server
     name: backup-drive-famille
@@ -34,17 +42,25 @@ spec:
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
-  nfs:
-    server: lin-nas-01.${DOMAIN}
-    path: /volume1/Photos
+  storageClassName: ""
   mountOptions:
-    - nfsvers=4.1
-    - hard
-    - intr
-    - rsize=1048576
-    - wsize=1048576
-    - timeo=600
-    - retrans=2
+    - vers=3.1.1
+    - seal
+    - ro
+    - dir_mode=0755
+    - file_mode=0644
+    - noperm
+    - mfsymlinks
+    - cache=strict
+    - noserverino
+  csi:
+    driver: smb.csi.k8s.io
+    volumeHandle: lin-nas-01.${DOMAIN}#backup-drive-photos#Photos
+    volumeAttributes:
+      source: //lin-nas-01.${DOMAIN}/Photos
+    nodeStageSecretRef:
+      name: backup-drive-secrets
+      namespace: media-server
   claimRef:
     namespace: media-server
     name: backup-drive-photos
@@ -59,17 +75,25 @@ spec:
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
-  nfs:
-    server: lin-nas-01.${DOMAIN}
-    path: /volume1/Public
+  storageClassName: ""
   mountOptions:
-    - nfsvers=4.1
-    - hard
-    - intr
-    - rsize=1048576
-    - wsize=1048576
-    - timeo=600
-    - retrans=2
+    - vers=3.1.1
+    - seal
+    - ro
+    - dir_mode=0755
+    - file_mode=0644
+    - noperm
+    - mfsymlinks
+    - cache=strict
+    - noserverino
+  csi:
+    driver: smb.csi.k8s.io
+    volumeHandle: lin-nas-01.${DOMAIN}#backup-drive-public#Public
+    volumeAttributes:
+      source: //lin-nas-01.${DOMAIN}/Public
+    nodeStageSecretRef:
+      name: backup-drive-secrets
+      namespace: media-server
   claimRef:
     namespace: media-server
     name: backup-drive-public
@@ -84,17 +108,25 @@ spec:
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
-  nfs:
-    server: lin-nas-01.${DOMAIN}
-    path: /volume1/Home
+  storageClassName: ""
   mountOptions:
-    - nfsvers=4.1
-    - hard
-    - intr
-    - rsize=1048576
-    - wsize=1048576
-    - timeo=600
-    - retrans=2
+    - vers=3.1.1
+    - seal
+    - ro
+    - dir_mode=0755
+    - file_mode=0644
+    - noperm
+    - mfsymlinks
+    - cache=strict
+    - noserverino
+  csi:
+    driver: smb.csi.k8s.io
+    volumeHandle: lin-nas-01.${DOMAIN}#backup-drive-homes#User Homes
+    volumeAttributes:
+      source: //lin-nas-01.${DOMAIN}/User Homes
+    nodeStageSecretRef:
+      name: backup-drive-secrets
+      namespace: media-server
   claimRef:
     namespace: media-server
     name: backup-drive-homes
@@ -109,17 +141,25 @@ spec:
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
-  nfs:
-    server: lin-nas-01.${DOMAIN}
-    path: /volume1/Backups
+  storageClassName: ""
   mountOptions:
-    - nfsvers=4.1
-    - hard
-    - intr
-    - rsize=1048576
-    - wsize=1048576
-    - timeo=600
-    - retrans=2
+    - vers=3.1.1
+    - seal
+    - ro
+    - dir_mode=0755
+    - file_mode=0644
+    - noperm
+    - mfsymlinks
+    - cache=strict
+    - noserverino
+  csi:
+    driver: smb.csi.k8s.io
+    volumeHandle: lin-nas-01.${DOMAIN}#backup-drive-backups#Backups
+    volumeAttributes:
+      source: //lin-nas-01.${DOMAIN}/Backups
+    nodeStageSecretRef:
+      name: backup-drive-secrets
+      namespace: media-server
   claimRef:
     namespace: media-server
     name: backup-drive-backups

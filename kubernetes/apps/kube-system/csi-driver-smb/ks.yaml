@@ -3,23 +3,15 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: media-server-backup-drive
+  name: csi-driver-smb
 spec:
   interval: 1h
-  path: ./kubernetes/apps/media-server/backup-drive/app
-  postBuild:
-    substituteFrom:
-      - kind: ConfigMap
-        name: cluster-settings
+  path: ./kubernetes/apps/kube-system/csi-driver-smb/app
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: media-server
-  dependsOn:
-    - name: media-server-storage
-    - name: csi-driver-smb
-      namespace: kube-system
+  targetNamespace: kube-system
   wait: true
   timeout: 15m

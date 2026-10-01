@@ -1,0 +1,21 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v1.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: csi-driver-smb
+spec:
+  chart:
+    spec:
+      chart: csi-driver-smb
+      version: 1.20.3
+      interval: 5h
+      sourceRef:
+        kind: HelmRepository
+        name: csi-driver-smb
+        namespace: kube-system
+  releaseName: csi-driver-smb
+  interval: 1h
+  values:
+    controller:
+      replicas: 1
