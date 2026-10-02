@@ -10,6 +10,17 @@ entries:
       name: linderis_jupyterhub
     attrs:
       is_superuser: false
+  - model: authentik_core.group
+    id: jupyterhub-admin-group
+    state: present
+    identifiers:
+      name: linderis_jupyterhub_admins
+    attrs:
+      is_superuser: false
+      users:
+        - !Find [authentik_core.user, [username, theo]]
+      parents:
+        - !KeyOf jupyterhub-group
   - model: authentik_providers_oauth2.oauth2provider
     id: jupyterhub-provider
     state: present

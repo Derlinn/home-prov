@@ -44,9 +44,20 @@ spec:
       config:
         Authenticator:
           allow_all: true
+          enable_auth_state: true
+          manage_groups: true
+          admin_groups:
+            - linderis_jupyterhub_admins
         JupyterHub:
           authenticator_class: generic-oauth
           admin_access: true
+          load_roles:
+            - name: user
+              scopes:
+                - self
+                - shares!user
+                - read:users:name
+                - read:groups:name
         GenericOAuthenticator:
           oauth_callback_url: https://jupyterhub.${DOMAIN}/hub/oauth_callback
           authorize_url: https://authentik.${DOMAIN}/application/o/authorize/
@@ -91,6 +102,13 @@ spec:
           storageClass: longhorn-production-v1
           storageAccessModes:
             - ReadWriteOnce
+        extraVolumes:
+          - name: shared
+            persistentVolumeClaim:
+              claimName: jupyterhub-shared
+        extraVolumeMounts:
+          - name: shared
+            mountPath: /home/jovyan/shared
       cpu:
         guarantee: 0.2
         limit: 2
