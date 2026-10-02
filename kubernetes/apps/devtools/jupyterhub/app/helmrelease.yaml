@@ -102,13 +102,6 @@ spec:
           storageClass: longhorn-production-v1
           storageAccessModes:
             - ReadWriteOnce
-        extraVolumes:
-          - name: shared
-            persistentVolumeClaim:
-              claimName: jupyterhub-shared
-        extraVolumeMounts:
-          - name: shared
-            mountPath: /home/jovyan/shared
       cpu:
         guarantee: 0.2
         limit: 2

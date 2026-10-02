@@ -21,7 +21,7 @@ Usage: $(basename "$0") <create|delete|list|share> [options]
   delete USERNAME [--keep-volume]
   delete --prefix PREFIX --count N [--start N] [--keep-volume]
   list
-  share FROM_USERNAME [--user USERNAME | --group GROUP] [--server NAME] [--allow-start]
+  share FROM_USERNAME [--user USERNAME | --group GROUP] [--allow-start]
 
 Env: AUTHENTIK_TOKEN (create/delete/list, platform host), JUPYTERHUB_TOKEN (share:
 your own Hub token from Hub Control Panel -> Token, or an admin token),
@@ -130,7 +130,6 @@ cmd_create() {
     return
   fi
 
-  [[ -n "${username}" ]] || die "missing USERNAME or --prefix"
   check_username "${username}"
   out="$(create_one "${username}" "${name}" "${email}" "${password}" "${gpk}")"
   echo "username: ${out%% *}"
@@ -188,14 +187,13 @@ cmd_list() {
 }
 
 cmd_share() {
-  local from="$1" user="" group="" server="" allow_start="false"
+  local from="$1" user="" group="" allow_start="false"
   shift
   check_username "${from}"
   while (($#)); do
     case "$1" in
       --user) user="$2"; shift 2 ;;
       --group) group="$2"; shift 2 ;;
-      --server) server="$2"; shift 2 ;;
       --allow-start) allow_start="true"; shift ;;
       *) die "unknown option: $1" ;;
     esac
@@ -206,7 +204,7 @@ cmd_share() {
   [[ -n "${HUB_TOKEN}" ]] || die "set JUPYTERHUB_TOKEN (your Hub token from Hub Control Panel -> Token)"
 
   local target payload code
-  target="${from}/${server}"
+  target="${from}/"
   if [[ -n "${user}" ]]; then
     payload="$(jq -n --arg u "${user}" '{user: $u}')"
   else
