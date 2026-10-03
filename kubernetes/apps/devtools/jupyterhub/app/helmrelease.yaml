@@ -90,6 +90,23 @@ spec:
               group = (int(match.group(1)) + 4) // 5
               return f"https://jupyterhub.${DOMAIN}/user/groupe-{group}/lab"
 
+
+          def shared_server_path(username):
+              url = shared_server_url(username)
+              if not url:
+                  return ""
+              return "/" + "/".join(url.split("/")[3:])
+
+
+          def guest_default_url(handler):
+              user = handler.current_user
+              if user and any(
+                  user.name.startswith(prefix) for prefix in BLOCKED_SPAWN_PREFIXES
+              ):
+                  return shared_server_path(user.name)
+              return ""
+
+
           async def block_guest_spawn(spawner):
               username = spawner.user.name
               if any(username.startswith(prefix) for prefix in BLOCKED_SPAWN_PREFIXES):
@@ -99,6 +116,7 @@ spec:
                       f"Personal servers are disabled for guest account '{username}'.{hint}"
                   )
 
+          c.JupyterHub.default_url = guest_default_url
           c.KubeSpawner.pre_spawn_hook = block_guest_spawn
       resources:
         requests:
