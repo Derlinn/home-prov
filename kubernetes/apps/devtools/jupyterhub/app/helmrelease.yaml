@@ -139,7 +139,7 @@ spec:
 
             SERVER_URL = os.environ.get(
                 "PLANTUML_SERVER",
-                "http://plantuml-server.devtools.svc.cluster.local:8080",
+                "http://plantuml-server.devtools.svc.cluster.local",
             )
 
             _ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_"
