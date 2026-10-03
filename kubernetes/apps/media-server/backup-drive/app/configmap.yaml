@@ -49,19 +49,20 @@ data:
         ensure_repo
         # shellcheck disable=SC2086
         restic backup --exclude-file=/scripts/exclude.txt --tag nas --tag selective $SOURCES
-        # shellcheck disable=SC2086
-        restic forget $RETENTION
-        ;;
-      check-weekly)
-        unlock
-        restic check --read-data-subset=10%
-        # shellcheck disable=SC2086
-        restic forget --prune $RETENTION
-        ;;
-      check-monthly)
-        unlock
-        restic check --read-data
-        restic snapshots >/dev/null
+        DOW=$(date +%u)
+        DOM=$(date +%d)
+        if [ "$DOM" = "01" ]; then
+          restic check --read-data
+        elif [ "$DOW" = "7" ]; then
+          restic check --read-data-subset=10%
+        fi
+        if [ "$DOW" = "7" ]; then
+          # shellcheck disable=SC2086
+          restic forget --prune $RETENTION
+        else
+          # shellcheck disable=SC2086
+          restic forget $RETENTION
+        fi
         ;;
       *)
         echo "unknown MODE: $MODE" >&2
