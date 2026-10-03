@@ -339,15 +339,25 @@ spec:
                 return f"{server}/{fmt}/{encode(code)}"
 
 
-            def puml(code, server=None, fmt="svg", timeout=30):
-                from IPython.display import SVG
+            def puml(code, server=None, fmt="svg", timeout=30, width="100%"):
+                from IPython.display import HTML
 
                 request = urllib.request.Request(
                     diagram_url(code, server=server or SERVER_URL, fmt=fmt),
                     headers={"User-Agent": "home-prov-puml/1.0"},
                 )
                 with urllib.request.urlopen(request, timeout=timeout) as response:
-                    return SVG(response.read().decode("utf-8"))
+                    svg = response.read().decode("utf-8")
+                svg = svg.replace(
+                    "<svg ",
+                    '<svg style="display:block;width:100%;height:auto;" ',
+                    1,
+                )
+                return HTML(
+                    f'<div style="display:block;width:{width};'
+                    'max-width:100%;overflow-x:auto;margin:0.5em 0;">'
+                    f"{svg}</div>"
+                )
 
 
             def load_ipython_extension(ipython):
