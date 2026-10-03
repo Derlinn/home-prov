@@ -24,8 +24,21 @@ data:
     export RESTIC_CACHE_DIR=/cache
     SOURCES="/nas/famille /nas/photos /nas/public /nas/homes /nas/backups"
     RETENTION="--keep-daily 7 --keep-weekly 4 --keep-monthly 6"
+    RCLONE_CONF_DIR="/root/.config/rclone"
+    : "$MODE" "$RCLONE_CONFIG_DRIVE_TOKEN" "$RCLONE_CONFIG_DRIVE_CLIENT_ID" "$RCLONE_CONFIG_DRIVE_CLIENT_SECRET"
+    case "$RCLONE_CONFIG_DRIVE_TOKEN" in
+      '{"access_token"'*) ;;
+      *) echo "RCLONE_CONFIG_DRIVE_TOKEN is not a JSON token object" >&2; exit 1 ;;
+    esac
+    mkdir -p "$RCLONE_CONF_DIR"
+    printf '[drive]\ntype = drive\nclient_id = %s\nclient_secret = %s\ntoken = %s\n' \
+      "$RCLONE_CONFIG_DRIVE_CLIENT_ID" \
+      "$RCLONE_CONFIG_DRIVE_CLIENT_SECRET" \
+      "$RCLONE_CONFIG_DRIVE_TOKEN" > "$RCLONE_CONF_DIR/rclone.conf"
+    chmod 600 "$RCLONE_CONF_DIR/rclone.conf"
+    export RCLONE_CONFIG="$RCLONE_CONF_DIR/rclone.conf"
     unlock() {
-      restic unlock --remove-all-locks || true
+      restic unlock || true
     }
     ensure_repo() {
       restic snapshots >/dev/null 2>&1 || restic init
