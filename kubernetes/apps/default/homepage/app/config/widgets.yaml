@@ -12,7 +12,7 @@
       cpu: true
       memory: true
       showLabel: true
-      label: lin-master-01
+      label: talos
     nodes:
       show: false
 

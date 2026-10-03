@@ -90,7 +90,7 @@ machine:
 cluster:
   clusterName: talos
   controlPlane:
-    endpoint: https://10.25.30.50:6443
+    endpoint: https://10.25.30.51:6443
   discovery:
     enabled: true
     registries:
