@@ -22,6 +22,7 @@ Usage: $(basename "$0") <create|delete|list|share> [options]
   delete --prefix PREFIX --count N [--start N] [--keep-volume]
   list
   share FROM_USERNAME [--user USERNAME | --group GROUP] [--allow-start]
+  share --for STUDENT [--allow-start]   (owner auto: groupe-ceil(N/5))
 
 Env: AUTHENTIK_TOKEN (create/delete/list, platform host), JUPYTERHUB_TOKEN (share:
 your own Hub token from Hub Control Panel -> Token, or an admin token),
@@ -48,7 +49,7 @@ api_code() {
 
 check_username() {
   [[ "$1" =~ ^[a-z0-9]([a-z0-9._-]*[a-z0-9])?$ ]] \
-    || die "username must be lowercase alphanumeric (pod/PVC-safe): $1"
+    || die "username must be lowercase alphanumeric plus ._- (Authentik/URL-safe): $1"
 }
 
 group_pk() {
@@ -141,9 +142,9 @@ delete_one() {
   local username="$1" keep_volume="$2" upk
   upk="$(user_pk "${username}")" && [[ -n "${upk}" ]] || die "user not found: ${username}"
 
-  kubectl -n "${NAMESPACE}" delete pod "jupyter-${username}" --ignore-not-found
+  kubectl -n "${NAMESPACE}" delete pod -l "hub.jupyter.org/username=${username}" --ignore-not-found
   [[ "${keep_volume}" == "true" ]] \
-    || kubectl -n "${NAMESPACE}" delete pvc "claim-${username}" --ignore-not-found
+    || kubectl -n "${NAMESPACE}" delete pvc -l "hub.jupyter.org/username=${username}" --ignore-not-found
   [[ "$(api_code DELETE "/core/users/${upk}/")" == "204" ]] || die "user deletion failed: ${username}"
   echo "deleted: ${username}"
 }
@@ -187,13 +188,27 @@ cmd_list() {
 }
 
 cmd_share() {
-  local from="$1" user="" group="" allow_start="false"
-  shift
-  check_username "${from}"
+  local from="" user="" group="" allow_start="false" auto="false"
+  if [[ "${1:-}" == "--for" ]]; then
+    auto="true"
+    local student="${2:-}" num grp
+    [[ -n "${student}" ]] || die "share --for needs a STUDENT username"
+    check_username "${student}"
+    [[ "${student}" =~ -([0-9]+)$ ]] || die "--for needs a username ending with -N (e.g. ensimag-7)"
+    num="${BASH_REMATCH[1]}"
+    grp=$(( (10#${num} + 4) / 5 ))
+    from="groupe-${grp}"
+    user="${student}"
+    shift 2
+  else
+    from="$1"
+    shift
+    check_username "${from}"
+  fi
   while (($#)); do
     case "$1" in
-      --user) user="$2"; shift 2 ;;
-      --group) group="$2"; shift 2 ;;
+      --user) [[ "${auto}" == "false" ]] || die "--user cannot be combined with --for"; user="$2"; shift 2 ;;
+      --group) [[ "${auto}" == "false" ]] || die "--group cannot be combined with --for"; group="$2"; shift 2 ;;
       --allow-start) allow_start="true"; shift ;;
       *) die "unknown option: $1" ;;
     esac
@@ -201,6 +216,11 @@ cmd_share() {
   [[ -n "${user}" || -n "${group}" ]] || die "share needs --user or --group"
   [[ -z "${user}" || -z "${group}" ]] || die "--user and --group are exclusive"
   [[ -z "${user}" ]] || check_username "${user}"
+  if [[ "${auto}" == "true" ]]; then
+    [[ -n "${AUTHENTIK_TOKEN}" ]] || die "set AUTHENTIK_TOKEN (Authentik Tokens & App passwords, intent API)"
+    [[ -n "$(user_pk "${from}")" ]] || die "owner account '${from}' does not exist (create it first)"
+    [[ -n "$(user_pk "${user}")" ]] || die "user not found: ${user}"
+  fi
   [[ -n "${HUB_TOKEN}" ]] || die "set JUPYTERHUB_TOKEN (your Hub token from Hub Control Panel -> Token)"
 
   local target payload code
