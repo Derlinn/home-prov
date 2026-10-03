@@ -4,7 +4,6 @@ kind: ConfigMap
 metadata:
   name: netbird-db-init
 data:
-  # The combined server opens three independent stores and never creates them.
   init.sql: |
     CREATE DATABASE netbird_activity OWNER netbird;
     CREATE DATABASE netbird_idp OWNER netbird;

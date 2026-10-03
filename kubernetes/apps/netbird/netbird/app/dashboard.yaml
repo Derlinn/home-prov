@@ -33,8 +33,6 @@ spec:
               value: https://netbird.${DOMAIN}
             - name: NETBIRD_MGMT_GRPC_API_ENDPOINT
               value: https://netbird.${DOMAIN}
-            # Fixed by the server: combined/cmd/config.go hardcodes the audience
-            # and client id to netbird-dashboard.
             - name: AUTH_AUDIENCE
               value: netbird-dashboard
             - name: AUTH_CLIENT_ID

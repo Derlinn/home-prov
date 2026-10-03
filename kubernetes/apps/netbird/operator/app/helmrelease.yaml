@@ -1,5 +1,4 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -12,8 +11,6 @@ spec:
     kind: OCIRepository
     name: netbird-operator
   values:
-    # Absent from values.yaml but read by the chart; without it the operator
-    # drives api.netbird.io instead of this cluster.
     managementURL: https://netbird.${DOMAIN}
     routingClientImage: docker.io/netbirdio/netbird:0.77.1
     cluster:

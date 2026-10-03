@@ -10,7 +10,6 @@ spec:
     - name: http
       port: 80
       targetPort: http
-    # Same listener, but gRPC needs an HTTP/2 upstream or Envoy downgrades it to 1.1.
     - name: grpc
       port: 8080
       targetPort: http
