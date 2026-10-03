@@ -45,7 +45,7 @@ spec:
 
     defaultPodOptions:
       nodeSelector:
-        kubernetes.io/hostname: lin-master-01
+        kubernetes.io/hostname: lin-node-01
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
