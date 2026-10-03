@@ -59,7 +59,7 @@ spec:
                 - name: MODE
                   value: backup
                 - name: RESTIC_REPOSITORY
-                  value: rclone:drive:/nas-selectif
+                  value: rclone:drive:/Sauvegardes-NAS/nas-selectif
                 - name: RESTIC_PASSWORD_FILE
                   value: /secrets/RESTIC_PASSWORD
                 - name: RCLONE_CONFIG_DRIVE_TYPE
@@ -192,7 +192,7 @@ spec:
                 - name: MODE
                   value: check-weekly
                 - name: RESTIC_REPOSITORY
-                  value: rclone:drive:/nas-selectif
+                  value: rclone:drive:/Sauvegardes-NAS/nas-selectif
                 - name: RESTIC_PASSWORD_FILE
                   value: /secrets/RESTIC_PASSWORD
                 - name: RCLONE_CONFIG_DRIVE_TYPE
@@ -295,7 +295,7 @@ spec:
                 - name: MODE
                   value: check-monthly
                 - name: RESTIC_REPOSITORY
-                  value: rclone:drive:/nas-selectif
+                  value: rclone:drive:/Sauvegardes-NAS/nas-selectif
                 - name: RESTIC_PASSWORD_FILE
                   value: /secrets/RESTIC_PASSWORD
                 - name: RCLONE_CONFIG_DRIVE_TYPE
