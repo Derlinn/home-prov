@@ -75,6 +75,37 @@ spec:
     - matches:
         - path:
             type: PathPrefix
+            value: /signalexchange.SignalExchange
+        - path:
+            type: PathPrefix
+            value: /management.ManagementService
+        - path:
+            type: PathPrefix
+            value: /management.ProxyService
+      timeouts:
+        request: 0s
+        backendRequest: 0s
+      backendRefs:
+        - name: netbird-server
+          namespace: netbird
+          port: 8080
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /relay
+        - path:
+            type: PathPrefix
+            value: /ws-proxy
+      timeouts:
+        request: 0s
+        backendRequest: 0s
+      backendRefs:
+        - name: netbird-server
+          namespace: netbird
+          port: 80
+    - matches:
+        - path:
+            type: PathPrefix
             value: /api
         - path:
             type: PathPrefix
