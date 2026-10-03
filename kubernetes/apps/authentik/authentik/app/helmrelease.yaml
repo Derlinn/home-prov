@@ -120,6 +120,11 @@ spec:
             secretKeyRef:
               name: authentik-credentials
               key: jupyterhub-client-secret
+        - name: AUTHENTIK_NETBIRD_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authentik-credentials
+              key: netbird-client-secret
 
     blueprints:
       configMaps:
