@@ -16,6 +16,7 @@ spec:
       containers:
         - name: rathole
           image: docker.io/rapiz1/rathole:v0.5.0
+          args: ["/etc/rathole/client.toml"]
           volumeMounts:
             - name: config
               mountPath: /etc/rathole/client.toml
