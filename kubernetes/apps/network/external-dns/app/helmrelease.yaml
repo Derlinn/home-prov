@@ -19,6 +19,7 @@ spec:
     policy: sync
     sources:
       - gateway-httproute
+      - crd
     txtOwnerId: external-dns
     txtPrefix: k8s.
     domainFilters:

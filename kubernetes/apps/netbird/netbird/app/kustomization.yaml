@@ -6,4 +6,5 @@ resources:
   - ./server.yaml
   - ./dashboard.yaml
   - ./httproute.yaml
+  - ./dnsendpoint.yaml
   - ./secret.sops.yaml

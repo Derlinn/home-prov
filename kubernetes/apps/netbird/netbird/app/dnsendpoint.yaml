@@ -1,0 +1,11 @@
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: netbird
+spec:
+  endpoints:
+    - dnsName: netbird.${DOMAIN}
+      recordType: A
+      targets:
+        - 212.227.22.223
