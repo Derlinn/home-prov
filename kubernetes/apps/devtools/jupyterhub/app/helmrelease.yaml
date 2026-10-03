@@ -109,6 +109,89 @@ spec:
         guarantee: 512M
         limit: 3G
       startTimeout: 300
+      extraEnv:
+        PYTHONPATH: "/opt/puml"
+      extraFiles:
+        puml-helper:
+          mountPath: /opt/puml/puml.py
+          stringData: |
+            """Render PlantUML diagrams from notebooks via the in-cluster server.
+
+            Usage:
+                from puml import puml
+
+                puml("@startuml\\nAlice -> Bob: hello\\n@enduml")
+
+            Or as a cell magic after running ``%load_ext puml`` once::
+
+                %%puml
+                @startuml
+                Alice -> Bob: hello
+                @enduml
+
+            Only the Python standard library is used. Diagrams are rendered by
+            the plantuml-server Service in the devtools namespace; point the
+            PLANTUML_SERVER environment variable at another server to override.
+            """
+            import os
+            import urllib.request
+            import zlib
+
+            SERVER_URL = os.environ.get(
+                "PLANTUML_SERVER",
+                "http://plantuml-server.devtools.svc.cluster.local:8080",
+            )
+
+            _ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_"
+
+
+            def _encode_char(byte):
+                return _ALPHABET[byte]
+
+
+            def _encode_triplet(first, second, third):
+                chars = [
+                    first >> 2,
+                    ((first & 0x3) << 4) | (second >> 4),
+                    ((second & 0xF) << 2) | (third >> 6),
+                    third & 0x3F,
+                ]
+                return "".join(_encode_char(char) for char in chars)
+
+
+            def encode(text):
+                compressed = zlib.compress(text.encode("utf-8"))[2:-4]
+                padded = compressed + b"\x00" * (-len(compressed) % 3)
+                return "".join(
+                    _encode_triplet(padded[i], padded[i + 1], padded[i + 2])
+                    for i in range(0, len(padded), 3)
+                )
+
+
+            def diagram_url(code, server=SERVER_URL, fmt="svg"):
+                return f"{server}/{fmt}/{encode(code)}"
+
+
+            def puml(code, server=None, fmt="svg", timeout=30):
+                from IPython.display import SVG
+
+                request = urllib.request.Request(
+                    diagram_url(code, server=server or SERVER_URL, fmt=fmt),
+                    headers={"User-Agent": "home-prov-puml/1.0"},
+                )
+                with urllib.request.urlopen(request, timeout=timeout) as response:
+                    return SVG(response.read().decode("utf-8"))
+
+
+            def load_ipython_extension(ipython):
+                from IPython.core.magic import register_cell_magic
+
+                @register_cell_magic
+                def puml_magic(line, cell):
+                    return puml(cell)
+
+                ipython.register_magic_function(puml_magic, magic_kind="cell", magic_name="puml")
+
     scheduling:
       userScheduler:
         enabled: false

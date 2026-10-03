@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: plantuml-server
+spec:
+  selector:
+    app: plantuml-server
+  ports:
+    - port: 80
+      targetPort: 8080

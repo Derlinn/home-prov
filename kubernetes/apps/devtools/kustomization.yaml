@@ -10,4 +10,5 @@ components:
 resources:
   - ./namespace.yaml
   - ./jupyterhub/ks.yaml
+  - ./plantuml/ks.yaml
 #  - gitlab/ks.yaml
