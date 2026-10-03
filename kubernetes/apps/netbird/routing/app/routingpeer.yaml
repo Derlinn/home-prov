@@ -1,0 +1,13 @@
+---
+apiVersion: netbird.io/v1
+kind: NBRoutingPeer
+metadata:
+  name: lan
+spec:
+  replicas: 2
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi

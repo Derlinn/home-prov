@@ -1,0 +1,88 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "NetBird"
+    gethomepage.dev/group: "Infrastructure"
+    gethomepage.dev/icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/netbird.svg"
+    gethomepage.dev/href: "https://netbird.${DOMAIN}"
+  name: netbird
+spec:
+  # Peers only: management, signal and relay must stay reachable from outside.
+  # The dashboard lives on the internal route below, so the login page is
+  # never exposed publicly.
+  parentRefs:
+    - name: envoy-external
+      namespace: network
+      sectionName: https
+  hostnames:
+    - netbird.${DOMAIN}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /signalexchange.SignalExchange
+        - path:
+            type: PathPrefix
+            value: /management.ManagementService
+        - path:
+            type: PathPrefix
+            value: /management.ProxyService
+      timeouts:
+        request: 0s
+        backendRequest: 0s
+      backendRefs:
+        - name: netbird-server
+          namespace: netbird
+          port: 8080
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /relay
+        - path:
+            type: PathPrefix
+            value: /ws-proxy
+      timeouts:
+        request: 0s
+        backendRequest: 0s
+      backendRefs:
+        - name: netbird-server
+          namespace: netbird
+          port: 80
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api
+        - path:
+            type: PathPrefix
+            value: /oauth2
+      backendRefs:
+        - name: netbird-server
+          namespace: netbird
+          port: 80
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: netbird-dashboard
+spec:
+  # LAN only: the admin UI is not needed by roaming peers.
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+      sectionName: https
+  hostnames:
+    - netbird.${DOMAIN}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: netbird-dashboard
+          namespace: netbird
+          port: 80

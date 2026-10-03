@@ -1,0 +1,30 @@
+---
+# yaml-language-server: $schema=https://datreeio.github.io/CRDs-catalog/cilium.io/ciliumnetworkpolicy_v2.json
+# NetBird routing peer: forwards mesh traffic into the LAN, and needs raw UDP
+# out for STUN and for the hole punching that keeps peers off the relay.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-netbird-router-egress
+spec:
+  enableDefaultDeny:
+    egress: false
+    ingress: false
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: netbird-router
+      io.kubernetes.pod.namespace: netbird
+  egress:
+    - toCIDR:
+        - 10.25.0.0/16
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "3478"
+              protocol: UDP
+            - port: "5555"
+              protocol: UDP
+            - port: "49152"
+              endPort: 65535
+              protocol: UDP

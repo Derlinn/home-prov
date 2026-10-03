@@ -1,0 +1,93 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: netbird-server
+spec:
+  selector:
+    app.kubernetes.io/name: netbird-server
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+    # Same listener, but gRPC needs an HTTP/2 upstream or Envoy downgrades it to 1.1.
+    - name: grpc
+      port: 8080
+      targetPort: http
+      appProtocol: kubernetes.io/h2c
+    - name: metrics
+      port: 9090
+      targetPort: metrics
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: netbird-server-data
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: longhorn-production-v1
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netbird-server
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: netbird-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: netbird-server
+    spec:
+      containers:
+        - name: netbird-server
+          image: docker.io/netbirdio/netbird-server:0.77.1
+          args: ["--config", "/etc/netbird/config.yaml"]
+          ports:
+            - name: http
+              containerPort: 80
+            - name: health
+              containerPort: 9000
+            - name: metrics
+              containerPort: 9090
+          startupProbe:
+            tcpSocket:
+              port: health
+            periodSeconds: 5
+            failureThreshold: 60
+          livenessProbe:
+            tcpSocket:
+              port: health
+            periodSeconds: 30
+          readinessProbe:
+            tcpSocket:
+              port: health
+            periodSeconds: 10
+          volumeMounts:
+            - name: config
+              mountPath: /etc/netbird
+              readOnly: true
+            - name: data
+              mountPath: /var/lib/netbird
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 100m
+            limits:
+              memory: 1Gi
+      volumes:
+        - name: config
+          secret:
+            secretName: netbird-config
+        - name: data
+          persistentVolumeClaim:
+            claimName: netbird-server-data

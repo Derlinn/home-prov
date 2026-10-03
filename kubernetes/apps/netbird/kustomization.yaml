@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: netbird
+
+components:
+  - ../../components/cluster-settings
+
+resources:
+  - ./namespace.yaml
+  - netbird/ks.yaml
+  # Both need a NetBird PAT in netbird-mgmt-api-key, which only exists once the
+  # server is up and someone has logged in.
+  # - operator/ks.yaml
+  # - routing/ks.yaml

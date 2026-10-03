@@ -1,0 +1,36 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: netbird-operator
+spec:
+  interval: 15m
+  timeout: 10m
+  releaseName: netbird-operator
+  chartRef:
+    kind: OCIRepository
+    name: netbird-operator
+  values:
+    # Absent from values.yaml but read by the chart; without it the operator
+    # drives api.netbird.io instead of this cluster.
+    managementURL: https://netbird.${DOMAIN}
+    routingClientImage: docker.io/netbirdio/netbird:0.77.1
+    cluster:
+      name: linderis
+      dns: svc.cluster.local
+    netbirdAPI:
+      keyFromSecret:
+        name: netbird-mgmt-api-key
+        key: NB_API_KEY
+    webhook:
+      enableCertManager: true
+    operator:
+      metrics:
+        enabled: true
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          memory: 256Mi

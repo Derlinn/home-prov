@@ -29,7 +29,9 @@ resources:
     - ./allow-envoy-clusterip.yaml
     - ./allow-media-server-internal.yaml
     - ./allow-home-automation-internal.yaml
+    - ./allow-netbird-internal.yaml
     - ./allow-wireguard-egress.yaml
+    - ./allow-netbird-router-egress.yaml
     - ./allow-clamav-egress.yaml
     - ./allow-mktxp-egress.yaml
     - ./allow-asustor-egress.yaml

@@ -175,6 +175,7 @@ Meme forme pour toutes : les pods selectionnes acceptent l'ingress et l'egress d
 | `allow-netbox-internal` | `policies/allow-netbox-internal.yaml` | namespace `default`, label `app.kubernetes.io/instance: netbox` |
 | `allow-glpi-internal` | `policies/allow-glpi-internal.yaml` | namespace `default`, label `app.kubernetes.io/instance: glpi` (nginx/php-fpm vers mariadb et valkey) |
 | `allow-rackula-internal` | `policies/allow-rackula-internal.yaml` | namespace `default`, label `app.kubernetes.io/instance: rackula` (frontend nginx vers son API sur 3001) |
+| `allow-netbird-internal` | `policies/allow-netbird-internal.yaml` | namespace `netbird` (server, dashboard, postgres, futurs peers operateur) |
 
 C'est `allow-observability-internal` qui autorise Prometheus a scraper Gatus (8080) et blackbox-exporter (9115) sans que ces ports figurent dans `allow-prometheus-egress`.
 
@@ -214,6 +215,7 @@ Homepage interroge l'API de chaque service pour alimenter ses widgets : 7878 (ra
 | `allow-wireguard-egress` | `policies/allow-wireguard-egress.yaml` | vpn-stack (`media-server`) | `world` | 51820 UDP |
 | `allow-clamav-egress` | `policies/allow-clamav-egress.yaml` | clamav (`media-server`) | `world` | 80 (freshclam CVD, 443/DNS déjà globaux) |
 | `allow-glpi-agent-egress` | `policies/allow-glpi-agent-egress.yaml` | glpi (`default`) | `10.25.0.0/16` (tout le LAN, futurs agents) | 62354 (GLPI-Agent httpd, inventaire distant) |
+| `allow-netbird-router-egress` | `policies/allow-netbird-router-egress.yaml` | peers de routage NetBird (`netbird`, label `app.kubernetes.io/name: netbird-router`) | `10.25.0.0/16` (forward vers le LAN) + `world` | 3478 UDP (STUN), 5555 UDP, 49152-65535 UDP (hole punching) |
 
 
 ---

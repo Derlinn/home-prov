@@ -1,0 +1,66 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: netbird-dashboard
+spec:
+  selector:
+    app.kubernetes.io/name: netbird-dashboard
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netbird-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: netbird-dashboard
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: netbird-dashboard
+    spec:
+      containers:
+        - name: dashboard
+          image: docker.io/netbirdio/dashboard:v2.91.1
+          env:
+            - name: NETBIRD_MGMT_API_ENDPOINT
+              value: https://netbird.${DOMAIN}
+            - name: NETBIRD_MGMT_GRPC_API_ENDPOINT
+              value: https://netbird.${DOMAIN}
+            # Fixed by the server: combined/cmd/config.go hardcodes the audience
+            # and client id to netbird-dashboard.
+            - name: AUTH_AUDIENCE
+              value: netbird-dashboard
+            - name: AUTH_CLIENT_ID
+              value: netbird-dashboard
+            - name: AUTH_CLIENT_SECRET
+              value: ""
+            - name: AUTH_AUTHORITY
+              value: https://netbird.${DOMAIN}/oauth2
+            - name: USE_AUTH0
+              value: "false"
+            - name: AUTH_SUPPORTED_SCOPES
+              value: openid profile email groups
+            - name: AUTH_REDIRECT_URI
+              value: /nb-auth
+            - name: AUTH_SILENT_REDIRECT_URI
+              value: /nb-silent-auth
+            - name: NGINX_SSL_PORT
+              value: "443"
+            - name: LETSENCRYPT_DOMAIN
+              value: none
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            requests:
+              memory: 64Mi
+              cpu: 10m
+            limits:
+              memory: 256Mi
