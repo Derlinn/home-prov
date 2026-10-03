@@ -9,3 +9,5 @@ components:
 resources:
   - ./namespace.yaml
   - netbird/ks.yaml
+  - operator/ks.yaml
+  - routing/ks.yaml
