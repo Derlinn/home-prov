@@ -73,6 +73,33 @@ spec:
         pvc:
           storage: 1Gi
           storageClassName: longhorn-production-v1
+      extraConfig:
+        00-block-guest-spawn: |
+          # Guest accounts (batch-created via scripts/jupyterhub-invites.sh) work
+          # on their shared groupe-K server and must not spawn personal servers.
+          # Group rule mirrors the script: K = ceil(N/5) from the trailing
+          # number (ensimag-1..5 -> groupe-1, ensimag-6..10 -> groupe-2, ...).
+          import re
+
+          BLOCKED_SPAWN_PREFIXES = ["ensimag-"]
+
+          def shared_server_url(username):
+              match = re.search(r"-(\d+)$", username)
+              if not match:
+                  return None
+              group = (int(match.group(1)) + 4) // 5
+              return f"https://jupyterhub.${DOMAIN}/user/groupe-{group}/lab"
+
+          async def block_guest_spawn(spawner):
+              username = spawner.user.name
+              if any(username.startswith(prefix) for prefix in BLOCKED_SPAWN_PREFIXES):
+                  url = shared_server_url(username)
+                  hint = f" Please use your shared server: {url}" if url else ""
+                  raise Exception(
+                      f"Personal servers are disabled for guest account '{username}'.{hint}"
+                  )
+
+          c.KubeSpawner.pre_spawn_hook = block_guest_spawn
       resources:
         requests:
           cpu: 100m
