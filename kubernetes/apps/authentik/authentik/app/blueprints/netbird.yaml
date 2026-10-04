@@ -17,6 +17,18 @@ entries:
       name: linderis_netbird_admins
     attrs:
       is_superuser: false
+  - model: authentik_providers_oauth2.scopemapping
+    id: netbird-groups-scope
+    state: present
+    identifiers:
+      name: NetBird groups (netbird-only)
+    attrs:
+      scope_name: groups
+      description: Only groups with netbird in the name reach NetBird
+      expression: |
+        return {
+            "groups": [g.name for g in request.user.groups.all() if "netbird" in g.name],
+        }
   - model: authentik_providers_oauth2.oauth2provider
     id: netbird-provider
     state: present
@@ -48,7 +60,7 @@ entries:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
-        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, groups]]
+        - !KeyOf netbird-groups-scope
       redirect_uris:
         # NetBird brokers through its own embedded Dex, so the callback is
         # Dex's, not the dashboard's. Confirm against Settings > Identity
