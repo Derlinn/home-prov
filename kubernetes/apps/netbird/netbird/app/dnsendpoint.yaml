@@ -3,9 +3,15 @@ apiVersion: externaldns.k8s.io/v1alpha1
 kind: DNSEndpoint
 metadata:
   name: netbird
+  annotations:
+    external-dns.alpha.kubernetes.io/controller: cloudflare
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
 spec:
   endpoints:
     - dnsName: netbird.${DOMAIN}
       recordType: A
       targets:
         - 212.227.22.223
+      providerSpecific:
+        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+          value: "false"
