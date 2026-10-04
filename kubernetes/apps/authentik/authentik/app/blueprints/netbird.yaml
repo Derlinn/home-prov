@@ -57,7 +57,7 @@ entries:
           redirect_uri_type: authorization
           url: https://netbird.${DOMAIN}/oauth2/callback
         - matching_mode: strict
-          redirect_uri_type: authorization
+          redirect_uri_type: logout
           url: https://netbird.${DOMAIN}/oauth2/logout/callback
   - model: authentik_core.application
     id: netbird-app
