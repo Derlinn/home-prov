@@ -10,6 +10,20 @@ entries:
       name: linderis_netbird
     attrs:
       is_superuser: false
+  - model: authentik_core.group
+    id: netbird-users-group
+    state: present
+    identifiers:
+      name: linderis_netbird_users
+    attrs:
+      is_superuser: false
+  - model: authentik_core.group
+    id: netbird-admins-group
+    state: present
+    identifiers:
+      name: linderis_netbird_admins
+    attrs:
+      is_superuser: false
   - model: authentik_providers_oauth2.oauth2provider
     id: netbird-provider
     state: present
@@ -70,4 +84,20 @@ entries:
       group: !KeyOf netbird-group
     attrs:
       order: 0
+      enabled: true
+  - model: authentik_policies.policybinding
+    state: present
+    identifiers:
+      target: !KeyOf netbird-app
+      group: !KeyOf netbird-users-group
+    attrs:
+      order: 1
+      enabled: true
+  - model: authentik_policies.policybinding
+    state: present
+    identifiers:
+      target: !KeyOf netbird-app
+      group: !KeyOf netbird-admins-group
+    attrs:
+      order: 2
       enabled: true
