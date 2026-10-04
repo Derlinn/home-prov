@@ -13,11 +13,15 @@ spec:
       io.kubernetes.pod.namespace: network
       gateway.envoyproxy.io/owning-gateway-name: envoy-external
   ingress:
-    # envoy-external has no LoadBalancer IP: cloudflared is its only client.
+    # envoy-external has no LoadBalancer IP: only in-cluster forwarders talk
+    # to it (cloudflared for the public wildcard, rathole-client for netbird).
     - fromEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: network
             app.kubernetes.io/name: cloudflare-tunnel
+        - matchLabels:
+            io.kubernetes.pod.namespace: network
+            app: rathole-client
       toPorts:
         - ports:
             - port: "443"
