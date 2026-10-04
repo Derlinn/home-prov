@@ -9,8 +9,8 @@ truth — update it on every mesh change.
 
 ## Access model
 
-Default policy is **enabled** (allow-all) until group memberships and
-re-logins are complete. Then it must be **disabled**, leaving only:
+Default policy is **disabled**. Only the rules below apply (zero trust —
+anything not listed is denied):
 
 | Policy | Sources | Destination | Ports |
 |---|---|---|---|

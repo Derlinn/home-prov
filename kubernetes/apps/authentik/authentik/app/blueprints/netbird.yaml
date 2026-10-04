@@ -4,13 +4,6 @@ metadata:
   name: netbird
 entries:
   - model: authentik_core.group
-    id: netbird-group
-    state: present
-    identifiers:
-      name: linderis_netbird
-    attrs:
-      is_superuser: false
-  - model: authentik_core.group
     id: netbird-users-group
     state: present
     identifiers:
@@ -77,14 +70,6 @@ entries:
       policy_engine_mode: any
       icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/netbird.svg
       group: Infrastructure
-  - model: authentik_policies.policybinding
-    state: present
-    identifiers:
-      target: !KeyOf netbird-app
-      group: !KeyOf netbird-group
-    attrs:
-      order: 0
-      enabled: true
   - model: authentik_policies.policybinding
     state: present
     identifiers:
