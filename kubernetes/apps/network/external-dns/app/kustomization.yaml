@@ -5,4 +5,5 @@ kind: Kustomization
 resources:
   - ./helmrepository.yaml
   - ./helmrelease.yaml
+  - ./helmrelease-cloudflare.yaml
   - ./grafanadashboard.yaml
