@@ -17,6 +17,7 @@ data:
     .DS_Store
     @eaDir/
     *#Recycle*
+    *.socket
   run.sh: |
     #!/bin/sh
     set -euo pipefail
