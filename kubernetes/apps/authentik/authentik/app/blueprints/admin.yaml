@@ -80,11 +80,6 @@ entries:
     identifiers:
       name: linderis_social_analyzer
   - model: authentik_core.group
-    id: g-netbird
-    state: created
-    identifiers:
-      name: linderis_netbird
-  - model: authentik_core.group
     id: g-glpi
     state: created
     identifiers:
@@ -119,6 +114,5 @@ entries:
         - !KeyOf g-prometheus
         - !KeyOf g-maigret
         - !KeyOf g-social-analyzer
-        - !KeyOf g-netbird
         - !KeyOf g-glpi
         - !KeyOf g-quarantaine
