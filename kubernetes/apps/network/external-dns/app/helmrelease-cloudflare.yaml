@@ -1,0 +1,44 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: external-dns-cloudflare
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: external-dns
+      sourceRef:
+        kind: HelmRepository
+        name: external-dns
+      interval: 1h
+  values:
+    fullnameOverride: external-dns-cloudflare
+    provider:
+      name: cloudflare
+    policy: sync
+    sources:
+      - crd
+    txtOwnerId: external-dns-cloudflare
+    txtPrefix: k8s-cf.
+    domainFilters:
+      - ${DOMAIN}
+    rbac:
+      create: true
+    serviceAccount:
+      create: true
+      name: external-dns-cloudflare
+    podSecurityContext:
+      runAsNonRoot: true
+    logLevel: debug
+    interval: 30s
+    env:
+      - name: CF_API_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: cloudflare-dns-secret
+            key: CF_API_TOKEN
+    extraArgs:
+      - --cloudflare-proxied
+    serviceMonitor:
+      enabled: true
