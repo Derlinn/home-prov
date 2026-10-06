@@ -1,0 +1,33 @@
+- name: Install base packages
+  ansible.builtin.apt:
+    name:
+      - qemu-guest-agent
+      - python3
+      - chrony
+      - locales
+      - curl
+      - ca-certificates
+      - gnupg
+      - unzip
+      - git
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Set timezone
+  community.general.timezone:
+    name: "{{ timezone }}"
+
+- name: Generate locale
+  community.general.locale_gen:
+    name: "{{ locale }}"
+    state: present
+
+- name: Enable base services
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop:
+    - qemu-guest-agent
+    - chrony

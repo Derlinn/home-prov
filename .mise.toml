@@ -35,6 +35,8 @@ KUBE_PS1_SUFFIX     = ") "
 "aqua:hashicorp/terraform" = "1.16.5"
 "aqua:terraform-linters/tflint" = "0.64.0"
 "aqua:aquasecurity/tfsec" = "1.28.14"
+"pypi:ansible-core" = "2.21.5"
+"pypi:ansible-lint" = "26.9.0"
 
 [tasks.install-kube-ps1]
 description = "Installe kube-ps1 dans /usr/local/bin"

@@ -20,11 +20,17 @@ locals {
   }
 }
 
-# Data source: fetch template per VM using its tags.
+# Data source: fetch the template per VM using its tags. The template filter
+# is load-bearing: live VMs may share every tag with their source template.
 data "proxmox_virtual_environment_vms" "template" {
   for_each  = local.vm_settings
   node_name = each.value.node_name
   tags      = each.value.template_tags
+
+  filter {
+    name   = "template"
+    values = [true]
+  }
 }
 
 locals {
@@ -129,6 +135,11 @@ resource "proxmox_virtual_environment_vm" "this" {
   }
 
   lifecycle {
+    precondition {
+      condition     = local.template_ids[each.key] != null
+      error_message = "No template matching tags ${jsonencode(local.vm_settings[each.key].template_tags)} found on node ${local.vm_settings[each.key].node_name}."
+    }
+
     ignore_changes = [
       initialization,
     ]

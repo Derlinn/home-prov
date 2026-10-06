@@ -1,0 +1,7 @@
+all:
+  children:
+    dev:
+      hosts:
+        lin-dev-01:
+          ansible_host: 10.25.30.6
+          ansible_user: theo

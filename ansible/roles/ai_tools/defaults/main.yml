@@ -1,0 +1,6 @@
+protonvp_repo: git@github.com:Derlinn/protonvp-opencode.git
+protonvp_dest: /opt/protonvp-opencode
+protonvp_key: /root/.ssh/github-deploy-protonvp
+protonvpn_conf_src: ""
+opencode_version: ""
+protonvp_sync: true

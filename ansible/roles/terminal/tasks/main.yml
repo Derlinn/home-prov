@@ -1,0 +1,78 @@
+- name: Install terminal packages
+  ansible.builtin.apt:
+    name:
+      - zsh
+      - neovim
+      - eza
+      - bat
+      - fd-find
+      - ripgrep
+      - btop
+      - fastfetch
+      - fzf
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Set zsh as default shell for the admin user
+  ansible.builtin.user:
+    name: "{{ admin_user }}"
+    shell: /usr/bin/zsh
+
+- name: Install oh-my-zsh
+  ansible.builtin.git:
+    repo: https://github.com/ohmyzsh/ohmyzsh.git
+    dest: /home/{{ admin_user }}/.oh-my-zsh
+    version: master
+    depth: 1
+  become_user: "{{ admin_user }}"
+
+- name: Install zsh plugins
+  ansible.builtin.git:
+    repo: "{{ item.repo }}"
+    dest: /home/{{ admin_user }}/.oh-my-zsh/custom/plugins/{{ item.name }}
+    version: master
+    depth: 1
+  become_user: "{{ admin_user }}"
+  loop:
+    - { name: zsh-autosuggestions, repo: https://github.com/zsh-users/zsh-autosuggestions }
+    - { name: zsh-syntax-highlighting, repo: https://github.com/zsh-users/zsh-syntax-highlighting.git }
+
+- name: Create user local bin directory
+  ansible.builtin.file:
+    path: /home/{{ admin_user }}/.local/bin
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0755"
+
+- name: Link Debian-renamed CLI binaries
+  ansible.builtin.file:
+    src: "{{ item.src }}"
+    dest: /home/{{ admin_user }}/.local/bin/{{ item.name }}
+    state: link
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+  loop:
+    - { name: bat, src: /usr/bin/batcat }
+    - { name: fd, src: /usr/bin/fdfind }
+
+- name: Install chezmoi
+  ansible.builtin.shell:
+    cmd: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /home/{{ admin_user }}/.local/bin
+    creates: /home/{{ admin_user }}/.local/bin/chezmoi
+  become_user: "{{ admin_user }}"
+
+- name: Apply dotfiles with chezmoi
+  ansible.builtin.command:
+    cmd: /home/{{ admin_user }}/.local/bin/chezmoi init --apply {{ dotfiles_repo }}
+    creates: /home/{{ admin_user }}/.local/share/chezmoi
+  become_user: "{{ admin_user }}"
+  environment:
+    GIT_SSH_COMMAND: ssh -i {{ dotfiles_key }} -o StrictHostKeyChecking=accept-new
+  when: dotfiles_sync
+
+- name: Explain skipped dotfiles sync
+  ansible.builtin.debug:
+    msg: Dotfiles sync skipped (private repo needs a GitHub deploy key on the VM; set dotfiles_sync=true once added).
+  when: not dotfiles_sync

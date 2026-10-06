@@ -12,6 +12,13 @@ locals {
   })
 }
 
+module "vm" {
+  source = "../../modules/proxmox-vm"
+
+  default_ssh_pubkey = var.default_ssh_pubkey
+  vms                = var.vms
+}
+
 module "talos" {
   count  = local.talos_enabled ? 1 : 0
   source = "../../modules/proxmox-talos"

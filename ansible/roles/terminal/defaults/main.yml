@@ -1,0 +1,3 @@
+dotfiles_repo: git@github.com:Derlinn/dotfiles.git
+dotfiles_key: /home/{{ admin_user }}/.ssh/github-deploy
+dotfiles_sync: true

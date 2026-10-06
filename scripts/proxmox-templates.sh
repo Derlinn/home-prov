@@ -109,6 +109,9 @@ for arg in "$@"; do
 
   echo "Injecting qemu-guest-agent into: $path"
   virt-customize -a "$path" --install qemu-guest-agent
+  # Enable it now: clones start the agent on first boot, so Proxmox can
+  # report IPs (and Terraform/Ansible can discover them) without SSH.
+  virt-customize -a "$path" --run-command 'systemctl enable qemu-guest-agent'
 
   # First free VMID >= PROXMOX_START_ID
   vmid="$(pick_vmid "$PROXMOX_START_ID")"

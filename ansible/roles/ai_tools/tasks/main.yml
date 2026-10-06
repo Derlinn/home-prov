@@ -1,0 +1,85 @@
+- name: Add NodeSource repository
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+    creates: /etc/apt/sources.list.d/nodesource.sources
+
+- name: Install Node.js
+  ansible.builtin.apt:
+    name: nodejs
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install Claude Code globally
+  community.general.npm:
+    name: "@anthropic-ai/claude-code"
+    global: true
+    state: absent
+
+- name: Install tar for the OpenCode installer
+  ansible.builtin.apt:
+    name: tar
+    state: present
+
+- name: Install OpenCode
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path{{ ' --version ' + opencode_version if opencode_version | length > 0 else '' }}
+    creates: /home/{{ admin_user }}/.opencode/bin/opencode
+  become_user: "{{ admin_user }}"
+
+- name: Stage the ProtonVPN deploy key for root
+  ansible.builtin.file:
+    path: /root/.ssh
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Copy the ProtonVPN deploy key for root
+  ansible.builtin.copy:
+    src: /home/{{ admin_user }}/.ssh/github-deploy-protonvp
+    dest: /root/.ssh/github-deploy-protonvp
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0600"
+  when: protonvp_sync
+
+- name: Clone the ProtonVPN namespace project
+  ansible.builtin.git:
+    repo: "{{ protonvp_repo }}"
+    dest: "{{ protonvp_dest }}"
+    version: main
+    depth: 1
+    key_file: "{{ protonvp_key }}"
+    accept_hostkey: true
+  when: protonvp_sync
+
+- name: Explain skipped ProtonVPN setup
+  ansible.builtin.debug:
+    msg: ProtonVPN setup skipped (private repo needs a GitHub deploy key on the VM; set protonvp_sync=true once added).
+  when: not protonvp_sync
+
+- name: Copy the ProtonVPN WireGuard configuration
+  ansible.builtin.copy:
+    src: "{{ protonvpn_conf_src }}"
+    dest: /etc/wireguard/opencode-vpn.conf
+    owner: root
+    group: root
+    mode: "0600"
+  when: protonvpn_conf_src | length > 0
+  notify: Restart VPN namespace
+
+- name: Run the ProtonVPN installer
+  ansible.builtin.command:
+    chdir: "{{ protonvp_dest }}"
+    cmd: ./install.sh
+  become_user: "{{ admin_user }}"
+  args:
+    creates: /usr/local/sbin/opencode-vpn
+  when: protonvp_sync
+
+- name: Warn when the VPN configuration is missing
+  ansible.builtin.debug:
+    msg: Tunnel not started (set protonvpn_conf_src to a local WireGuard .conf to enable it).
+  when: protonvpn_conf_src | length == 0

@@ -1,0 +1,14 @@
+- name: Harden and provision development VMs
+  hosts: dev
+  become: true
+  roles:
+    - role: hardening
+      tags: [hardening]
+    - role: base
+      tags: [base]
+    - role: terminal
+      tags: [terminal]
+    - role: docker
+      tags: [docker]
+    - role: ai_tools
+      tags: [ai_tools]
