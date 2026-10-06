@@ -69,6 +69,7 @@ spec:
             - openid
             - email
             - profile
+            - offline_access
       db:
         pvc:
           storage: 1Gi

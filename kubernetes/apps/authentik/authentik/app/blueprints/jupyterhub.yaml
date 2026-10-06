@@ -49,6 +49,9 @@ entries:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, offline_access]]
+      access_token_validity: hours=12
+      refresh_token_validity: days=30
       redirect_uris:
         - matching_mode: strict
           redirect_uri_type: authorization
