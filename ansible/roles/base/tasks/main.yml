@@ -10,9 +10,29 @@
       - gnupg
       - unzip
       - git
+      - ncurses-term
     state: present
     update_cache: true
     cache_valid_time: 3600
+
+- name: Set default locale
+  ansible.builtin.lineinfile:
+    path: /etc/default/locale
+    regexp: ^{{ item.key }}=
+    line: '{{ item.key }}="{{ item.value }}"'
+    create: true
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - { key: LANG, value: "{{ locale }}" }
+    - { key: LANGUAGE, value: "{{ locale }}" }
+
+- name: Alias xterm-kitty to the kitty terminfo entry
+  ansible.builtin.shell:
+    cmd: infocmp kitty | sed 's/^kitty|/xterm-kitty|/' | tic -o /etc/terminfo -
+    creates: /etc/terminfo/x/xterm-kitty
+
 
 - name: Set timezone
   community.general.timezone:

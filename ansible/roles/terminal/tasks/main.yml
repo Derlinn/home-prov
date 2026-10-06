@@ -10,6 +10,9 @@
       - btop
       - fastfetch
       - fzf
+      - starship
+      - zoxide
+      - direnv
     state: present
     update_cache: true
     cache_valid_time: 3600
@@ -46,16 +49,50 @@
     group: "{{ admin_user }}"
     mode: "0755"
 
-- name: Link Debian-renamed CLI binaries
+- name: Install mise
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://mise.run | sh
+    creates: /home/{{ admin_user }}/.local/bin/mise
+  become_user: "{{ admin_user }}"
+
+- name: Install atuin
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://setup.atuin.sh | bash
+    creates: /home/{{ admin_user }}/.atuin/bin/atuin
+  become_user: "{{ admin_user }}"
+
+- name: Link Debian-renamed CLI binaries on the system PATH
   ansible.builtin.file:
     src: "{{ item.src }}"
-    dest: /home/{{ admin_user }}/.local/bin/{{ item.name }}
+    dest: /usr/local/bin/{{ item.name }}
     state: link
-    owner: "{{ admin_user }}"
-    group: "{{ admin_user }}"
+    owner: root
+    group: root
   loop:
     - { name: bat, src: /usr/bin/batcat }
     - { name: fd, src: /usr/bin/fdfind }
+    - { name: atuin, src: "/home/{{ admin_user }}/.atuin/bin/atuin" }
+
+- name: Ensure user tool directories are on PATH
+  ansible.builtin.copy:
+    dest: /home/{{ admin_user }}/.zshenv
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0644"
+    content: |
+      export PATH="$HOME/.local/bin:$HOME/.atuin/bin:$HOME/.opencode/bin:$PATH"
+
+- name: Use a font-independent SSH symbol in the prompt
+  ansible.builtin.copy:
+    dest: /home/{{ admin_user }}/.config/starship.toml
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0644"
+    content: |
+      [hostname]
+      ssh_symbol = "ssh:"
+
+
 
 - name: Install chezmoi
   ansible.builtin.shell:

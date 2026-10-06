@@ -1,3 +1,8 @@
+- name: Install VPN configuration
+  ansible.builtin.command:
+    cmd: /usr/local/sbin/opencode-vpn-install-conf /root/proton-opencode.conf
+  listen: Install VPN configuration
+
 - name: Restart VPN namespace
   ansible.builtin.systemd_service:
     name: opencode-vpn-netns

@@ -60,15 +60,25 @@
     msg: ProtonVPN setup skipped (private repo needs a GitHub deploy key on the VM; set protonvp_sync=true once added).
   when: not protonvp_sync
 
-- name: Copy the ProtonVPN WireGuard configuration
+- name: Ensure a previous VPN configuration exists for backup
   ansible.builtin.copy:
-    src: "{{ protonvpn_conf_src }}"
+    content: ""
     dest: /etc/wireguard/opencode-vpn.conf
+    force: false
     owner: root
     group: root
     mode: "0600"
   when: protonvpn_conf_src | length > 0
-  notify: Restart VPN namespace
+
+- name: Stage the ProtonVPN WireGuard configuration
+  ansible.builtin.copy:
+    src: "{{ protonvpn_conf_src }}"
+    dest: /root/proton-opencode.conf
+    owner: root
+    group: root
+    mode: "0600"
+  when: protonvpn_conf_src | length > 0
+  notify: Install VPN configuration
 
 - name: Run the ProtonVPN installer
   ansible.builtin.command:
