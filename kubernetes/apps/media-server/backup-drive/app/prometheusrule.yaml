@@ -18,7 +18,7 @@ spec:
             summary: "NAS -> Drive backup job failed ({{ $labels.job_name }})"
         - alert: BackupDriveStale
           expr: |
-            time() - kube_cronjob_status_last_successful_time{cronjob="backup-drive-daily"} > 129600
+            time() - kube_cronjob_status_last_successful_time{cronjob="backup-drive-daily"} > 777600
           for: 1h
           labels:
             severity: critical

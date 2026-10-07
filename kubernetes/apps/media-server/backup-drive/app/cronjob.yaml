@@ -14,7 +14,7 @@ metadata:
   labels:
     app.kubernetes.io/name: backup-drive
 spec:
-  schedule: "30 4 * * *"
+  schedule: "30 4 * * 0"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3

@@ -25,7 +25,7 @@ data:
     export RESTIC_CACHE_DIR=/cache
     SOURCES="/nas/famille /nas/photos /nas/public /nas/homes /nas/backups"
     RESTIC_HOST="nas-selectif"
-    RETENTION="--keep-daily 7 --keep-weekly 4 --keep-monthly 6"
+    RETENTION="--keep-last 4 --keep-weekly 8 --keep-monthly 6"
     RCLONE_CONF_DIR="/root/.config/rclone"
     : "$MODE" "$RCLONE_CONFIG_DRIVE_TOKEN" "$RCLONE_CONFIG_DRIVE_CLIENT_ID" "$RCLONE_CONFIG_DRIVE_CLIENT_SECRET"
     case "$RCLONE_CONFIG_DRIVE_TOKEN" in
@@ -50,21 +50,13 @@ data:
         unlock
         ensure_repo
         # shellcheck disable=SC2086
-        restic backup --host "$RESTIC_HOST" --exclude-file=/scripts/exclude.txt --tag nas --tag selective $SOURCES
-        DOW=$(date +%u)
-        DOM=$(date +%d)
-        if [ "$DOM" = "01" ]; then
-          restic check --read-data
-        elif [ "$DOW" = "7" ]; then
-          restic check --read-data-subset=10%
-        fi
-        if [ "$DOW" = "7" ]; then
-          # shellcheck disable=SC2086
-          restic forget --host "$RESTIC_HOST" --prune $RETENTION
-        else
-          # shellcheck disable=SC2086
-          restic forget --host "$RESTIC_HOST" $RETENTION
-        fi
+        restic backup --no-scan --host "$RESTIC_HOST" --exclude-file=/scripts/exclude.txt --tag nas --tag selective $SOURCES
+        case $(date +%d) in
+          0[1-7]) restic check --read-data ;;
+          *) restic check --read-data-subset=10% ;;
+        esac
+        # shellcheck disable=SC2086
+        restic forget --host "$RESTIC_HOST" --prune $RETENTION
         ;;
       *)
         echo "unknown MODE: $MODE" >&2
