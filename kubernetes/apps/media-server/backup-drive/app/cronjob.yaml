@@ -35,7 +35,7 @@ spec:
               type: RuntimeDefault
           initContainers:
             - name: restic-bin
-              image: restic/restic:0.18.1
+              image: restic/restic:0.19.1
               command: ["sh", "-c", "cp /usr/bin/restic /shared/restic && chmod +x /shared/restic"]
               securityContext:
                 allowPrivilegeEscalation: false
