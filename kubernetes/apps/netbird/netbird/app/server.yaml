@@ -49,7 +49,7 @@ spec:
     spec:
       containers:
         - name: netbird-server
-          image: docker.io/netbirdio/netbird-server:0.77.1
+          image: docker.io/netbirdio/netbird-server:0.80.0
           args: ["--config", "/etc/netbird/config.yaml"]
           ports:
             - name: http
