@@ -4,7 +4,7 @@ locals {
     name            = ""
     endpoint        = ""
     gateway         = ""
-    talos_version   = "v1.13.10"
+    talos_version   = "v1.13.11"
     proxmox_cluster = ""
     # Must stay in sync with tuppr's KubernetesUpgrade CR (tracked by Renovate
     # through the customManager in .renovaterc.json5).
