@@ -57,6 +57,23 @@ spec:
             envFrom:
               - secretRef:
                   name: gluetun-credentials
+            probes:
+              # Gluetun gives up permanently if port forwarding fails at startup,
+              # while the VPN itself stays healthy. Restart it to renegotiate.
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command:
+                      - /bin/sh
+                      - -c
+                      - |
+                        PORT=$(wget -qO- --timeout=5 http://127.0.0.1:8000/v1/openvpn/portforwarded | grep -o '"port":[0-9]*' | grep -o '[0-9]*$')
+                        [ -n "$PORT" ] && [ "$PORT" != 0 ]
+                  initialDelaySeconds: 180
+                  periodSeconds: 60
+                  failureThreshold: 5
 
           port-sync:
             image:
@@ -66,19 +83,20 @@ spec:
               - /bin/sh
               - -c
               - |
-                PORT_FILE=/tmp/gluetun/forwarded_port
+                GLUETUN=http://127.0.0.1:8000/v1/openvpn/portforwarded
+                QBT=http://127.0.0.1:8080/api/v2
                 sleep 30
                 while true; do
-                  if [ -f "$PORT_FILE" ]; then
-                    PORT=$(cat "$PORT_FILE")
-                    if [ -n "$PORT" ]; then
-                      CURRENT=$(wget -qO- --timeout=5 "http://127.0.0.1:8080/api/v2/app/preferences" 2>/dev/null | grep -o '"listen_port":[0-9]*' | grep -o '[0-9]*$')
-                      if [ -n "$CURRENT" ] && [ "$CURRENT" != "$PORT" ]; then
-                        wget -qO- --timeout=5 \
-                          --post-data "json={\"listen_port\":${PORT}}" \
-                          "http://127.0.0.1:8080/api/v2/app/setPreferences" >/dev/null && \
-                        echo "[port-sync] updated qBittorrent listen_port $CURRENT -> $PORT"
-                      fi
+                  PORT=$(wget -qO- --timeout=5 "$GLUETUN" 2>/dev/null | grep -o '"port":[0-9]*' | grep -o '[0-9]*$')
+                  if [ -z "$PORT" ] || [ "$PORT" = 0 ]; then
+                    echo "[port-sync] gluetun reports no forwarded port"
+                  else
+                    CURRENT=$(wget -qO- --timeout=5 "$QBT/app/preferences" 2>/dev/null | grep -o '"listen_port":[0-9]*' | grep -o '[0-9]*$')
+                    if [ -n "$CURRENT" ] && [ "$CURRENT" != "$PORT" ]; then
+                      wget -qO- --timeout=5 \
+                        --post-data "json={\"listen_port\":${PORT}}" \
+                        "$QBT/app/setPreferences" >/dev/null && \
+                      echo "[port-sync] updated qBittorrent listen_port $CURRENT -> $PORT"
                     fi
                   fi
                   sleep 30
@@ -131,9 +149,6 @@ spec:
           main:
             gluetun:
               - path: /tmp/gluetun
-            port-sync:
-              - path: /tmp/gluetun
-                readOnly: true
       tun:
         type: hostPath
         hostPath: /dev/net/tun
