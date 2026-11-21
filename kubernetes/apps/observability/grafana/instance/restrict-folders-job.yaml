@@ -29,7 +29,7 @@ spec:
             secretName: grafana-admin-password-secret
       containers:
         - name: restrictor
-          image: curlimages/curl:8.22.0
+          image: curlimages/curl:8.23.0
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
