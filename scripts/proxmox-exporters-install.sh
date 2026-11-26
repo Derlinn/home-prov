@@ -11,7 +11,7 @@
 set -euo pipefail
 
 # renovate: datasource=github-releases depName=prometheus/node_exporter
-NODE_EXPORTER_VERSION="1.12.1"
+NODE_EXPORTER_VERSION="1.13.1"
 ARCH="amd64"
 INSTALL_DIR="/usr/local/bin"
 
