@@ -103,7 +103,7 @@ spec:
             - name: quarantine
               mountPath: /quarantine
         - name: browser
-          image: sigoden/dufs:v0.46.0
+          image: sigoden/dufs:v0.47.0
           args: ["/quarantine", "-p", "8080", "--hidden", ".last-sweep"]
           ports:
             - name: browser
